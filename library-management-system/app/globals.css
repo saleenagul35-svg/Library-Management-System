@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* ── CSS Custom Properties ── */
+@theme {
+  --color-primary: #864c25;
+  --color-secondary: #515427;
+  --color-brand-bg: #fcf5e1;
+  --color-card-bg: #fffff3;
+  
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Custom Shadows for v4 */
+  --shadow-brand-sm: 0 2px 8px rgba(134, 76, 37, 0.08);
+  --shadow-brand-md: 0 4px 20px rgba(134, 76, 37, 0.12);
+}
+
+/* ── Base Resets (v4 style) ── */
+@layer base {
+  body {
+    background-color: var(--color-brand-bg);
+    color: #210f06;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
+}
+
+/* ── Component Classes ── */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5
+           text-sm font-semibold transition-all duration-200 cursor-pointer
+           bg-primary text-white shadow-brand-sm
+           hover:bg-[var(--color-primary)] hover:brightness-90 hover:shadow-brand-md 
+           hover:-translate-y-px active:translate-y-0 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5
+           text-sm font-semibold transition-all duration-200 cursor-pointer
+           bg-secondary text-white shadow-brand-sm
+           hover:brightness-90 hover:shadow-brand-md hover:-translate-y-px
+           active:translate-y-0 disabled:opacity-50;
+  }
+
+  .card-hover {
+    @apply rounded-2xl border border-[rgba(134,76,37,0.1)] bg-[var(--color-card-bg)] p-6 
+           shadow-brand-sm transition-all duration-300 hover:-translate-y-1 
+           hover:shadow-brand-md hover:border-[rgba(134,76,37,0.2)] cursor-pointer;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-[rgba(134,76,37,0.15)] bg-[var(--color-card-bg)] 
+           px-4 py-2.5 text-sm outline-none transition-all duration-200
+           focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(134,76,37,0.1)];
+  }
+}
