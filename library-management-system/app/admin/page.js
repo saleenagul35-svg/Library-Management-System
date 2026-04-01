@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
   const getFun = async () => {
     try {
       const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/data", {
+      const response = await fetch("http://localhost:5000/api/bookData", {
         method: "GET",
        headers:{
          "authorization": `Bearer ${token}`
@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
   const TotalStnd = async () => {
     try {
       const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/StudentData", {
+      const response = await fetch("http://localhost:5000/api/membersData", {
 
         method: "GET",
         headers: {

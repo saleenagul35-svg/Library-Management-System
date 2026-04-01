@@ -22,7 +22,7 @@ export default function UserLoginPage() {
   const userpage = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("http://localhost:5000/userVerify", {
+      const response = await fetch("http://localhost:5000/api/userLogin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -31,10 +31,11 @@ export default function UserLoginPage() {
 
 
       })
-      const data = await response.json()
+      
     
     
       if (response.ok) {
+        const data = await response.json()
         localStorage.setItem("UserLoginToken",data.token)
         window.location.href = "/user"
       }

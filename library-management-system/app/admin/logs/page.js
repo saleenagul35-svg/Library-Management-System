@@ -114,7 +114,7 @@ export default function StudentRegistryPage() {
     const TotalStnd = async () => {
       try {
         const token = localStorage.getItem("Admintoken")
-        const response = await fetch("http://localhost:5000/StudentData", {
+        const response = await fetch("http://localhost:5000/api/membersData", {
   
           method: "GET",
           headers: {

@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
   const adminPage = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("http://localhost:5000/adminVerify", {
+      const response = await fetch("http://localhost:5000/api/adminVerification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -29,15 +29,14 @@ export default function AdminLoginPage() {
 
 
       })
-    
-      
-      
-      const data = await response.json()
-      console.log(data);
 
       if (response.ok) {
+        const data = await response.json()
+        console.log(data);
         localStorage.setItem("Admintoken", data.token)
         window.location.href = "/admin"
+      }else{
+        console.log(await response.text())
       }
 
 

@@ -16,8 +16,9 @@ export default function UserHomePage() {
     }
    
     try {
-      const response = await fetch("http://localhost:5000/data", { method: "GET",  headers:{
-        "authorization":`Bearer ${token}`
+      const response = await fetch("http://localhost:5000/api/bookData", { method: "GET",  headers:{
+        "authorization":`Bearer ${token}`,
+        "Content-Type": "application/json" 
       }});
       const Data = await response.json();
       setBooks(Data.data);

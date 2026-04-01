@@ -53,15 +53,19 @@ export default function AddNewBookForm() {
 
     try {
       const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/submit", {
+      const response = await fetch("http://localhost:5000/api/addBooks", {
         method: "POST",
         headers: {
-          "authorization": `Bearer ${token}`
+          "authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
         },
         body: JSON.stringify(handleform)
       })
 
 
+      if(response.ok){
+        window.location.href = "/admin/inventory"
+      }
 
 
 
@@ -69,7 +73,7 @@ export default function AddNewBookForm() {
       console.log(error);
 
     }
-    window.location.href = "/admin/inventory"
+    
 
     // if (!title.trim()) {
     //   setTitleError(true);

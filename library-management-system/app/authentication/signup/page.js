@@ -43,14 +43,15 @@ export default function SignupPage() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5000/signUp", {
+      const response = await fetch("http://localhost:5000/api/signUp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       })
-      const data = await response.json()
+      
      
       if (response.ok) {
+        const data = await response.json()
         localStorage.setItem("user_Signup_Token", data.token)
         window.location.href = "/user"
       }

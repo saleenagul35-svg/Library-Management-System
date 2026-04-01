@@ -28,7 +28,7 @@ export const metadata = {
   title:       'Library Management System',
   description: 'A production-ready academic library management platform for administrators and students.',
   keywords:    ['library', 'management', 'books', 'catalogue', 'academic'],
-  authors:     [{ name: 'Bibliotheca Team' }],
+  authors:     [{ name: 'Saleena' }],
   themeColor:  '#864c25',
   openGraph: {
     title:       'Library Management System',
@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
       className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-brand-bg font-body antialiased">
+      <body  suppressHydrationWarning className="min-h-screen bg-brand-bg font-body antialiased">
         {children}
       </body>
     </html>

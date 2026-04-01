@@ -20,10 +20,11 @@ export default function ProfilePage() {
       }
 
 
-      const response = await fetch("http://localhost:5000/CUserInfo", {
+      const response = await fetch("http://localhost:5000/api/CUserInfo", {
         method: "Get",
         headers: {
-          "authorization": `Bearer ${token}`
+          "authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
         },
 
       })

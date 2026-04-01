@@ -23,17 +23,18 @@ export default function InventoryPage() {
     const getFun = async () => {
       try {
         const token = localStorage.getItem("Admintoken")
-        const response = await fetch("http://localhost:5000/data", {
+        const response = await fetch("http://localhost:5000/api/bookData", {
           method: "GET",
           headers: {
-            "authorization": `Bearer ${token}`
+            "authorization": `Bearer ${token}`,
+            "Content-Type": "application/json" 
           }
 
         })
         const Data = await response.json()
         const dataArray = Data.data
-        setBooks(dataArray)
-
+        // setBooks(dataArray)
+setBooks(dataArray || [])
       } catch (error) {
         console.log(error);
 
@@ -51,16 +52,17 @@ export default function InventoryPage() {
   const [sortField, setSortField] = useState('title');
   const [sortDir, setSortDir] = useState('asc');
 
-  const filtered = books
+  
 
-    .filter(b =>
-      b.Title.toLowerCase().includes(search.toLowerCase()) ||
-      b.Author.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      const v = String(a[sortField]).localeCompare(String(b[sortField]));
-      return sortDir === 'asc' ? v : -v;
-    });
+const filtered = books
+  .filter(b =>
+    b?.Title?.toLowerCase().includes(search.toLowerCase()) ||
+    b?.Author?.toLowerCase().includes(search.toLowerCase())
+  )
+  .sort((a, b) => {
+    const v = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''));
+    return sortDir === 'asc' ? v : -v;
+  });
 
   function toggleSort(field) {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
