@@ -1,35 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function UserHomePage() {
 
   // ─── Data ─────────────────────────────────────────────────────────────────────
+  const [loader, setLoader] = useState(true)
   const [books, setBooks] = useState([]);
   let token = null
-  const getFun = async () => {
-    if(localStorage.getItem("UserLoginToken")){
-       token = localStorage.getItem("UserLoginToken")
-    }else if(localStorage.getItem("user_Signup_Token")){
-       token = localStorage.getItem("user_Signup_Token")
-    }
-   
+
+  const fetchingAPIs = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/bookData", { method: "GET",  headers:{
-        "authorization":`Bearer ${token}`,
-        "Content-Type": "application/json" 
-      }});
-      const Data = await response.json();
-      setBooks(Data.data);
+      if (localStorage.getItem("UserLoginToken")) {
+        token = localStorage.getItem("UserLoginToken")
+      } else if (localStorage.getItem("user_Signup_Token")) {
+        token = localStorage.getItem("user_Signup_Token")
+      }
+      const headers = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+      const [res1] = await Promise.all([
+        fetch("http://localhost:5000/api/bookData", { method: "GET", headers })
+      ])
+      const [data1] = await Promise.all([
+        res1 ? res1.json() : null
+      ])
+      if (data1) {
+        setBooks(data1.data);
+        setLoader(false)
+      }
     } catch (error) {
       console.log(error);
+
+    } finally {
+      setLoader(false)
     }
-  };
- 
+
+  }
+
   useEffect(() => {
 
-    getFun();
+    fetchingAPIs();
   }, []);
 
   const GENRES = ["All", "Fiction", "Self-Help", "History", "Novel", "Psychology", "Productivity", "Classic", "Philosophy"];
@@ -160,8 +174,9 @@ export default function UserHomePage() {
   const [toast, setToast] = useState(null);
 
   const filtered = books.filter((b) => {
-    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || b.Author.toLowerCase().includes(search.toLowerCase());
-    const matchGenre = activeGenre === "All" || b.Genre === activeGenre;
+    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || b.Author.toLowerCase().includes(search.toLowerCase()) 
+    ||   b.Genre?.toLowerCase().includes(search.toLowerCase())
+    const matchGenre = activeGenre === "All" || b.Genre?.toLowerCase().trim() === activeGenre.toLowerCase().trim();
     return matchSearch && matchGenre;
   });
 
@@ -170,6 +185,15 @@ export default function UserHomePage() {
     setModalBook(null);
     setToast(`"${book.Title}" has been added to your library.`);
   };
+  if (loader) {
+    return (
+      <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
+
+        <CircularProgress sx={{ color: "#52512a" }} />
+
+      </Stack>
+    )
+  }
 
   return (
     <>

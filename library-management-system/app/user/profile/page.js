@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────────
 
 
@@ -24,13 +25,15 @@ export default function ProfilePage() {
         method: "Get",
         headers: {
           "authorization": `Bearer ${token}`,
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
 
       })
-      const data = await response.json()
-      const arrayOfData = data.data
-      setUSER(arrayOfData)
+      if (response.ok) {
+        const data = await response.json()
+        const arrayOfData = data.data
+        setUSER(arrayOfData)
+      }
     } catch (error) {
       console.log(error);
     }
@@ -39,7 +42,7 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchInfo()
   }, [])
-  if (!USER) return <div>Loading...</div>
+  if (!USER) return  <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row"> <CircularProgress sx={{ color: "#52512a" }} /></Stack>
   console.log(Date.now());
 
 
@@ -224,7 +227,7 @@ export default function ProfilePage() {
               borderTop: "1px solid rgba(255,255,243,.12)",
             }}>
               {[
-                { label: "Member ID", value: "REG-"+ USER.id },
+                { label: "Member ID", value: "REG-" + USER.id },
                 { label: "Member Since", value: USER.memberSince },
                 { label: "Status", value: "Active" },
               ].map((item, i) => (

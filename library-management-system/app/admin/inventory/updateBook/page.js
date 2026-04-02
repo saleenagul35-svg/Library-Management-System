@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 
-export default function AddNewBookForm() {
+export default function updateBookForm() {
   const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Status: "", Description: "" })
 
   const formData = (e) => {

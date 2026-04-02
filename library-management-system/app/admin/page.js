@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   BookOpen,
   Users,
@@ -22,65 +24,48 @@ export default function AdminDashboardPage() {
 
 
 
-  //============================== total Books ===========================//
-
+  //============================== APIs ===========================//
+  const [loader, setLoader] = useState(true)
   const [totalBooks, setTotalBooks] = useState(0)
-  const getFun = async () => {
-    try {
-      const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/api/bookData", {
-        method: "GET",
-       headers:{
-         "authorization": `Bearer ${token}`
-       }
-
-      })
-      const Data = await response.json()
-      const dataArray = Data.data
-      setTotalBooks(dataArray)
-
-    } catch (error) {
-      console.log(error);
-
-    }
-  }
-  useEffect(() => {
-
-    getFun()
-
-  }
-
-    , [])
-
-  //============================== total Students ===========================//
-
   const [totalStudents, setTotalStudents] = useState(0)
-  const TotalStnd = async () => {
+  const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/api/membersData", {
+      const headers = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+      const [res1, res2] = await Promise.all([
+        fetch("http://localhost:5000/api/bookData", {method:"GET", headers}),
+        fetch("http://localhost:5000/api/membersData", {method:"GET", headers})
+      ])
+      const [data1,data2] = await Promise.all([
+        res1.ok ? res1.json() :null,
+        res2.ok ? res2.json() : null
+      ])
 
-        method: "GET",
-        headers: {
-          "authorization": `Bearer ${token}`
-        }
-      })
+      if (data1) {
+        const dataArray = data1.data
+        setTotalBooks(dataArray)
 
-      let data = await response.json()
-      console.log(data);
+      }
+      if (data2) {
+        let length = data2.data.length
+        setTotalStudents(length)
 
-      let length = data.data.length
-      setTotalStudents(length)
+
+      }
 
     } catch (error) {
       console.log(error);
 
+    } finally {
+      setLoader(false)
     }
-
   }
   useEffect(() => {
 
-    TotalStnd()
+    fetchingAPIs()
 
   }, [])
 
@@ -145,6 +130,9 @@ export default function AdminDashboardPage() {
   ];
 
   // ─── Sub-components ───────────────────────────────────────────────────────────
+
+
+
 
   /** Individual stat card */
   function StatCard({ card, index }) {
@@ -282,98 +270,112 @@ export default function AdminDashboardPage() {
   const timeString = now.toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
+  if (loader) {
+    return (
 
-  return (
-    <div className="min-h-full p-6 lg:p-8">
+      <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
-      {/* ── Page header ── */}
-      <div className="mb-8 animate-fade-up">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-primary-950 leading-tight">
-              Good morning, Admin
-            </h1>
-            <p className="mt-1 text-sm text-primary-800/50">{timeString}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/admin/inventory/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-brand-sm hover:bg-primary-600 hover:-translate-y-px hover:shadow-brand-md transition-all duration-200"
-            >
-              <Plus size={15} strokeWidth={2.5} />
-              Add Book
-            </Link>
-          </div>
-        </div>
-      </div>
+        <CircularProgress sx={{ color: "#52512a" }} />
 
-      {/* ── Stat cards ── */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {STAT_CARDS.map((card, i) => (
-          <StatCard key={card.id} card={card} index={i} />
-        ))}
-      </div>
+      </Stack>
+    )
+  } else {
 
-      {/* ── Main grid: Activity + Top Books ── */}
-      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
 
-        {/* Recent activity (3/5 width) */}
-        <div className="lg:col-span-3 rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '160ms' }}>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-primary/[0.08]">
+
+    return (
+      <div className="min-h-full p-6 lg:p-8">
+
+
+        {/* ── Page header ── */}
+        <div className="mb-8 animate-fade-up">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="font-display text-lg font-semibold text-primary-950">Recent Activity</h2>
-              <p className="text-xs text-primary-800/45 mt-0.5">Latest borrow & return events</p>
+              <h1 className="font-display text-3xl font-bold text-primary-950 leading-tight">
+                Good morning, Admin
+              </h1>
+              <p className="mt-1 text-sm text-primary-800/50">{timeString}</p>
             </div>
-            <Link
-              href="/admin/logs"
-              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-700 transition-colors"
-            >
-              View All <ArrowRight size={13} />
-            </Link>
-          </div>
-          <div className="px-5 divide-y divide-primary/[0.04]">
-            {RECENT_ACTIVITY.map((item, i) => (
-              <ActivityRow key={item.id} item={item} index={i} />
-            ))}
-          </div>
-        </div>
-
-        {/* Top borrowed books (2/5 width) */}
-        <div className="lg:col-span-2 rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '220ms' }}>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-primary/[0.08]">
-            <div>
-              <h2 className="font-display text-lg font-semibold text-primary-950">Top Books</h2>
-              <p className="text-xs text-primary-800/45 mt-0.5">Most borrowed this month</p>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/admin/inventory/new"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-brand-sm hover:bg-primary-600 hover:-translate-y-px hover:shadow-brand-md transition-all duration-200"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+                Add Book
+              </Link>
             </div>
-            <BarChart2 size={16} className="text-primary/30" />
-          </div>
-          <div className="px-5 py-4">
-            <TopBooksChart />
           </div>
         </div>
-      </div>
 
-      {/* ── Quick actions row ── */}
-      <div className="rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '280ms' }}>
-        <div className="px-5 py-4 border-b border-primary/[0.08]">
-          <h2 className="font-display text-lg font-semibold text-primary-950">Quick Actions</h2>
+        {/* ── Stat cards ── */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {STAT_CARDS.map((card, i) => (
+            <StatCard key={card.id} card={card} index={i} />
+          ))}
         </div>
-        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
-          <QuickAction icon={Plus} label="Add New Book" href="/admin/inventory/new" color="bg-primary/10 text-primary" />
-          <QuickAction icon={Users} label="Manage Users" href="/admin/logs" color="bg-secondary/10 text-secondary" />
-          <QuickAction icon={BookCopy} label="View Borrowings" href="/admin/logs" color="bg-amber-500/10 text-amber-700" />
-          <QuickAction icon={BarChart2} label="Analytics" href="/admin/analytics" color="bg-blue-500/10 text-blue-700" />
-        </div>
-      </div>
 
-      {/* ── System status strip ── */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/[0.08] bg-card-bg px-5 py-3 animate-fade-up" style={{ animationDelay: '340ms' }}>
-        <div className="flex items-center gap-2 text-xs text-primary-800/50">
-          <CheckCircle2 size={13} className="text-secondary" />
-          All systems operational
-        </div>
-      </div>
+        {/* ── Main grid: Activity + Top Books ── */}
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-5">
 
-    </div>
-  );
+          {/* Recent activity (3/5 width) */}
+          <div className="lg:col-span-3 rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '160ms' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-primary/[0.08]">
+              <div>
+                <h2 className="font-display text-lg font-semibold text-primary-950">Recent Activity</h2>
+                <p className="text-xs text-primary-800/45 mt-0.5">Latest borrow & return events</p>
+              </div>
+              <Link
+                href="/admin/logs"
+                className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-700 transition-colors"
+              >
+                View All <ArrowRight size={13} />
+              </Link>
+            </div>
+            <div className="px-5 divide-y divide-primary/[0.04]">
+              {RECENT_ACTIVITY.map((item, i) => (
+                <ActivityRow key={item.id} item={item} index={i} />
+              ))}
+            </div>
+          </div>
+
+          {/* Top borrowed books (2/5 width) */}
+          <div className="lg:col-span-2 rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '220ms' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-primary/[0.08]">
+              <div>
+                <h2 className="font-display text-lg font-semibold text-primary-950">Top Books</h2>
+                <p className="text-xs text-primary-800/45 mt-0.5">Most borrowed this month</p>
+              </div>
+              <BarChart2 size={16} className="text-primary/30" />
+            </div>
+            <div className="px-5 py-4">
+              <TopBooksChart />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Quick actions row ── */}
+        <div className="rounded-2xl border border-primary/[0.1] bg-card-bg shadow-brand-sm overflow-hidden animate-fade-up" style={{ animationDelay: '280ms' }}>
+          <div className="px-5 py-4 border-b border-primary/[0.08]">
+            <h2 className="font-display text-lg font-semibold text-primary-950">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+            <QuickAction icon={Plus} label="Add New Book" href="/admin/inventory/new" color="bg-primary/10 text-primary" />
+            <QuickAction icon={Users} label="Manage Users" href="/admin/logs" color="bg-secondary/10 text-secondary" />
+            <QuickAction icon={BookCopy} label="View Borrowings" href="/admin/logs" color="bg-amber-500/10 text-amber-700" />
+            <QuickAction icon={BarChart2} label="Analytics" href="/admin/analytics" color="bg-blue-500/10 text-blue-700" />
+          </div>
+        </div>
+
+        {/* ── System status strip ── */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/[0.08] bg-card-bg px-5 py-3 animate-fade-up" style={{ animationDelay: '340ms' }}>
+          <div className="flex items-center gap-2 text-xs text-primary-800/50">
+            <CheckCircle2 size={13} className="text-secondary" />
+            All systems operational
+          </div>
+        </div>
+
+      </div>
+    );
+  }
 }

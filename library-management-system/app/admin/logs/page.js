@@ -1,15 +1,17 @@
 'use client';
 
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Search, Mail, Phone, Calendar, BookOpen } from 'lucide-react';
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // ─── Exact Color Palette ──────────────────────────────────────────────────────
 const C = {
-  brown:    '#7a421f',
-  olive:    '#525333',
-  cream:    '#fcf5e1',
+  brown: '#7a421f',
+  olive: '#525333',
+  cream: '#fcf5e1',
   offwhite: '#fefef1',
-  dark:     '#210f06',
+  dark: '#210f06',
 };
 
 
@@ -106,41 +108,56 @@ function StudentRow({ student, index }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function StudentRegistryPage() {
-  const [search, setSearch]   = useState('');
+  const [loader, setLoader] = useState(true)
+  const [search, setSearch] = useState('');
   const [focused, setFocused] = useState(false);
-    //============================== total Students ===========================//
-  
-    const [totalStudents, setTotalStudents] = useState([])
-    const TotalStnd = async () => {
-      try {
-        const token = localStorage.getItem("Admintoken")
-        const response = await fetch("http://localhost:5000/api/membersData", {
-  
-          method: "GET",
-          headers: {
-            "authorization": `Bearer ${token}`
-          }
-        })
-  
-        let data = await response.json()
+  const [totalStudents, setTotalStudents] = useState([])
+  //============================== total Students ===========================//
 
-        setTotalStudents(data.data)
-  
-      } catch (error) {
-        console.log(error);
-  
+  const fetchingAPIs = async () => {
+    try {
+      const token = localStorage.getItem("Admintoken")
+      const headers = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
       }
-  
+      const [res1] = await Promise.all([
+        fetch("http://localhost:5000/api/membersData", { method: "GET", headers })
+      ])
+      const [data1] = await Promise.all([
+        res1.ok ? res1.json() : null
+      ])
+      if (data1) {
+        const dataArray = data1.data
+        setTotalStudents(dataArray)
+
+      }
+    } catch (error) {
+      console.log(error);
+
+    } finally {
+      setLoader(false)
     }
-    useEffect(() => {
-  
-      TotalStnd()
-  
-    }, [])
+  }
+  useEffect(() => {
+
+    fetchingAPIs()
+
+  }, [])
 
   const filtered = totalStudents.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase())
   );
+  if (loader) {
+    return (
+
+      <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
+
+        <CircularProgress sx={{ color: "#52512a" }} />
+
+      </Stack>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100%', padding: '32px', backgroundColor: C.offwhite }}>
@@ -154,7 +171,7 @@ export default function StudentRegistryPage() {
               fontSize: 28, fontWeight: 700,
               color: C.dark, margin: 0, lineHeight: 1.25,
             }}>
-              Student Registry
+              Members Registry
             </h1>
             <p style={{ marginTop: 4, fontSize: 13, color: `${C.brown}80`, margin: '4px 0 0' }}>
               All registered library members
@@ -180,7 +197,7 @@ export default function StudentRegistryPage() {
                 Total
               </p>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.dark, lineHeight: 1.1 }}>
-                {totalStudents.length} Students
+                {totalStudents.length} Members
               </p>
             </div>
           </div>
@@ -197,7 +214,7 @@ export default function StudentRegistryPage() {
           />
           <input
             type="text"
-            placeholder="Search by student name..."
+            placeholder="Search by member name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             onFocus={() => setFocused(true)}
@@ -238,7 +255,7 @@ export default function StudentRegistryPage() {
           borderBottom: `1px solid ${C.brown}18`,
           backgroundColor: `${C.brown}07`,
         }}>
-          {['Student', 'Contact', 'Member Since', 'Books'].map((col, i) => (
+          {['Member', 'Contact', 'Member Since', 'Books'].map((col, i) => (
             <p key={i} style={{
               margin: 0, fontSize: 10, fontWeight: 600,
               textTransform: 'uppercase', letterSpacing: '0.07em',
@@ -253,7 +270,7 @@ export default function StudentRegistryPage() {
         <div>
           {filtered.length === 0 ? (
             <div style={{ padding: '60px 20px', textAlign: 'center', fontSize: 13, color: `${C.brown}65` }}>
-              No student found with that name.
+              No Member found with that name.
             </div>
           ) : (
             filtered.map((s, i) => (
@@ -274,7 +291,7 @@ export default function StudentRegistryPage() {
             <span style={{ fontWeight: 600, color: `${C.brown}cc` }}>{filtered.length}</span>
             {' '}of{' '}
             <span style={{ fontWeight: 600, color: `${C.brown}cc` }}>{totalStudents.length}</span>
-            {' '}students
+            {' '}members
           </p>
         </div>
       </div>
