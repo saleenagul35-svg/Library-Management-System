@@ -5,7 +5,7 @@ const Token_Verfication = require("../middleware/authMiddleware")
 
 
 router.post("/borrowRequest",Token_Verfication,borrowBook)
-router.put("/rejectRequest",Token_Verfication,rejectRequest)
-router.put("/acceptRequest",Token_Verfication,acceptRequest)
+router.put("/rejectRequest/:id",Token_Verfication,rejectRequest)
+router.put("/acceptRequest/:id",Token_Verfication,acceptRequest)
 
 module.exports = router

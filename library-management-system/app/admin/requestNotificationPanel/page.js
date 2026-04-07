@@ -73,7 +73,7 @@ function EmptyState() {
 // ✅ Fixed: equal Member/Book columns, tighter Stock
 const GRID = "1.1fr 1.1fr 90px 120px 150px";
 
-function DesktopTable({ requests,handleRejection, handleApproval }) {
+function DesktopTable({ requests, handleRejection, handleApproval }) {
   return (
     <div className="hidden md:block bg-[#fffff3] rounded-xl border border-[#d9d4c2] overflow-hidden">
       <div className="grid bg-[#FCF5E1] border-b border-[#d9d4c2] px-5 py-2.5"
@@ -85,7 +85,7 @@ function DesktopTable({ requests,handleRejection, handleApproval }) {
         ))}
       </div>
       {requests.map((r, idx) => (
-        <DesktopRow key={r.userId.id} r={r} index={idx} isLast={idx === requests.length - 1} handleApproval={handleApproval} handleRejection={handleRejection} />
+        <DesktopRow key={r._id} r={r} index={idx} isLast={idx === requests.length - 1} handleApproval={handleApproval} handleRejection={handleRejection} />
       ))}
     </div>
   );
@@ -130,7 +130,7 @@ function MobileCards({ requests, handleRejection, handleApproval }) {
   return (
     <div className="md:hidden flex flex-col gap-3">
       {requests.map((r, idx) => (
-        <div key={r.userId.id} className="bg-[#fffff3] rounded-xl border border-[#d9d4c2] p-4">
+        <div key={r._id} className="bg-[#fffff3] rounded-xl border border-[#d9d4c2] p-4">
           <div className="flex items-center gap-3 mb-3">
             <Avatar name={r.userId.name} index={idx} />
             <div className="flex-1 min-w-0">
@@ -172,7 +172,8 @@ export default function BorrowRequests() {
       });
       if (response.ok) {
         const data = await response.json();
-        return setRequests(data.data);
+        setRequests(data.data);
+        
       }
     } catch (error) {
       console.log(error);
@@ -189,15 +190,16 @@ export default function BorrowRequests() {
         authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       };
-      await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
+      const  res  = await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
         method: 'PUT',
         headers,
       });
+      if (res.ok) {
+        fetchingAPIs();
+      }
+
     } catch (error) {
       console.log(error);
-    } finally {
-
-      fetchingAPIs();
     }
   }
   const handleApproval = async (requestId) => {
@@ -208,15 +210,16 @@ export default function BorrowRequests() {
         authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       };
-      await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
+      const  res  = await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
         method: 'PUT',
         headers,
       });
+      if (res.ok) {
+        fetchingAPIs();
+      }
+
     } catch (error) {
       console.log(error);
-    } finally {
-
-      fetchingAPIs();
     }
   }
 

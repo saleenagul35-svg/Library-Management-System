@@ -281,8 +281,8 @@ function TopBar({ onMenuClick, pageTitle, breadcrumb, requestCount }) {
         <a href='/admin/requestNotificationPanel' className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 text-primary/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all">
           <Bell size={16} />
           {/* Unread dot */}
-
-          <span className="absolute bottom-5 left-4.5 h-6 w-6 flex justify-center rounded-full bg-primary text-white" >{requestCount > 99 ? "99+" : requestCount}</span>
+          {requestCount > 0 && <span className="absolute bottom-5 left-4.5 h-6 w-6 flex justify-center rounded-full bg-primary text-white" > {requestCount > 99 ? "99+" : requestCount}</span>
+          }
         </a>
 
         {/* Avatar */}

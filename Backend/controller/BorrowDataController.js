@@ -15,11 +15,12 @@ const adminNotification = async (req, res) => {
             const activeBooks = userApprovedRequests.filter((arr) => {
                 return arr.dueDate.getTime() > today.getTime()
             })
-            let status = (overdueBooks.length === 0) ? `${overdueBooks.length} overdue ` : `${activeBooks.length} borrowed`
+            let status = (overdueBooks.length === 0) ? `${activeBooks.length} borrowed `:`${overdueBooks.length} overdue `
             if((overdueBooks.length === 0) && (activeBooks.length === 0)){
                 status = "Eligible"
             }
             return {
+                _id:request._id,
                 userId: request.userId,
                 bookId: request.bookId,
                 requestDate: request.requestDate,

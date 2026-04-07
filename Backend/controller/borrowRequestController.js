@@ -18,26 +18,45 @@ const borrowBook = async (req, res) => {
                 })
                 const DateObj = CheckRequest.dueDate;
 
-            if (CheckRequest.status === "approved" && DateObj.getTime() < new Date().getTime()) {
+                if (CheckRequest.status === "approved" && DateObj.getTime() < new Date().getTime()) {
                     res.status(401).json({
-                        message: "You have already borrowed this book",
+                        message: "You have already borrowed this book.",
+                    })
+                } else {
+                    res.status(401).json({
+                        message: "You have already borrowed this book and due Date is over",
                     })
                 }
+            }
             if (CheckRequest.status === "returned") {
-                    const newRequest = new RequestsCollection({
-                        userId: userId,
-                        bookId: bookId,
-                        status: "pending",
-                        requestDate: new Date(),
-                        issueDate: null,
-                        dueDate: null,
-                        returnDate: null
-                    })
-                    await newRequest.save()
-                    res.status(200).json({
-                        message: "Request submitted successfully",
-                    })
-                }
+                const newRequest = new RequestsCollection({
+                    userId: userId,
+                    bookId: bookId,
+                    status: "pending",
+                    requestDate: new Date(),
+                    issueDate: null,
+                    dueDate: null,
+                    returnDate: null
+                })
+                await newRequest.save()
+                res.status(200).json({
+                    message: "Request submitted successfully",
+                })
+            }
+            if (CheckRequest.status === "rejected") {
+                const newRequest = new RequestsCollection({
+                    userId: userId,
+                    bookId: bookId,
+                    status: "pending",
+                    requestDate: new Date(),
+                    issueDate: null,
+                    dueDate: null,
+                    returnDate: null
+                })
+                await newRequest.save()
+                res.status(200).json({
+                    message: "Request submitted successfully",
+                })
             }
 
         } else {
@@ -65,14 +84,14 @@ const borrowBook = async (req, res) => {
 
 
 }
-const rejectRequest = async(req,res) =>{
+const rejectRequest = async (req, res) => {
     const id = req.params.id
-  
+
 
     try {
         await RequestsCollection.updateOne({ _id: id }, {
             $set: {
-                status: "rejected",            
+                status: "rejected",
             }
         })
         res.status(200).json({
@@ -85,14 +104,14 @@ const rejectRequest = async(req,res) =>{
         })
     }
 }
-const acceptRequest  = async(req,res)=>{
-        const id = req.params.id
+const acceptRequest = async (req, res) => {
+    const id = req.params.id
     try {
         await RequestsCollection.updateOne({ _id: id }, {
             $set: {
-                status: "approved", 
+                status: "approved",
                 issueDate: new Date(),
-                dueDate: dueDateCounting,          
+                dueDate: dueDateCounting,
             }
         })
         res.status(200).json({
@@ -106,4 +125,4 @@ const acceptRequest  = async(req,res)=>{
     }
 
 }
-module.exports = { borrowBook,rejectRequest ,acceptRequest}
+module.exports = { borrowBook, rejectRequest, acceptRequest }
