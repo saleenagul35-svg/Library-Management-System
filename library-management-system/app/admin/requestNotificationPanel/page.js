@@ -20,6 +20,7 @@ const formatDate = (rawDate) => {
   return `${day} ${month} ${year}`;
 };
 
+
 function Avatar({ name, index }) {
   return (
     <div className={`${getAvBg(index)} text-[#fffff3] w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium shrink-0`}>
@@ -72,7 +73,7 @@ function EmptyState() {
 // ✅ Fixed: equal Member/Book columns, tighter Stock
 const GRID = "1.1fr 1.1fr 90px 120px 150px";
 
-function DesktopTable({ requests }) {
+function DesktopTable({ requests,handleRejection, handleApproval }) {
   return (
     <div className="hidden md:block bg-[#fffff3] rounded-xl border border-[#d9d4c2] overflow-hidden">
       <div className="grid bg-[#FCF5E1] border-b border-[#d9d4c2] px-5 py-2.5"
@@ -84,13 +85,13 @@ function DesktopTable({ requests }) {
         ))}
       </div>
       {requests.map((r, idx) => (
-        <DesktopRow key={r.userId.id} r={r} index={idx} isLast={idx === requests.length - 1} />
+        <DesktopRow key={r.userId.id} r={r} index={idx} isLast={idx === requests.length - 1} handleApproval={handleApproval} handleRejection={handleRejection} />
       ))}
     </div>
   );
 }
 
-function DesktopRow({ r, index, isLast }) {
+function DesktopRow({ r, index, isLast, handleRejection, handleApproval }) {
   return (
     <div
       className={`grid items-center px-5 py-3.5 hover:bg-[#faf8ef] transition-colors duration-150 ${!isLast ? "border-b border-[#ede9d8]" : ""}`}
@@ -117,15 +118,15 @@ function DesktopRow({ r, index, isLast }) {
         </div>
       </div>
       <div className="flex items-center justify-center gap-2">
-        <DeclineBtn onClick={() => { }} />
-        <ApproveBtn onClick={() => { }} />
+        <DeclineBtn onClick={() => handleRejection(r._id)} />
+        <ApproveBtn onClick={() => handleApproval(r._id)} />
       </div>
     </div>
   );
 }
 
 // ✅ Fixed: date calculation moved inside map
-function MobileCards({ requests }) {
+function MobileCards({ requests, handleRejection, handleApproval }) {
   return (
     <div className="md:hidden flex flex-col gap-3">
       {requests.map((r, idx) => (
@@ -146,8 +147,8 @@ function MobileCards({ requests }) {
             <Badge label={r.bookId.Copy} />
             <span className="text-[11px] text-[#9a9280]">{formatDate(r.requestDate)}</span>
             <div className="ml-auto flex items-center gap-2">
-              <DeclineBtn onClick={() => { }} />
-              <ApproveBtn onClick={() => { }} />
+              <DeclineBtn onClick={() => handleRejection(r._id)} />
+              <ApproveBtn onClick={() => handleApproval(r._id)} />
             </div>
           </div>
         </div>
@@ -159,7 +160,6 @@ function MobileCards({ requests }) {
 export default function BorrowRequests() {
   const [requests, setRequests] = useState([]);
   const [loader, setLoader] = useState(true)
-
   const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem('Admintoken');
@@ -172,14 +172,53 @@ export default function BorrowRequests() {
       });
       if (response.ok) {
         const data = await response.json();
-        setRequests(data.data);
+        return setRequests(data.data);
       }
     } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       setLoader(false)
     }
   };
+
+  const handleRejection = async (requestId) => {
+    try {
+
+      const token = localStorage.getItem('Admintoken');
+      const headers = {
+        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
+        method: 'PUT',
+        headers,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+
+      fetchingAPIs();
+    }
+  }
+  const handleApproval = async (requestId) => {
+    try {
+
+      const token = localStorage.getItem('Admintoken');
+      const headers = {
+        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
+        method: 'PUT',
+        headers,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+
+      fetchingAPIs();
+    }
+  }
 
   useEffect(() => {
     fetchingAPIs();
@@ -213,8 +252,8 @@ export default function BorrowRequests() {
           <EmptyState />
         ) : (
           <>
-            <DesktopTable requests={requests} />
-            <MobileCards requests={requests} />
+            <DesktopTable requests={requests} handleApproval={handleApproval} handleRejection={handleRejection} />
+            <MobileCards requests={requests} handleApproval={handleApproval} handleRejection={handleRejection} />
           </>
         )}
       </div>

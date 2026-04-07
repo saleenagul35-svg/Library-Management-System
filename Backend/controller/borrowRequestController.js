@@ -1,6 +1,10 @@
 const RequestsCollection = require("../models/borrowRequestModel")
 const jwt = require("jsonwebtoken")
 
+let dueDateCounting = new Date();
+dueDateCounting.setDate(dueDateCounting.getDate() + 14)
+
+
 
 const borrowBook = async (req, res) => {
     const { bookId } = req.body
@@ -61,5 +65,45 @@ const borrowBook = async (req, res) => {
 
 
 }
+const rejectRequest = async(req,res) =>{
+    const id = req.params.id
+  
 
-module.exports = { borrowBook }
+    try {
+        await RequestsCollection.updateOne({ _id: id }, {
+            $set: {
+                status: "rejected",            
+            }
+        })
+        res.status(200).json({
+            message: "borrow request rejected"
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            message: "error occured rejecting borrow request"
+        })
+    }
+}
+const acceptRequest  = async(req,res)=>{
+        const id = req.params.id
+    try {
+        await RequestsCollection.updateOne({ _id: id }, {
+            $set: {
+                status: "approved", 
+                issueDate: new Date(),
+                dueDate: dueDateCounting,          
+            }
+        })
+        res.status(200).json({
+            message: "borrow request rejected"
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            message: "error occured rejecting borrow request"
+        })
+    }
+
+}
+module.exports = { borrowBook,rejectRequest ,acceptRequest}

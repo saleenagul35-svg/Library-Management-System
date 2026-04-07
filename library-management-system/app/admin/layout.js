@@ -165,7 +165,7 @@ function SidebarUserCard() {
 }
 
 /** The full sidebar — used in both desktop (fixed) and mobile (drawer) */
-function Sidebar({ onClose, requestCount }) {
+function Sidebar({ onClose }) {
   return (
     <aside
       className="flex h-full w-64 flex-col"
@@ -199,7 +199,7 @@ function Sidebar({ onClose, requestCount }) {
 
       {/* Brand */}
       <div className="relative z-10">
-        <SidebarBrand requestCount={requestCount} />
+        <SidebarBrand />
       </div>
 
       {/* Mobile close button */}
@@ -281,7 +281,8 @@ function TopBar({ onMenuClick, pageTitle, breadcrumb, requestCount }) {
         <a href='/admin/requestNotificationPanel' className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 text-primary/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all">
           <Bell size={16} />
           {/* Unread dot */}
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary text-white ring-2 ring-brand-bg" >{requestCount}</span>
+
+          <span className="absolute bottom-5 left-4.5 h-6 w-6 flex justify-center rounded-full bg-primary text-white" >{requestCount > 99 ? "99+" : requestCount}</span>
         </a>
 
         {/* Avatar */}
@@ -315,10 +316,6 @@ export default function AdminLayout({ children }) {
       if (response.ok) {
         const data = await response.json()
         setRequestCount(data.data)
-
-
-
-
       }
 
 
@@ -388,6 +385,7 @@ export default function AdminLayout({ children }) {
       {/* ── Main content column ── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar
+          requestCount={requestCount}
           onMenuClick={() => setMobileOpen(true)}
           breadcrumb={breadcrumb}
         />
