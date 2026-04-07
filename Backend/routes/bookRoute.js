@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const {storeBooks,fetchBooks} = require("../controller/bookController")
+const {storeBooks,fetchBooks,deleteBook,editBook,updateBookCopies} = require("../controller/bookController")
 const Token_Verfication = require("../middleware/authMiddleware")
 
-router.post("/addBooks",storeBooks)
+router.post("/addBooks",Token_Verfication,storeBooks)
 router.get("/bookData",Token_Verfication, fetchBooks)
+router.delete("/deleteBook/:id",Token_Verfication,deleteBook)
+router.put("/editBook/:id",Token_Verfication,editBook)
+router.put("/editBook/:id",Token_Verfication,updateBookCopies)
 
 module.exports = router

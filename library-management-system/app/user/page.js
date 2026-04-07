@@ -34,15 +34,12 @@ export default function UserHomePage() {
       }
     } catch (error) {
       console.log(error);
-
     } finally {
       setLoader(false)
     }
-
   }
 
   useEffect(() => {
-
     fetchingAPIs();
   }, []);
 
@@ -50,22 +47,7 @@ export default function UserHomePage() {
 
   // ─── Sub-components ────────────────────────────────────────────────────────────
 
-  function StarRating({ rating }) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <svg key={star} width="12" height="12" viewBox="0 0 24 24"
-            fill={star <= Math.round(rating) ? "#c8a96e" : "none"}
-            stroke="#c8a96e" strokeWidth="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-        ))}
-        <span style={{ fontSize: "11px", color: "#9b8a6a", marginLeft: "3px" }}>{rating}</span>
-      </div>
-    );
-  }
-
-  function BookCover({ book, borrowed }) {
+  function BookCover({ book }) {
     const initials = book.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
     return (
       <div style={{ width: "100%", height: "215px", background: book.color, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -74,14 +56,11 @@ export default function UserHomePage() {
         </div>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 55%, rgba(0,0,0,.4) 100%)" }} />
         <span style={{ position: "absolute", top: "10px", right: "10px", background: "rgba(255,255,243,.88)", color: "#515427", fontSize: "10px", fontWeight: "600", padding: "3px 9px", borderRadius: "20px" }}>{book.Genre}</span>
-        {borrowed && (
-          <span style={{ position: "absolute", top: "10px", left: "10px", background: "#515427", color: "#fffff3", fontSize: "10px", fontWeight: "600", padding: "3px 9px", borderRadius: "20px" }}>✓ Borrowed</span>
-        )}
       </div>
     );
   }
 
-  function BookCard({ book, borrowed, onBorrowClick }) {
+  function BookCard({ book, onBorrowClick }) {
     const [hovered, setHovered] = useState(false);
     return (
       <div
@@ -95,27 +74,24 @@ export default function UserHomePage() {
           transition: "all .28s cubic-bezier(.16,1,.3,1)",
         }}
       >
-        <BookCover book={book} borrowed={borrowed} />
+        <BookCover book={book} />
         <div style={{ padding: "16px 18px 18px", flex: 1, display: "flex", flexDirection: "column" }}>
           <h3 style={{ color: "#515427", fontSize: "15px", fontWeight: "700", margin: "0 0 4px", fontFamily: "Georgia, serif", lineHeight: "1.3" }}>{book.Title}</h3>
           <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 9px", fontStyle: "italic" }}>{book.Author}</p>
-          <StarRating rating={book.Rating} />
-          <p style={{ color: "#b0a080", fontSize: "11px", margin: "7px 0 0" }}>{book.Pages} pages</p>
           <div style={{ marginTop: "auto", paddingTop: "14px" }}>
             <button
-              disabled={borrowed}
-              onClick={() => !borrowed && onBorrowClick(book)}
+              onClick={() => onBorrowClick(book)}
               style={{
                 width: "100%", padding: "10px", borderRadius: "9px", border: "none",
-                background: borrowed ? "#e8e3d0" : "#864c25",
-                color: borrowed ? "#9b8a6a" : "#fffff3",
-                cursor: borrowed ? "default" : "pointer",
+                background: "#864c25",
+                color: "#fffff3",
+                cursor: "pointer",
                 fontSize: "13px", fontWeight: "600", fontFamily: "inherit",
-                boxShadow: borrowed ? "none" : "0 4px 12px rgba(134,76,37,.28)",
+                boxShadow: "0 4px 12px rgba(134,76,37,.28)",
                 transition: "all .18s ease",
               }}
             >
-              {borrowed ? "Already Borrowed" : "Borrow Book"}
+              Request To Borrow
             </button>
           </div>
         </div>
@@ -136,13 +112,13 @@ export default function UserHomePage() {
           <div style={{ fontSize: "44px", marginBottom: "14px" }}>📖</div>
           <h3 style={{ color: "#515427", fontSize: "21px", margin: "0 0 8px", fontWeight: "700" }}>Borrow this book?</h3>
           <p style={{ color: "#515427", fontSize: "16px", fontWeight: "700", margin: "0 0 4px" }}>{book.Title}</p>
-          <p style={{ color: "#9b8a6a", fontSize: "13px", margin: "0 0 24px" }}>by {book.Author} · {book.Pages} pages · {book.Genre}</p>
+          <p style={{ color: "#9b8a6a", fontSize: "13px", margin: "0 0 24px" }}>by {book.Author} · {book.Genre}</p>
           <p style={{ color: "#7a6f4e", fontSize: "13px", margin: "0 0 26px", lineHeight: "1.65" }}>
-            Borrowing period is <strong style={{ color: "#515427" }}>14 days</strong>. The book will be added to your library immediately.
+            Borrowing period is <strong style={{ color: "#515427" }}>14 days</strong>. The book will be reserved for you immediately.
           </p>
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={onCancel} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "1.5px solid #d4c9a8", background: "transparent", color: "#7a6f4e", cursor: "pointer", fontSize: "14px", fontFamily: "inherit" }}>Cancel</button>
-            <button onClick={() => onConfirm(book)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "none", background: "#864c25", color: "#fffff3", cursor: "pointer", fontSize: "14px", fontFamily: "inherit", fontWeight: "600", boxShadow: "0 4px 16px rgba(134,76,37,.32)" }}>Confirm Borrow</button>
+            <button onClick={() => onConfirm(book)} style={{ flex: 1, padding: "12px", borderRadius: "10px", border: "none", background: "#864c25", color: "#fffff3", cursor: "pointer", fontSize: "14px", fontFamily: "inherit", fontWeight: "600", boxShadow: "0 4px 16px rgba(134,76,37,.32)" }}>Confirm Request</button>
           </div>
         </div>
       </div>
@@ -155,7 +131,7 @@ export default function UserHomePage() {
       return () => clearTimeout(t);
     }, [onClose]);
     return (
-      <div style={{ position: "fixed", bottom: "28px", right: "28px", zIndex: 1000, background: "#252210", color: "#fffff3", padding: "14px 20px", borderRadius: "12px", boxShadow: "0 8px 32px rgba(0,0,0,.3)", display: "flex", alignItems: "center", gap: "12px", fontSize: "14px", minWidth: "270px", fontFamily: "inherit" }}>
+      <div style={{ position: "fixed", bottom: "28px", right: "28px", zIndex: 1000, background: "#515427", color: "#fffff3", padding: "14px 20px", borderRadius: "12px", boxShadow: "0 8px 32px rgba(0,0,0,.3)", display: "flex", alignItems: "center", gap: "12px", fontSize: "14px", minWidth: "270px", fontFamily: "inherit" }}>
         <span style={{ fontSize: "20px" }}>📚</span>
         <div>
           <div style={{ fontWeight: "600", marginBottom: "2px" }}>Book Reserved!</div>
@@ -169,28 +145,38 @@ export default function UserHomePage() {
   // ─── Main State ────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
-  const [borrowedIds, setBorrowedIds] = useState([]);
   const [modalBook, setModalBook] = useState(null);
   const [toast, setToast] = useState(null);
 
   const filtered = books.filter((b) => {
-    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || b.Author.toLowerCase().includes(search.toLowerCase()) 
-    ||   b.Genre?.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || b.Author.toLowerCase().includes(search.toLowerCase())
+      || b.Genre?.toLowerCase().includes(search.toLowerCase())
     const matchGenre = activeGenre === "All" || b.Genre?.toLowerCase().trim() === activeGenre.toLowerCase().trim();
     return matchSearch && matchGenre;
   });
 
-  const handleConfirmBorrow = (book) => {
-    setBorrowedIds((prev) => [...prev, book._id]);
+  const handleConfirmBorrow = async(book) => {
     setModalBook(null);
-    setToast(`"${book.Title}" has been added to your library.`);
+    setToast(`"${book.Title}" has been reserved for you.`);
+    try {
+      const token = localStorage.getItem("UserLoginToken")
+      const response =await fetch("http://localhost:5000/api/borrowRequest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({bookId:`${book._id}`})
+      })
+    } catch (error) {
+      console.log(error);
+    }
   };
+
   if (loader) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
-
         <CircularProgress sx={{ color: "#52512a" }} />
-
       </Stack>
     )
   }
@@ -206,9 +192,6 @@ export default function UserHomePage() {
         .pill:hover{background:#515427!important;color:#fffff3!important}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
       `}</style>
-
-      {/* ── Navbar ── */}
-
 
       <div style={{ minHeight: "100vh", background: "#fffff3", fontFamily: "'Inter', sans-serif" }}>
 
@@ -266,7 +249,7 @@ export default function UserHomePage() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "26px", animation: "fadeIn .4s ease" }}>
               {filtered.map((book) => (
-                <BookCard key={book._id} book={book} borrowed={borrowedIds.includes(book._id)} onBorrowClick={setModalBook} />
+                <BookCard key={book._id} book={book} onBorrowClick={setModalBook} />
               ))}
             </div>
           )}

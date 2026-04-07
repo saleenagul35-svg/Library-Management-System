@@ -34,10 +34,17 @@ function formatDate(d) {
   });
 }
 
+  
+
 // ─── Student Row ──────────────────────────────────────────────────────────────
 function StudentRow({ student, index }) {
   const [hov, setHov] = useState(false);
   const [from, to] = AVATAR_PAIRS[student.id % AVATAR_PAIRS.length];
+    const date = new Date(student.memberSince)
+  const day = date.getDate()
+  const year = date.getFullYear()
+  const month = date.toLocaleString("en-US",{month:"long"})
+  const formattedDate = `${day} ${month} ${year}`
 
   return (
     <div
@@ -72,7 +79,7 @@ function StudentRow({ student, index }) {
             {student.name}
           </p>
           <p style={{ margin: 0, fontSize: 10, color: `${C.brown}55` }}>
-            #{String(student.id).padStart(4, '0')}
+            REG-{String(student.id).padStart(4, '0')}
           </p>
         </div>
       </div>
@@ -85,22 +92,19 @@ function StudentRow({ student, index }) {
             {student.email}
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Phone size={9} color={`${C.brown}55`} strokeWidth={2} />
-          <span style={{ fontSize: 11, color: `${C.dark}95` }}>{student.phone}</span>
-        </div>
       </div>
 
       {/* Member Since */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <Calendar size={10} color={`${C.brown}55`} strokeWidth={2} />
-        <span style={{ fontSize: 11, color: `${C.dark}95` }}>{student.memberSince}</span>
+        <Phone size={9} color={`${C.brown}55`} strokeWidth={2} />
+        <span style={{ fontSize: 11, color: `${C.dark}95` }}>{student.phone}</span>
       </div>
 
       {/* Books */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <BookOpen size={10} color={`${C.brown}55`} strokeWidth={2} />
-        <span style={{ fontSize: 14, fontWeight: 700, color: C.brown }}>{student.booksBorrowed}</span>
+        <Calendar size={10} color={`${C.brown}55`} strokeWidth={2} />
+        <span style={{ fontSize: 11, color: `${C.dark}95` }}>{formattedDate}</span>
+
       </div>
     </div>
   );
@@ -158,6 +162,7 @@ export default function StudentRegistryPage() {
       </Stack>
     )
   }
+  
 
   return (
     <div style={{ minHeight: '100%', padding: '32px', backgroundColor: C.offwhite }}>
@@ -255,7 +260,7 @@ export default function StudentRegistryPage() {
           borderBottom: `1px solid ${C.brown}18`,
           backgroundColor: `${C.brown}07`,
         }}>
-          {['Member', 'Contact', 'Member Since', 'Books'].map((col, i) => (
+          {['Member',"Email Address" ,'Contact Number', 'Member Since'].map((col, i) => (
             <p key={i} style={{
               margin: 0, fontSize: 10, fontWeight: 600,
               textTransform: 'uppercase', letterSpacing: '0.07em',
@@ -270,7 +275,7 @@ export default function StudentRegistryPage() {
         <div>
           {filtered.length === 0 ? (
             <div style={{ padding: '60px 20px', textAlign: 'center', fontSize: 13, color: `${C.brown}65` }}>
-              No Member found with that name.
+              No Member found
             </div>
           ) : (
             filtered.map((s, i) => (

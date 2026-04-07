@@ -1,62 +1,95 @@
 "use client";
 
-import { useState } from "react";
-
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 export default function updateBookForm() {
+  const router = useRouter()
+  const useSrchPrms = useSearchParams()
+
   const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Status: "", Description: "" })
 
+  const book = useSrchPrms.get("book")
+  
+  
+  const [parsed,setParsed] = useState(null);
   const formData = (e) => {
     const { name, value } = e.target;
     setHandleForm((prev) => ({
       ...prev,
       [name]: value
-
-
     }))
   }
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log(handleform);
-
     try {
-      const token = localStorage.getItem("Admintoken")
-      const response = await fetch("http://localhost:5000/api/addBooks", {
-        method: "POST",
-        headers: {
-          "authorization": `Bearer ${token}`,
-          "Content-Type": "application/json" 
-        },
+      const bookId = parsed._id
+      const token = localStorage.getItem('Admintoken')
+      const headers = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+      const response = await fetch(`http://localhost:5000/api/editBook/${bookId}`, {
+        method: "PUT",
+        headers,
         body: JSON.stringify(handleform)
       })
-
-      if(response.ok){
-        window.location.href = "/admin/inventory"
+      if (response.ok) {
+        router.push("/admin/inventory")
       }
 
     } catch (error) {
       console.log(error);
+
     }
   };
 
   const cancel = () => {
     window.location.href = "/admin/inventory"
   }
+  useEffect(() => {
+    if (book) {
+      const parsedBook = JSON.parse(book)
+      setParsed(parsedBook)
+      setHandleForm({ Title: parsedBook.Title || "", Author: parsedBook.Author || "", ISBN: parsedBook.ISBN || "", Genre: parsedBook.Genre || "", Publisher: parsedBook.Publisher || "", Year: parsedBook.Year || "", Language: parsedBook.Language || "", Copy: parsedBook.Copy || "", Status: parsedBook.Status || "", Description: parsedBook.Description || "" })
+    }
+    console.log("runn");
+    
+  }, [book])
 
   return (
     <div className="min-h-screen bg-[#fcf5e1] font-sans">
 
+      {/* Edit Mode Top Strip */}
+      <div className="bg-[#54552b] px-6 py-2 flex items-center gap-2">
+        <svg className="w-3.5 h-3.5 text-[#f5f0e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        <p className="text-[11px] text-[#f5f0e0] font-medium tracking-widest uppercase">Editing Existing Record — Changes will overwrite current catalogue data</p>
+      </div>
+
       {/* Page Header */}
-      <div className="px-6 pt-2 pb-4 flex items-start justify-between">
+      <div className="px-6 pt-4 pb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#54552b] flex items-center justify-center shadow-sm">
+            <svg className="w-4 h-4 text-[#f5f0e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </div>
           <div>
-            <h1 className="text-xl font-bold text-[#3a2e1e] tracking-tight">Add New Book</h1>
+            <h1 className="text-xl font-bold text-[#3a2e1e] tracking-tight">Edit Book Details</h1>
             <p className="text-xs text-[#9a8e7f] mt-0.5">
-              Fill in the details below to register a new Book in the catalogue.
+              Modify the fields below to update this catalogue entry.
             </p>
           </div>
+        </div>
+
+        {/* Unsaved badge */}
+        <div className="flex items-center gap-1.5 bg-[#fdfaea] border border-[#d4c9b0] rounded-lg px-3 py-1.5 shadow-sm">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#54552b]" />
+          <span className="text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider">Unsaved Changes</span>
         </div>
       </div>
 
@@ -72,20 +105,22 @@ export default function updateBookForm() {
 
         {/* Basic Information */}
         <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-[#3a2e1e]">Basic Information</h2>
+                <p className="text-[11px] text-[#9a8e7f]">Core identifiers for this catalogue entry</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[#3a2e1e]">Basic Information</h2>
-              <p className="text-[11px] text-[#9a8e7f]">Core identifiers required for catalogue entry</p>
-            </div>
+            <span className="text-[10px] font-medium text-[#9a8e7f] bg-[#f5f0e0] border border-[#e8e0cc] px-2 py-0.5 rounded-full">1 of 4</span>
           </div>
 
           <div className="px-5 py-5 space-y-4">
-            {/* Book Title */}
             <div>
               <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
                 Book Title <span className="text-red-500">*</span>
@@ -102,12 +137,11 @@ export default function updateBookForm() {
                   value={handleform.Title}
                   onChange={formData}
                   placeholder="e.g. The Name of the Rose"
-                  className="w-full pl-9 pr-9 py-2.5 rounded-lg border text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] transition-colors outline-none focus:ring-2 focus:ring-offset-0 border-[#d4c9b0] focus:ring-[#d4c9b0] focus:border-[#a89880]"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                 />
               </div>
             </div>
 
-            {/* Author */}
             <div>
               <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
                 Author <span className="text-red-500">*</span>
@@ -130,7 +164,6 @@ export default function updateBookForm() {
               <p className="mt-1.5 text-[11px] text-[#9a8e7f]">First name Last name format preferred</p>
             </div>
 
-            {/* ISBN + Genre */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
@@ -155,7 +188,6 @@ export default function updateBookForm() {
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">13 digit format</p>
               </div>
 
-              {/* Genre — UPDATED */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
                   Genre <span className="text-red-500">*</span>
@@ -182,24 +214,26 @@ export default function updateBookForm() {
 
         {/* Publication Details */}
         <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-[#3a2e1e]">Publication Details</h2>
+                <p className="text-[11px] text-[#9a8e7f]">Publisher information and edition metadata</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[#3a2e1e]">Publication Details</h2>
-              <p className="text-[11px] text-[#9a8e7f]">Publisher information and edition metadata</p>
-            </div>
+            <span className="text-[10px] font-medium text-[#9a8e7f] bg-[#f5f0e0] border border-[#e8e0cc] px-2 py-0.5 rounded-full">2 of 4</span>
           </div>
 
           <div className="px-5 py-5">
             <div className="grid grid-cols-3 gap-4">
-              {/* Publisher */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Publisher<span className="text-red-500">*</span>
+                  Publisher <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -218,10 +252,9 @@ export default function updateBookForm() {
                 </div>
               </div>
 
-              {/* Year Published */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Year Published<span className="text-red-500">*</span>
+                  Year Published <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -243,10 +276,9 @@ export default function updateBookForm() {
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Between 1000–2026</p>
               </div>
 
-              {/* Language — UPDATED */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Language<span className="text-red-500">*</span>
+                  Language <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -259,7 +291,7 @@ export default function updateBookForm() {
                     value={handleform.Language}
                     onChange={formData}
                     placeholder="e.g. English, Urdu"
-                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Primary language of the book</p>
@@ -270,21 +302,23 @@ export default function updateBookForm() {
 
         {/* Inventory */}
         <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-              </svg>
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-[#3a2e1e]">Inventory</h2>
+                <p className="text-[11px] text-[#9a8e7f]">Physical stock management</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[#3a2e1e]">Inventory</h2>
-              <p className="text-[11px] text-[#9a8e7f]">Physical stock management</p>
-            </div>
+            <span className="text-[10px] font-medium text-[#9a8e7f] bg-[#f5f0e0] border border-[#e8e0cc] px-2 py-0.5 rounded-full">3 of 4</span>
           </div>
 
           <div className="px-5 py-5">
             <div className="grid grid-cols-2 gap-4">
-              {/* Number of Copies */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
                   Number of Copies <span className="text-red-500">*</span>
@@ -304,13 +338,12 @@ export default function updateBookForm() {
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Total physical copies being added to stock</p>
+                <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Total physical copies in stock</p>
               </div>
 
-              {/* Initial Status */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Status<span className="text-red-500">*</span>
+                  Status <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -335,52 +368,61 @@ export default function updateBookForm() {
 
         {/* Description */}
         <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-[#3a2e1e]">Description</h2>
+                <p className="text-[11px] text-[#9a8e7f]">Book synopsis and summary</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[#3a2e1e]">Description</h2>
-            </div>
+            <span className="text-[10px] font-medium text-[#9a8e7f] bg-[#f5f0e0] border border-[#e8e0cc] px-2 py-0.5 rounded-full">4 of 4</span>
           </div>
 
           <div className="px-5 py-5">
             <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-              Synopsis<span className="text-red-500">*</span>
+              Synopsis <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <textarea
-                rows={5}
-                maxLength={1000}
-                name="Description"
-                value={handleform.Description}
-                onChange={formData}
-                placeholder="A brief description of the book's content, themes, and audience..."
-                className="w-full px-4 py-3 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors resize-none"
-              />
+            <textarea
+              rows={5}
+              maxLength={1000}
+              name="Description"
+              value={handleform.Description}
+              onChange={formData}
+              placeholder="A brief description of the book's content, themes, and audience..."
+              className="w-full px-4 py-3 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors resize-none"
+            />
+            <div className="flex justify-end mt-1">
+              <span className="text-[11px] text-[#9a8e7f]">{handleform.Description.length}/1000</span>
             </div>
           </div>
         </section>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-between pt-2">
           <button
             type="button"
             onClick={cancel}
-            className="px-5 py-2.5 rounded-lg border border-[#d4c9b0] bg-[#fdfaea] text-sm font-medium text-[#5c4f3a] hover:bg-[#f5f0e0] transition-colors shadow-sm"
+            className="px-5 py-2.5 rounded-lg border border-[#d4c9b0] bg-[#fdfaea] text-sm font-medium text-[#5c4f3a] hover:bg-[#f5f0e0] transition-colors shadow-sm flex items-center gap-2"
           >
-            Cancel
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Discard Changes
           </button>
+
           <button
             type="submit"
             className="px-5 py-2.5 rounded-lg bg-[#54552b] text-sm font-medium text-[#f5f0e0] hover:bg-[#3a2e1e] transition-colors shadow-sm flex items-center gap-2"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            Add Book to Catalogue
+            Save Changes
           </button>
         </div>
       </form>

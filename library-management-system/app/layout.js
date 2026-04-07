@@ -43,9 +43,9 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
-      suppressHydrationWarning
+      suppressHydrationWarning={true}
     >
-      <body  suppressHydrationWarning className="min-h-screen bg-brand-bg font-body antialiased">
+      <body suppressHydrationWarning={true}  className="min-h-screen bg-brand-bg font-body antialiased">
         {children}
       </body>
     </html>

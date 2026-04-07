@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Token_Verfication = async (req, res, next) => {
-    const token = req.headers?.authorization?.split(" ")[1]
+    const token = req.headers.authorization?.split(" ")[1]
     try {
         if (token) {
 
@@ -8,11 +8,12 @@ const Token_Verfication = async (req, res, next) => {
             if (decoded) {
                 if (decoded.role === "user") {
                     req.ActiveEmail = decoded.email
+                    req.ActiveID = decoded.id
 
                     next();
                 }
                 if (decoded.role === "admin") {
-                   
+                     req.ActiveID = decoded.id
                     next();
                 }
             }

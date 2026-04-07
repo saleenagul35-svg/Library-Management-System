@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   LayoutDashboard,
   Library,
@@ -20,34 +22,44 @@ import {
 // ─── Navigation config ────────────────────────────────────────────────────────
 const NAV_ITEMS = [
   {
-    href:    '/admin',
-    label:   'Dashboard',
-    icon:    LayoutDashboard,
-    exact:   true,
-    badge:   null,
+    href: '/admin',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    exact: true,
+    badge: null,
   },
   {
-    href:    '/admin/inventory',
-    label:   'Book Inventory',
-    icon:    Library,
-    exact:   false,
-    badge:   'New',
+    href: '/admin/inventory',
+    label: 'Book Inventory',
+    icon: Library,
+    exact: false,
+    badge: 'New',
   },
   {
-    href:    '/admin/logs',
-    label:   'User Logs',
-    icon:    ScrollText,
-    exact:   false,
-    badge:   null,
+    href: '/admin/logs',
+    label: 'User Logs',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
   },
   {
-    href:    '/admin/analytics',
-    label:   'Analytics',
-    icon:    TrendingUp,
-    exact:   false,
-    badge:   null,
+    href: '/admin/analytics',
+    label: 'Analytics',
+    icon: TrendingUp,
+    exact: false,
+    badge: null,
   },
+  {
+    href: '/admin/UserActivity',
+    label: 'User Activity',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
+
+  // '/admin/BorrowedBooks': 'Books Borrowed',
 ];
+
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -74,8 +86,8 @@ function SidebarBrand() {
 
 /** Single nav link with active state */
 function NavItem({ item, onClick }) {
-  const pathname  = usePathname();
-  const isActive  = item.exact
+  const pathname = usePathname();
+  const isActive = item.exact
     ? pathname === item.href
     : pathname.startsWith(item.href);
   const Icon = item.icon;
@@ -126,6 +138,10 @@ function NavItem({ item, onClick }) {
 
 /** Bottom user card in sidebar */
 function SidebarUserCard() {
+  const LogOutAdmin = () => {
+    localStorage.removeItem("Admintoken")
+    window.location.href = "/authentication"
+  }
   return (
     <div className="mx-3 mb-4 rounded-xl border border-white/[0.08] bg-white/[0.05] p-3">
       <div className="flex items-center gap-3">
@@ -134,11 +150,12 @@ function SidebarUserCard() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white truncate">Saleena Gul</p>
-          <p className="text-[11px] text-white/35 truncate">saleenagul35@gmail.com</p>
+          <p className="text-[11px] text-white/35 ">saleenagul35@gmail.com</p>
         </div>
         <button
           className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 hover:bg-white/10 hover:text-white/70 transition-colors"
           aria-label="Log out"
+          onClick={LogOutAdmin}
         >
           <LogOut size={13} />
         </button>
@@ -148,7 +165,7 @@ function SidebarUserCard() {
 }
 
 /** The full sidebar — used in both desktop (fixed) and mobile (drawer) */
-function Sidebar({ onClose }) {
+function Sidebar({ onClose, requestCount }) {
   return (
     <aside
       className="flex h-full w-64 flex-col"
@@ -162,8 +179,8 @@ function Sidebar({ onClose }) {
             rgba(42,44,18,0.99) 100%
           )
         `,
-        backdropFilter:         'blur(24px) saturate(1.6)',
-        WebkitBackdropFilter:   'blur(24px) saturate(1.6)',
+        backdropFilter: 'blur(24px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
         borderRight: '1px solid rgba(255,255,255,0.06)',
       }}
     >
@@ -182,7 +199,7 @@ function Sidebar({ onClose }) {
 
       {/* Brand */}
       <div className="relative z-10">
-        <SidebarBrand />
+        <SidebarBrand requestCount={requestCount} />
       </div>
 
       {/* Mobile close button */}
@@ -232,7 +249,7 @@ function Sidebar({ onClose }) {
 }
 
 /** Top header bar for the content area */
-function TopBar({ onMenuClick, pageTitle, breadcrumb }) {
+function TopBar({ onMenuClick, pageTitle, breadcrumb, requestCount }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-primary/[0.08] bg-brand-bg/80 px-6 backdrop-blur-md">
       {/* Left: hamburger + breadcrumb */}
@@ -261,11 +278,11 @@ function TopBar({ onMenuClick, pageTitle, breadcrumb }) {
       {/* Right: actions */}
       <div className="flex items-center gap-2">
         {/* Notification bell */}
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 text-primary/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all">
+        <a href='/admin/requestNotificationPanel' className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 text-primary/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all">
           <Bell size={16} />
           {/* Unread dot */}
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary ring-2 ring-brand-bg" />
-        </button>
+          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary text-white ring-2 ring-brand-bg" >{requestCount}</span>
+        </a>
 
         {/* Avatar */}
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold text-sm cursor-pointer hover:bg-primary/15 transition-colors">
@@ -278,29 +295,74 @@ function TopBar({ onMenuClick, pageTitle, breadcrumb }) {
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 export default function AdminLayout({ children }) {
+  const [loader, setLoader] = useState(true)
+
+
+  const [requestCount, setRequestCount] = useState(null)
+  console.log(requestCount);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const fetchingAPI = async () => {
+    const token = localStorage.getItem("Admintoken")
+    try {
+      const response = await fetch("http://localhost:5000/api/requestCount", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`
+        }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setRequestCount(data.data)
+
+
+
+
+      }
+
+
+
+    } catch (error) {
+      console.log(error);
+
+    } finally {
+      setLoader(false)
+    }
+  }
+  useEffect(() => {
+    fetchingAPI()
+  }, [])
+
 
   // Close mobile sidebar on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   // Derive breadcrumb from pathname
   const crumbMap = {
-    '/admin':           null,
+    '/admin': null,
     '/admin/inventory': 'Book Inventory',
-    '/admin/logs':      'User Logs',
+    '/admin/logs': 'User Logs',
     '/admin/analytics': 'Analytics',
-    '/admin/settings':  'Settings',
+    '/admin/UserActivity': 'User Activity',
+    '/admin/settings': 'Settings',
   };
   const breadcrumb = crumbMap[pathname] ?? null;
+  if (loader) {
+    return (
+      <Stack sx={{ color: 'grey.500' }} className="flex justify-center min-h-screen items-center" spacing={2} direction="row">
+        <CircularProgress sx={{ color: "#52512a" }} />
+      </Stack>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-brand-bg font-body">
 
       {/* ── Desktop sidebar (always visible) ── */}
-      <div className="hidden lg:flex lg:flex-shrink-0 relative">
+      <div className="hidden lg:flex lg:flex-shrink-0 relative" >
         <div className="w-64 h-screen">
-          <Sidebar />
+          <Sidebar requestCount={requestCount} />
         </div>
       </div>
 

@@ -1,0 +1,19 @@
+const mongoose = require("mongoose");
+const RequestSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "signUp"
+  },
+  bookId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "BooksData"
+  },
+  status: String,
+  requestDate: String,
+  issueDate: Date,
+  dueDate: Date,
+  returnDate: Date
+})
+const RequestsCollection = mongoose.model("RequestsCollection", RequestSchema)
+
+module.exports = RequestsCollection

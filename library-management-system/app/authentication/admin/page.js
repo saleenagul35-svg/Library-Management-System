@@ -33,10 +33,8 @@ export default function AdminLoginPage() {
       if (response.ok) {
         const data = await response.json()
         console.log(data);
-        localStorage.setItem("Admintoken", data.token)
+        localStorage.setItem("Admintoken", data.accessToken)
         window.location.href = "/admin"
-      }else{
-        console.log(await response.text())
       }
 
 
@@ -55,6 +53,7 @@ export default function AdminLoginPage() {
         <div className="hidden md:flex items-center justify-center p-4 ">
           <Image
             src={admin}
+            priority
             alt="admin"
             className="w-full h-auto object-contain rounded-4xl"
           />
@@ -80,7 +79,9 @@ export default function AdminLoginPage() {
                 name="email"
                 value={handleform.email}
                 onChange={formData}
+                autoComplete="email"
                 placeholder="example@mail.com"
+                
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
             </div>
@@ -96,12 +97,14 @@ export default function AdminLoginPage() {
                 value={handleform.password}
                 onChange={formData}
                 placeholder="********"
+                
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
             </div>
 
             {/* Button */}
-            <button className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
+            <button 
+              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
               Login
             </button>
 

@@ -7,7 +7,8 @@ const connectDB = require("./config/db")
 const bookRoute = require("./routes/bookRoute")
 const adminRoute = require("./routes/adminRoute")
 const userRoute = require("./routes/userRoute")
-
+const requestRoute = require("./routes/requestRoute")
+const BorrowDataRequest = require("./routes/BorrowDataRoute")
 app.use(express.json())
 app.use(cors())
 
@@ -15,6 +16,8 @@ connectDB();
 app.use("/api",bookRoute)
 app.use("/api",adminRoute)
 app.use("/api", userRoute)
+app.use("/api",requestRoute)
+app.use("/api",BorrowDataRequest)
 
 
 app.put("/edit/:id", async (req, res) => {
@@ -34,24 +37,6 @@ app.put("/edit/:id", async (req, res) => {
     }
 
 
-
-
-})
-
-app.delete("/delete/:id", async (req, res) => {
-    const id = req.params.id
-
-    try {
-        await bookCollection.deleteOne({ _id: id })
-        res.status(200).json({
-            message: "task deleted successfully"
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            message: "error occured while deleting task"
-        })
-    }
 
 
 })

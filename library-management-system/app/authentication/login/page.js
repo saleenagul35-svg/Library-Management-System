@@ -31,12 +31,12 @@ export default function UserLoginPage() {
 
 
       })
-      
-    
-    
+
+
+
       if (response.ok) {
         const data = await response.json()
-        localStorage.setItem("UserLoginToken",data.token)
+        localStorage.setItem("UserLoginToken", data.accessToken)
         window.location.href = "/user"
       }
 
@@ -86,6 +86,8 @@ export default function UserLoginPage() {
                 value={handleForm.email}
                 onChange={submitForm}
                 placeholder="example@mail.com"
+                autoComplete="email"
+                
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
             </div>
@@ -101,12 +103,14 @@ export default function UserLoginPage() {
                 value={handleForm.password}
                 onChange={submitForm}
                 placeholder="********"
+                autoComplete="current-password"
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
             </div>
 
             {/* Button */}
-            <button className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
+            <button 
+              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
 
               Login
 

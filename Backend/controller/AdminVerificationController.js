@@ -12,7 +12,7 @@ const adminVerification = async (req, res) => {
         if (testAdmin) {
             const testadminPass = await bcrypt.compare(password, testAdmin.password)
             if (testadminPass) {
-                const token = jwt.sign(
+                const accessToken = jwt.sign(
                     { id: testAdmin._id, email: testAdmin.email, role: "admin" },
                     process.env.JWT_SECRET_KEY,
                     { expiresIn: "2h" }
@@ -21,7 +21,7 @@ const adminVerification = async (req, res) => {
 
                 res.status(200).json({
                     message: "Admin verified",
-                    token: token
+                    accessToken: accessToken
                 })
             } else {
                 res.status(401).json({

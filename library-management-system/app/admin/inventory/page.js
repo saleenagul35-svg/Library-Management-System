@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
   Search, Plus, Filter, BookOpen,
   ChevronUp, ChevronDown, Pencil, Trash2,
   X, AlertTriangle, ChevronLeft, ChevronRight,
+  Hash, Calendar, Globe, Building2, FileText,
+  Layers, MapPin, AlignLeft, Tag, Copy,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,21 +21,134 @@ const STATUS_STYLES = {
 
 const BOOKS_PER_PAGE = 10;
 
+/* ─── Book Details Modal ─────────────────────────────────────────────── */
+function BookDetailsModal({ book, onClose }) {
+  if (!book) return null;
+
+  const detailFields = [
+    { icon: Hash,       label: 'ISBN',           value: book.ISBN },
+    { icon: Calendar,   label: 'Published',      value: book.Year },
+    { icon: Globe,      label: 'Language',       value: book.Language },
+    { icon: Building2,  label: 'Publisher',      value: book.Publisher },
+  ].filter(f => f.value !== undefined && f.value !== null && f.value !== '');
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(6px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="relative w-full max-w-xl rounded-2xl bg-[#fffff3] shadow-2xl animate-fade-up overflow-hidden max-h-[90vh] flex flex-col">
+
+        {/* top accent strip */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-primary to-primary-600 flex-shrink-0" />
+
+        {/* close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-primary/30 hover:bg-primary/8 hover:text-primary transition-all z-10">
+          <X size={15} />
+        </button>
+
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 px-6 pb-6 pt-5">
+
+          {/* Header */}
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary-600 flex-shrink-0">
+              <BookOpen size={18} strokeWidth={1.75} />
+            </div>
+            <div>
+              <h2 className="font-display text-lg font-bold text-primary-950">Book Details</h2>
+              <p className="text-xs text-primary-800/50">Complete information about this book</p>
+            </div>
+          </div>
+
+          {/* Book Identity Card */}
+          <div className="mb-4 rounded-xl border border-primary/10 bg-brand-bg/60 p-4">
+            <div className="flex items-start gap-3 pb-4 mb-4 border-b border-primary/[0.08]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary flex-shrink-0">
+                <BookOpen size={18} strokeWidth={1.75} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-base text-primary-950 leading-tight">{book.Title}</p>
+                <p className="text-xs text-primary-800/60 mt-1 font-medium">{book.Author}</p>
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {book.Genre && (
+                    <span className="rounded-full bg-brand-bg border border-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary-800/60">
+                      {book.Genre}
+                    </span>
+                  )}
+                  {book.Copy !== undefined && (
+                    <span className="rounded-full bg-brand-bg border border-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary-800/60">
+                      {book.Copy} {book.Copy === 1 ? 'copy' : 'copies'}
+                    </span>
+                  )}
+                  {book.Status && (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${STATUS_STYLES[book.Status] ?? ''}`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                      {book.Status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Detail grid */}
+            {detailFields.length > 0 && (
+              <div className="grid grid-cols-2 gap-2.5">
+                {detailFields.map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="bg-[#fffff3] rounded-xl border border-primary/8 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon size={11} className="text-primary/40" />
+                      <p className="text-[10px] uppercase tracking-[0.07em] font-semibold text-primary-800/40">{label}</p>
+                    </div>
+                    <p className="text-xs uppercase font-medium text-primary-950">{value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Synopsis Section */}
+          {book.Description && (
+            <div className="mb-4 rounded-xl border border-primary/10 bg-brand-bg/60 p-4">
+              <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary/60">
+                  <AlignLeft size={12} strokeWidth={2} />
+                </div>
+                <p className="text-[11px] uppercase tracking-[0.07em] font-semibold text-primary-800/50">Synopsis</p>
+              </div>
+              <p className="text-sm text-primary-800/70 leading-relaxed overflow-auto">{book.Description}</p>
+            </div>
+          )}
+
+          {/* Footer action */}
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={onClose}
+              className="rounded-xl border border-primary/15 bg-[#fffff3] px-5 py-2 text-sm font-medium text-primary/70 hover:border-primary/30 hover:text-primary transition-all">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Delete Confirmation Modal ─────────────────────────────────────── */
 function DeleteModal({ book, onCancel, onConfirm }) {
   if (!book) return null;
   return (
-    /* backdrop */
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
-
-      {/* card */}
-      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl animate-fade-up overflow-hidden">
-
-        {/* top accent strip */}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+    >
+      <div className="relative w-full max-w-md rounded-2xl bg-[#fffff3] shadow-2xl animate-fade-up overflow-hidden">
         <div className="h-1.5 w-full bg-gradient-to-r from-primary to-primary-600" />
 
-        {/* close */}
         <button
           onClick={onCancel}
           className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-primary/30 hover:bg-primary/8 hover:text-primary transition-all">
@@ -40,7 +156,6 @@ function DeleteModal({ book, onCancel, onConfirm }) {
         </button>
 
         <div className="px-6 pb-6 pt-5">
-          {/* icon + heading */}
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary-600 flex-shrink-0">
               <AlertTriangle size={18} strokeWidth={2} />
@@ -51,7 +166,6 @@ function DeleteModal({ book, onCancel, onConfirm }) {
             </div>
           </div>
 
-          {/* book info card */}
           <div className="mb-5 rounded-xl border border-primary/10 bg-brand-bg/60 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
@@ -81,11 +195,10 @@ function DeleteModal({ book, onCancel, onConfirm }) {
             </div>
           </div>
 
-          {/* actions */}
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={onCancel}
-              className="rounded-xl border border-primary/15 bg-white px-4 py-2 text-sm font-medium text-primary/70 hover:border-primary/30 hover:text-primary transition-all">
+              className="rounded-xl border border-primary/15 bg-[#fffff3] px-4 py-2 text-sm font-medium text-primary/70 hover:border-primary/30 hover:text-primary transition-all">
               Cancel
             </button>
             <button
@@ -104,7 +217,6 @@ function DeleteModal({ book, onCancel, onConfirm }) {
 function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
-  // build page numbers array with ellipsis logic
   const pages = [];
   for (let i = 1; i <= totalPages; i++) {
     if (
@@ -119,7 +231,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
   return (
     <div className="flex items-center gap-1">
-      {/* prev */}
       <button
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
@@ -143,7 +254,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           )
       )}
 
-      {/* next */}
       <button
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
@@ -156,11 +266,13 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
 /* ─── Main Page ──────────────────────────────────────────────────────── */
 export default function InventoryPage() {
+  const router = useRouter();
   const [loader, setLoader] = useState(true);
   const [books, setBooks] = useState([]);
 
-  // modal state
+  // modal states
   const [bookToDelete, setBookToDelete] = useState(null);
+  const [bookToView, setBookToView] = useState(null);
 
   // search / sort / page
   const [search, setSearch] = useState('');
@@ -179,8 +291,6 @@ export default function InventoryPage() {
       const res1 = await fetch('http://localhost:5000/api/bookData', { method: 'GET', headers });
       const data1 = res1.ok ? await res1.json() : null;
       if (data1) setBooks(data1.data);
-      
-      
     } catch (error) {
       console.log(error);
     } finally {
@@ -189,8 +299,6 @@ export default function InventoryPage() {
   };
 
   useEffect(() => { fetchingAPIs(); }, []);
-
-  /* reset to page 1 when search changes */
   useEffect(() => { setCurrentPage(1); }, [search]);
 
   /* sort + filter */
@@ -204,7 +312,7 @@ export default function InventoryPage() {
       return sortDir === 'asc' ? v : -v;
     });
 
-  /* pagination math */
+  /* pagination */
   const totalPages = Math.ceil(filtered.length / BOOKS_PER_PAGE);
   const paginated = filtered.slice(
     (currentPage - 1) * BOOKS_PER_PAGE,
@@ -223,25 +331,38 @@ export default function InventoryPage() {
       : <ChevronDown size={12} className="text-primary" />;
   }
 
-  /* handlers — UI only, no API calls */
+  /* handlers */
   function handleEditClick(book) {
-    // TODO: add your own edit logic / navigation here
-    console.log('Edit book:', book);
+    const params = new URLSearchParams();
+    params.set('book', JSON.stringify(book));
+    router.push(`/admin/inventory/updateBook?${params.toString()}`);
   }
 
-  function handleDeleteClick(book) {
-    setBookToDelete(book);
-  }
+  function handleDeleteClick(book) { setBookToDelete(book); }
+  function handleDeleteCancel() { setBookToDelete(null); }
 
-  function handleDeleteCancel() {
-    setBookToDelete(null);
-  }
+  function handleViewClick(book) { setBookToView(book); }
+  function handleViewClose() { setBookToView(null); }
 
-  function handleDeleteConfirm(book) {
-    // TODO: add your own delete API call here
-    console.log('Confirmed delete for:', book);
-    setBookToDelete(null);
-  }
+  const handleDeleteConfirm = async (book) => {
+    try {
+      const bookId = book._id;
+      const token = localStorage.getItem('Admintoken');
+      const headers = {
+        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      await fetch(`http://localhost:5000/api/deleteBook/${bookId}`, {
+        method: 'DELETE',
+        headers,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setBookToDelete(null);
+      fetchingAPIs();
+    }
+  };
 
   if (loader) {
     return (
@@ -253,7 +374,8 @@ export default function InventoryPage() {
 
   return (
     <>
-      {/* Delete Modal */}
+      {/* Modals */}
+      <BookDetailsModal book={bookToView} onClose={handleViewClose} />
       <DeleteModal
         book={bookToDelete}
         onCancel={handleDeleteCancel}
@@ -305,7 +427,6 @@ export default function InventoryPage() {
                   ))}
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Copies</th>
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Status</th>
-                  {/* Actions column */}
                   <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Actions</th>
                 </tr>
               </thead>
@@ -323,13 +444,20 @@ export default function InventoryPage() {
                       className="group hover:bg-primary/[0.02] transition-colors animate-fade-up"
                       style={{ animationDelay: `${200 + i * 40}ms` }}>
 
-                      {/* Title */}
+                      {/* Title — clickable with animated underline */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/8 text-primary/60 flex-shrink-0">
                             <BookOpen size={14} strokeWidth={1.75} />
                           </div>
-                          <span className="font-medium text-primary-950">{book.Title}</span>
+                          <span
+                            onClick={() => handleViewClick(book)}
+                            className="font-medium text-primary-950 cursor-pointer relative group/title select-none"
+                          >
+                            {book.Title}
+                            {/* animated underline */}
+                            <span className="absolute left-0 -bottom-0.5 h-[1.5px] w-0 bg-primary group-hover/title:w-full transition-all duration-300 ease-out rounded-full" />
+                          </span>
                         </div>
                       </td>
 
@@ -360,28 +488,19 @@ export default function InventoryPage() {
 
                       {/* Actions: Edit + Delete */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-1.5 transition-opacity">
-
-                          {/* Edit button */}
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleEditClick(book)}
                             title="Edit book"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-primary/40
-                              hover:bg-primary/10 hover:text-primary
-                              transition-all duration-150 active:scale-95">
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-primary/40 hover:bg-primary/10 hover:text-primary transition-all duration-150 active:scale-95">
                             <Pencil size={13} strokeWidth={2} />
                           </button>
-
-                          {/* Delete button */}
                           <button
                             onClick={() => handleDeleteClick(book)}
                             title="Delete book"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-primary/40
-                              hover:bg-primary/10 hover:text-primary-800/60
-                              transition-all duration-150 active:scale-95">
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-primary/40 hover:bg-primary/10 hover:text-primary-800/60 transition-all duration-150 active:scale-95">
                             <Trash2 size={13} strokeWidth={2} />
                           </button>
-
                         </div>
                       </td>
                     </tr>
@@ -391,7 +510,7 @@ export default function InventoryPage() {
             </table>
           </div>
 
-          {/* Table footer — count + pagination */}
+          {/* Table footer */}
           <div className="flex items-center justify-between border-t border-primary/[0.06] px-5 py-3">
             <p className="text-xs text-primary-800/40">
               Showing{' '}
@@ -400,7 +519,6 @@ export default function InventoryPage() {
               </strong>{' '}
               of <strong className="text-primary-800/70">{filtered.length}</strong> books
             </p>
-
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

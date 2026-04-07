@@ -1,64 +1,57 @@
 "use client";
 import { useState } from "react";
 
-// ✅ Field component BAHAR — App ke andar nahi!
-function Field({ label, type = "text", value, onChange, placeholder }) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <div style={{ marginBottom: "18px" }}>
-      <label style={{
-        fontSize: "10px", fontWeight: "700", color: "#9b8a6a",
-        textTransform: "uppercase", letterSpacing: ".8px",
-        display: "block", marginBottom: "7px",
-      }}>
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={{
-          width: "100%", padding: "12px 16px", borderRadius: "12px",
-          border: `1.5px solid ${focused ? "#864c25" : "rgba(200,185,154,.45)"}`,
-          background: "#fafaf0", fontSize: "14px", color: "#515427",
-          fontFamily: "inherit", outline: "none", boxSizing: "border-box",
-          transition: "border-color .18s",
-        }}
-      />
-    </div>
-  );
-}
-
-// ✅ Phir SignupPage alag
 export default function SignupPage() {
   const [form, setForm] = useState({
-   id:Date.now(), name: "", email: "", phone: "", password: "", confirm: "",
+    id: Date.now(), name: "", email: "", phone: "", password: "", confirm: "",
+  });
+
+  const [focused, setFocused] = useState({
+    name: false, email: false, phone: false, password: false, confirm: false,
   });
 
   const update = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const onFocus = (field) =>
+    setFocused((prev) => ({ ...prev, [field]: true }));
+
+  const onBlur = (field) =>
+    setFocused((prev) => ({ ...prev, [field]: false }));
 
   const handleSubmit = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/signUp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      })
-      
-     
+        body: JSON.stringify(form),
+      });
+
       if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem("user_Signup_Token", data.token)
-        window.location.href = "/user"
+        const data = await response.json();
+        localStorage.setItem("user_Signup_Token", data.accessToken);
+        window.location.href = "/user";
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
+
+  const labelStyle = {
+    fontSize: "10px", fontWeight: "700", color: "#9b8a6a",
+    textTransform: "uppercase", letterSpacing: ".8px",
+    display: "block", marginBottom: "7px",
+  };
+
+  const inputStyle = (field) => ({
+    width: "100%", padding: "12px 16px", borderRadius: "12px",
+    border: `1.5px solid ${focused[field] ? "#864c25" : "rgba(200,185,154,.45)"}`,
+    background: "#fafaf0", fontSize: "14px", color: "#515427",
+    fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+    transition: "border-color .18s",
+  });
+
+  const wrapStyle = { marginBottom: "18px" };
 
   return (
     <>
@@ -82,6 +75,7 @@ export default function SignupPage() {
           animation: "fadeUp .4s ease both",
         }}>
 
+          {/* ── Header ── */}
           <div style={{ marginBottom: "36px" }}>
             <p style={{
               fontSize: "10px", fontWeight: "700", color: "#b0a080",
@@ -97,12 +91,82 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <Field label="Full Name" value={form.name} onChange={update("name")} placeholder="e.g. Ayesha Raza" />
-          <Field label="Email Address" type="email" value={form.email} onChange={update("email")} placeholder="example@mail.com" />
-          <Field label="Phone Number" type="tel" value={form.phone} onChange={update("phone")} placeholder="+92 300 0000000" />
-          <Field label="Password" type="password" value={form.password} onChange={update("password")} placeholder="Min. 8 characters" />
-          <Field label="Confirm Password" type="password" value={form.confirm} onChange={update("confirm")} placeholder="Repeat your password" />
+          {/* ── Full Name ── */}
+          <div style={wrapStyle}>
+            <label style={labelStyle}>Full Name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={update("name")}
+              onFocus={() => onFocus("name")}
+              onBlur={() => onBlur("name")}
+              placeholder="e.g. Ayesha Raza"
+              autoComplete="name"
+              style={inputStyle("name")}
+            />
+          </div>
 
+          {/* ── Email ── */}
+          <div style={wrapStyle}>
+            <label style={labelStyle}>Email Address</label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={update("email")}
+              onFocus={() => onFocus("email")}
+              onBlur={() => onBlur("email")}
+              placeholder="example@mail.com"
+              autoComplete="email"
+              style={inputStyle("email")}
+            />
+          </div>
+
+          {/* ── Phone ── */}
+          <div style={wrapStyle}>
+            <label style={labelStyle}>Phone Number</label>
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={update("phone")}
+              onFocus={() => onFocus("phone")}
+              onBlur={() => onBlur("phone")}
+              placeholder="+92 300 0000000"
+              autoComplete="tel"
+              style={inputStyle("phone")}
+            />
+          </div>
+
+          {/* ── Password ── */}
+          <div style={wrapStyle}>
+            <label style={labelStyle}>Password</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={update("password")}
+              onFocus={() => onFocus("password")}
+              onBlur={() => onBlur("password")}
+              placeholder="Min. 8 characters"
+              autoComplete="new-password"
+              style={inputStyle("password")}
+            />
+          </div>
+
+          {/* ── Confirm Password ── */}
+          <div style={wrapStyle}>
+            <label style={labelStyle}>Confirm Password</label>
+            <input
+              type="password"
+              value={form.confirm}
+              onChange={update("confirm")}
+              onFocus={() => onFocus("confirm")}
+              onBlur={() => onBlur("confirm")}
+              placeholder="Repeat your password"
+               autoComplete="new-password"
+              style={inputStyle("confirm")}
+            />
+          </div>
+
+          {/* ── Submit Button ── */}
           <button
             onClick={handleSubmit}
             style={{

@@ -8,9 +8,11 @@ export default function UserNavbar({ borrowedCount = 0 }) {
   const pathname = usePathname();
 
   const NAV_LINKS = [
-    { label: "Home",              path: "/user"                },
-    { label: "My Borrowed Books", path: "/user/BorrowedBooks"  },
-    { label: "Profile",           path: "/user/profile"        },
+    { label: "Home", path: "/user" },
+    { label: "My Borrowed Books", path: "/user/BorrowedBooks" },
+    { label: "Pending Approvals", path: "/user/pendingApprovals" },
+    { label: "Profile", path: "/user/profile" },
+
   ];
 
   return (
@@ -76,18 +78,6 @@ export default function UserNavbar({ borrowedCount = 0 }) {
                   }}
                 >
                   {label}
-                  {label === "My Borrowed Books" && borrowedCount > 0 && (
-                    <span style={{
-                      background: isActive ? "rgba(255,255,243,.25)" : "#864c25",
-                      color: "#fffff3",
-                      fontSize: "10px",
-                      padding: "1px 6px",
-                      borderRadius: "12px",
-                      fontWeight: "700",
-                    }}>
-                      {borrowedCount}
-                    </span>
-                  )}
                 </button>
               );
             })}

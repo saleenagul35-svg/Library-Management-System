@@ -61,3 +61,6 @@
            focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[rgba(134,76,37,0.1)];
   }
 }
+::-webkit-scrollbar{
+  display: none;
+}

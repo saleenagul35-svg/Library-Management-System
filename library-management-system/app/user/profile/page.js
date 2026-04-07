@@ -11,6 +11,8 @@ export default function ProfilePage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [USER, setUSER] = useState(null)
+
+  
   const fetchInfo = async () => {
     try {
       let token = null
@@ -43,8 +45,12 @@ export default function ProfilePage() {
     fetchInfo()
   }, [])
   if (!USER) return  <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row"> <CircularProgress sx={{ color: "#52512a" }} /></Stack>
-  console.log(Date.now());
-
+  
+  const date = new Date(USER.memberSince)
+  const day = date.getDate()
+  const year = date.getFullYear()
+  const month = date.toLocaleString("en-US",{month:"long"})
+  const formattedDate = `${day} ${month} ${year}`
 
 
   const initials = USER.name
@@ -226,9 +232,10 @@ export default function ProfilePage() {
               gap: "0", paddingTop: "22px",
               borderTop: "1px solid rgba(255,255,243,.12)",
             }}>
+            
               {[
                 { label: "Member ID", value: "REG-" + USER.id },
-                { label: "Member Since", value: USER.memberSince },
+                { label: "Member Since", value: formattedDate },
                 { label: "Status", value: "Active" },
               ].map((item, i) => (
                 <div key={item.label} style={{

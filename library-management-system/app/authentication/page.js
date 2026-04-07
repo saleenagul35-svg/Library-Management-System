@@ -123,6 +123,8 @@ export default function RoleSelection() {
               {/* Admin */}
               <button
                 className="role-btn"
+                suppressHydrationWarning={true}
+
                 onClick={() => router.push("/authentication/admin")}
                 style={{
                   width: "100%", padding: "14px 20px",
@@ -142,6 +144,8 @@ export default function RoleSelection() {
               {/* Member */}
               <button
                 className="role-btn"
+                suppressHydrationWarning={true}
+
                 onClick={() => router.push("/authentication/login")}
                 style={{
                   width: "100%", padding: "14px 20px",

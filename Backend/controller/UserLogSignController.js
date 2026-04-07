@@ -24,17 +24,17 @@ const registerUsers =  async (req, res) => {
                 phone: phone,
                 password: hash,
                 confirm: repeatHash,
-                memberSince: new Date().getFullYear()
+                memberSince: new Date()
             })
             await gmailInfo.save()
-            const token = jwt.sign(
+            const accessToken = jwt.sign(
                 { id: gmailInfo._id, email: gmailInfo.email, role: "user" },
                 process.env.JWT_SECRET_KEY,
                 { expiresIn: "2h" }
             )
             res.status(200).json({
                 message: "user signed up",
-                token: token
+                accessToken: accessToken
 
             })
         }
@@ -56,7 +56,7 @@ const loginUser = async (req, res) => {
         if (testEmail) {
             const testPassword = await bcrypt.compare(password, testEmail.password)
             if (testPassword) {
-                const token = jwt.sign(
+                const accessToken = jwt.sign(
                     { id: testEmail._id, email: testEmail.email, role: "user" },
                     process.env.JWT_SECRET_KEY,
                     { expiresIn: "2h" }
@@ -66,7 +66,7 @@ const loginUser = async (req, res) => {
 
                 res.status(200).json({
                     message: "user verified",
-                    token: token
+                    accessToken: accessToken
                 })
             } else {
                 res.status(401).json({
