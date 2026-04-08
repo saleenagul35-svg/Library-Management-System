@@ -116,7 +116,22 @@ const membersData =  async (req, res) => {
         })
     }
 }
+const membersCount =  async (req, res) => {
+    try {
+        const data = await signUp.countDocuments()
+        res.status(200).json({
+            message: "data fetched",
+            data: data
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error occured",
+
+        })
+    }
+}
 
 
 
-module.exports = {registerUsers,loginUser,profileInfo,membersData}
+module.exports = {registerUsers,loginUser,profileInfo,membersData,membersCount}

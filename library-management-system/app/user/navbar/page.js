@@ -10,7 +10,7 @@ export default function UserNavbar({ borrowedCount = 0 }) {
   const NAV_LINKS = [
     { label: "Home", path: "/user" },
     { label: "My Borrowed Books", path: "/user/BorrowedBooks" },
-    { label: "Pending Approvals", path: "/user/pendingApprovals" },
+    { label: "My Requests", path: "/user/myRequests" },
     { label: "Profile", path: "/user/profile" },
 
   ];

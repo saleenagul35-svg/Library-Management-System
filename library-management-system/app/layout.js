@@ -1,6 +1,6 @@
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-
+import { Viewport } from "next"
 // ── Font configuration ──────────────────────────────────────────────────────
 const playfair = Playfair_Display({
   subsets:  ['latin'],
@@ -29,14 +29,15 @@ export const metadata = {
   description: 'A production-ready academic library management platform for administrators and students.',
   keywords:    ['library', 'management', 'books', 'catalogue', 'academic'],
   authors:     [{ name: 'Saleena' }],
-  themeColor:  '#864c25',
   openGraph: {
     title:       'Library Management System',
     description: 'Library Management System',
     type:        'website',
   },
 };
-
+export const viewport = {
+  themeColor: "#864c25",
+};
 // ── Root Layout ─────────────────────────────────────────────────────────────
 export default function RootLayout({ children }) {
   return (

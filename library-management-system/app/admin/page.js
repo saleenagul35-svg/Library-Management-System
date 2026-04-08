@@ -26,8 +26,10 @@ export default function AdminDashboardPage() {
 
   //============================== APIs ===========================//
   const [loader, setLoader] = useState(true)
-  const [totalBooks, setTotalBooks] = useState(0)
-  const [totalStudents, setTotalStudents] = useState(0)
+  const [totalBooks, setTotalBooks] = useState(null)
+  const [totalStudents, setTotalStudents] = useState(null)
+  const [totalBorrowings, setTotalBorrowings] = useState(null)
+  const [overDueBooks,setOverDueBooks] = useState(null)
   const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem("Admintoken")
@@ -35,13 +37,17 @@ export default function AdminDashboardPage() {
         "authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       }
-      const [res1, res2] = await Promise.all([
-        fetch("http://localhost:5000/api/bookData", {method:"GET", headers}),
-        fetch("http://localhost:5000/api/membersData", {method:"GET", headers})
+      const [res1, res2, res3, res4] = await Promise.all([
+        fetch("http://localhost:5000/api/bookCount", { method: "GET", headers }),
+        fetch("http://localhost:5000/api/membersCount", { method: "GET", headers }),
+        fetch("http://localhost:5000/api/approvedRequestCount", { method: "GET", headers }),
+        fetch("http://localhost:5000/api/overDueCount", { method: "GET", headers }),
       ])
-      const [data1,data2] = await Promise.all([
-        res1.ok ? res1.json() :null,
-        res2.ok ? res2.json() : null
+      const [data1, data2, data3, data4] = await Promise.all([
+        res1.ok ? res1.json() : null,
+        res2.ok ? res2.json() : null,
+        res3.ok ? res3.json() : null,
+        res4.ok ? res4.json() : null
       ])
 
       if (data1) {
@@ -50,8 +56,20 @@ export default function AdminDashboardPage() {
 
       }
       if (data2) {
-        let length = data2.data.length
+        let length = data2.data
         setTotalStudents(length)
+
+
+      }
+      if (data3) {
+        let length = data3.data
+        setTotalBorrowings(length)
+
+
+      }
+      if (data4) {
+        let length = data4.data
+        setOverDueBooks(length)
 
 
       }
@@ -77,7 +95,7 @@ export default function AdminDashboardPage() {
     {
       id: 'total-books',
       label: 'Total Books',
-      value: `${totalBooks.length}`,
+      value: `${totalBooks}`,
       icon: BookOpen,
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
@@ -86,7 +104,7 @@ export default function AdminDashboardPage() {
     {
       id: 'active-borrows',
       label: 'Active Borrowings',
-      value: '3,204',
+      value: `${totalBorrowings}`,
       icon: BookCopy,
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
@@ -104,7 +122,7 @@ export default function AdminDashboardPage() {
     {
       id: 'overdue',
       label: 'Overdue Books',
-      value: '47',
+      value: `${overDueBooks}`,
       icon: AlertTriangle,
       iconBg: 'bg-red-500/10',
       iconColor: 'text-red-600',

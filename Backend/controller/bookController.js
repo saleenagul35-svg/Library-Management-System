@@ -88,6 +88,21 @@ const editBook = async (req, res) => {
         })
     }
 }
+const bookCount = async (req, res) => {
+    try {
+        const totalBooks = await bookCollection.countDocuments()
+        res.status(200).json({
+            message: "data fetched successfully",
+            data: totalBooks
+        })
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+}
 const updateBookCopies = async (req, res) => {
     const id = req.params.id
     const {Copy, Status } = req.body
@@ -109,4 +124,4 @@ const updateBookCopies = async (req, res) => {
         })
     }
 }
-module.exports = { storeBooks, fetchBooks, deleteBook, editBook,updateBookCopies };
+module.exports = { storeBooks, fetchBooks, deleteBook, editBook,updateBookCopies,bookCount };

@@ -1,8 +1,16 @@
 const RequestsCollection = require("../models/borrowRequestModel")
-const jwt = require("jsonwebtoken")
+const bookCollection = require("../models/BooksModel");
+const cron = require('node-cron');
 
 let dueDateCounting = new Date();
 dueDateCounting.setDate(dueDateCounting.getDate() + 14)
+
+cron.schedule('* * * * *', async() => {
+  console.log('running a task every minute');
+  const now = new Date();
+await bookCollection.updateMany({$lt : dueDate},{$set:{status:"overdue"}})
+    
+});
 
 
 
@@ -107,16 +115,29 @@ const rejectRequest = async (req, res) => {
 const acceptRequest = async (req, res) => {
     const id = req.params.id
     try {
+        const findRequest = await RequestsCollection.findOne({_id:id})
+        
+        const checkingCopies = await bookCollection.findOne({_id:findRequest.bookId})
+        
+        if(checkingCopies.Copy < 1){
+        res.status(409).json({
+            message: "book is not available"
+        })
+        }else{
+        await bookCollection.updateOne({_id:findRequest.bookId},{$inc :{ Copy: - 1}})
+        
         await RequestsCollection.updateOne({ _id: id }, {
             $set: {
                 status: "approved",
                 issueDate: new Date(),
-                dueDate: dueDateCounting,
+                dueDate: `${dueDateCounting}` ,
             }
         })
         res.status(200).json({
-            message: "borrow request rejected"
+            message: "borrow request approved"
         })
+
+        }
 
     } catch (error) {
         res.status(500).json({
