@@ -353,7 +353,7 @@ export default function updateBookForm() {
                     className="w-full px-3 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer">
                     <option value="Available">Available</option>
                     <option value="Unavailable">Unavailable</option>
-                    <option value="Borrowed">Borrowed</option>
+                   
                   </select>
                   <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                     <svg className="w-3.5 h-3.5 text-[#b5a898]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

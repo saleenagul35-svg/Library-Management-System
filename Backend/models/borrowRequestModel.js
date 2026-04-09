@@ -12,7 +12,8 @@ const RequestSchema = new mongoose.Schema({
   requestDate: String,
   issueDate: Date,
   dueDate: Date,
-  returnDate: Date
+  returnDate: Date,
+  rejectionReason: String,
 })
 const RequestsCollection = mongoose.model("RequestsCollection", RequestSchema)
 

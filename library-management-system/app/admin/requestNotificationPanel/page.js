@@ -1,8 +1,10 @@
 "use client"
 import { useState, useEffect } from "react";
+import { X, AlertCircle, XCircle } from "lucide-react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
+// ─── Helpers ──────────────────────────────────────────────
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
@@ -20,7 +22,7 @@ const formatDate = (rawDate) => {
   return `${day} ${month} ${year}`;
 };
 
-
+// ─── Small Components ──────────────────────────────────────
 function Avatar({ name, index }) {
   return (
     <div className={`${getAvBg(index)} text-[#fffff3] w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium shrink-0`}>
@@ -70,7 +72,154 @@ function EmptyState() {
   );
 }
 
-// ✅ Fixed: equal Member/Book columns, tighter Stock
+// ─── Decline Modal ─────────────────────────────────────────
+function DeclineModal({ isOpen, onClose, onConfirm, request }) {
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Reset jab modal band ho
+  useEffect(() => {
+    if (!isOpen) {
+      setReason('');
+      setError(false);
+      setLoading(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleConfirm = async () => {
+    if (!reason.trim()) {
+      setError(true);
+      return;
+    }
+    setLoading(true);
+    await onConfirm(request._id, reason);
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <div className="w-full max-w-md rounded-2xl overflow-hidden"
+        style={{ background: '#fdfcef', border: '0.5px solid #864c2530' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4"
+          style={{ }}>
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="font-serif text-[18px] font-medium" style={{ color: '#515029' }}>
+                Decline Borrow Request
+              </p>
+              <p className="text-xs" style={{ color: '#515029' }}>
+                This action will notify the user
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: '', border: 'none', cursor: 'pointer' }}>
+            <X size={14} color="#515029" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-5">
+          {/* Info box */}
+          <div className="flex gap-2 items-start rounded-xl p-3 mb-4"
+            style={{ background: '#fcf5e1', border: '0.5px solid #864c2525' }}>
+            <AlertCircle size={15} color="#864c25" className="flex-shrink-0 mt-0.5" />
+            <p className="text-xs leading-relaxed" style={{ color: '#515029' }}>
+              You are declining the request for{' '}
+              <strong style={{ color: '#864c25' }}>{request?.bookId?.Title}</strong>{' '}
+              by <strong style={{ color: '#864c25' }}>{request?.userId?.name}</strong>.
+            </p>
+          </div>
+
+          {/* Textarea */}
+          <div className="mb-4">
+            <label className="flex items-center gap-1 text-xs font-medium mb-2"
+              style={{ color: '#515029' }}>
+              Reason for Declining
+              <span style={{ color: '#864c25' }}>*</span>
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => {
+                setReason(e.target.value);
+                if (e.target.value.trim()) setError(false);
+              }}
+              maxLength={500}
+              placeholder="e.g. All copies are currently issued to other members..."
+              rows={4}
+              className="w-full rounded-xl text-sm leading-relaxed outline-none resize-y"
+              style={{
+                background: '#fff',
+                border: error ? '1.5px solid #c0392b' : '1.5px solid #864c2540',
+                padding: '0.7rem 1rem',
+                color: '#515029',
+                minHeight: '110px',
+                maxHeight: '280px',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#864c25';
+                e.target.style.boxShadow = '0 0 0 3px #864c2515';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = error ? '#c0392b' : '#864c2540';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+            <div className="flex justify-between mt-1">
+              {error
+                ? <p className="text-xs" style={{ color: '#c0392b' }}>Reason is required.</p>
+                : <span />
+              }
+              <p className="text-xs ml-auto" style={{ color: '#51502960' }}>{reason.length} / 500</p>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleConfirm}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all"
+              style={{
+                background: loading ? '#b07050' : '#515029',
+                color: '#fcf5e1',
+                border: 'none',
+                minWidth: '120px',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}>
+              <XCircle size={14} />
+              {loading ? 'Declining...' : 'Decline Request'}
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 rounded-xl py-2.5 text-sm font-medium transition-all"
+              style={{
+                background: 'transparent',
+                color: '#515029',
+                border: '1.5px solid #51502940',
+                minWidth: '120px',
+                cursor: 'pointer'
+              }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Table ─────────────────────────────────────────────────
 const GRID = "1.1fr 1.1fr 90px 120px 150px";
 
 function DesktopTable({ requests, handleRejection, handleApproval }) {
@@ -85,7 +234,8 @@ function DesktopTable({ requests, handleRejection, handleApproval }) {
         ))}
       </div>
       {requests.map((r, idx) => (
-        <DesktopRow key={r._id} r={r} index={idx} isLast={idx === requests.length - 1} handleApproval={handleApproval} handleRejection={handleRejection} />
+        <DesktopRow key={r._id} r={r} index={idx} isLast={idx === requests.length - 1}
+          handleApproval={handleApproval} handleRejection={handleRejection} />
       ))}
     </div>
   );
@@ -93,10 +243,8 @@ function DesktopTable({ requests, handleRejection, handleApproval }) {
 
 function DesktopRow({ r, index, isLast, handleRejection, handleApproval }) {
   return (
-    <div
-      className={`grid items-center px-5 py-3.5 hover:bg-[#faf8ef] transition-colors duration-150 ${!isLast ? "border-b border-[#ede9d8]" : ""}`}
-      style={{ gridTemplateColumns: GRID }}
-    >
+    <div className={`grid items-center px-5 py-3.5 hover:bg-[#faf8ef] transition-colors duration-150 ${!isLast ? "border-b border-[#ede9d8]" : ""}`}
+      style={{ gridTemplateColumns: GRID }}>
       <div className="flex items-center gap-2.5 min-w-0">
         <Avatar name={r.userId.name} index={index} />
         <div className="min-w-0">
@@ -113,19 +261,17 @@ function DesktopRow({ r, index, isLast, handleRejection, handleApproval }) {
       </div>
       <div>
         <p className="text-[12px] font-medium text-[#2e2c1e]">{formatDate(r.requestDate)}</p>
-        <div className="mt-1">
-          <Badge label={r.status} />
-        </div>
+        <div className="mt-1"><Badge label={r.status} /></div>
       </div>
       <div className="flex items-center justify-center gap-2">
-        <DeclineBtn onClick={() => handleRejection(r._id)} />
+        {/* ✅ Decline button ab modal open karta hai, direct API nahi */}
+        <DeclineBtn onClick={() => handleRejection(r)} />
         <ApproveBtn onClick={() => handleApproval(r._id)} />
       </div>
     </div>
   );
 }
 
-// ✅ Fixed: date calculation moved inside map
 function MobileCards({ requests, handleRejection, handleApproval }) {
   return (
     <div className="md:hidden flex flex-col gap-3">
@@ -147,7 +293,8 @@ function MobileCards({ requests, handleRejection, handleApproval }) {
             <Badge label={r.bookId.Copy} />
             <span className="text-[11px] text-[#9a9280]">{formatDate(r.requestDate)}</span>
             <div className="ml-auto flex items-center gap-2">
-              <DeclineBtn onClick={() => handleRejection(r._id)} />
+              {/* ✅ Mobile mein bhi modal */}
+              <DeclineBtn onClick={() => handleRejection(r)} />
               <ApproveBtn onClick={() => handleApproval(r._id)} />
             </div>
           </div>
@@ -157,9 +304,15 @@ function MobileCards({ requests, handleRejection, handleApproval }) {
   );
 }
 
+// ─── Main Component ────────────────────────────────────────
 export default function BorrowRequests() {
   const [requests, setRequests] = useState([]);
-  const [loader, setLoader] = useState(true)
+  const [loader, setLoader] = useState(true);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
   const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem('Admintoken');
@@ -173,67 +326,68 @@ export default function BorrowRequests() {
       if (response.ok) {
         const data = await response.json();
         setRequests(data.data);
-        
       }
     } catch (error) {
       console.log(error);
     } finally {
-      setLoader(false)
+      setLoader(false);
     }
   };
 
-  const handleRejection = async (requestId) => {
-    try {
+  // ✅ Ye ab pura request object leta hai, modal open karta hai
+  const handleRejection = (request) => {
+    setSelectedRequest(request);
+    setModalOpen(true);
+  };
 
+  // ✅ Modal confirm hone par reason ke saath API call
+  const handleConfirmDecline = async (requestId, reason) => {
+    try {
       const token = localStorage.getItem('Admintoken');
-      const headers = {
-        authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-      const  res  = await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
+      const res = await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
         method: 'PUT',
-        headers,
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason })
       });
       if (res.ok) {
         fetchingAPIs();
       }
-
     } catch (error) {
       console.log(error);
     }
-  }
+  };
+
   const handleApproval = async (requestId) => {
     try {
-
       const token = localStorage.getItem('Admintoken');
-      const headers = {
-        authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-      const  res  = await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
+      const res = await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
         method: 'PUT',
-        headers,
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
       if (res.ok) {
         fetchingAPIs();
       }
-
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchingAPIs();
   }, []);
+
   if (loader) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
-
         <CircularProgress sx={{ color: "#52512a" }} />
-
       </Stack>
-    )
+    );
   }
 
   return (
@@ -260,6 +414,17 @@ export default function BorrowRequests() {
           </>
         )}
       </div>
+
+      {/* ✅ Modal yahan — component ke bahar, har jagah visible */}
+      <DeclineModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedRequest(null);
+        }}
+        onConfirm={handleConfirmDecline}
+        request={selectedRequest}
+      />
     </div>
   );
 }

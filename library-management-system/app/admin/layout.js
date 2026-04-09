@@ -43,13 +43,6 @@ const NAV_ITEMS = [
     badge: null,
   },
   {
-    href: '/admin/analytics',
-    label: 'Analytics',
-    icon: TrendingUp,
-    exact: false,
-    badge: null,
-  },
-  {
     href: '/admin/UserActivity',
     label: 'User Activity',
     icon: ScrollText,

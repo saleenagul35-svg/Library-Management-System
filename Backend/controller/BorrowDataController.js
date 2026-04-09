@@ -2,10 +2,9 @@ const RequestsCollection = require("../models/borrowRequestModel");
 
 const adminNotification = async (req, res) => {
     try {
-        const today = new Date()
-        const pendingRequests = await RequestsCollection.find({ status: "pending" }).populate("userId", "id name").populate("bookId", "Title Copy ISBN")
+        const pendingRequests = await RequestsCollection.find({ status: "Pending" }).populate("userId", "id name").populate("bookId", "Title Copy ISBN")
         const FinalRequests = await Promise.all(pendingRequests.map(async (request) => {
-            const userApprovedRequests = await RequestsCollection.find({ userId: request.userId, status: "approved" })
+            const userApprovedRequests = await RequestsCollection.find({ userId: request.userId, status: "Borrowed" })
             const userOverDueBooks = await RequestsCollection.find({ userId: request.userId, status: "overdue" })
             let status = null;
             if (userApprovedRequests.length >= 1) {
@@ -45,7 +44,7 @@ const adminNotification = async (req, res) => {
 const UserpendingRequestData = async (req, res) => {
     const id = req.ActiveID
     try {
-        const pendingRequests = await RequestsCollection.find({ userId: id, status: "pending" }).populate("bookId", "Title Author ISBN")
+        const pendingRequests = await RequestsCollection.find({ userId: id, status: "Pending" }).populate("bookId", "Title Author ISBN")
 
         res.status(200).json({
             message: "data fetched successfully",
@@ -63,7 +62,7 @@ const UserpendingRequestData = async (req, res) => {
 }
 const requestCount = async (req, res) => {
     try {
-        const pendingRequests = await RequestsCollection.find({ status: "pending" })
+        const pendingRequests = await RequestsCollection.find({ status: "Pending" })
         res.status(200).json({
             message: "data fetched successfully",
             data: pendingRequests.length
@@ -78,10 +77,10 @@ const requestCount = async (req, res) => {
 }
 const approvedRequestCount = async (req, res) => {
     try {
-        const approvedRequests = await RequestsCollection.find({ status: "approved" })
+        const BorrowedRequests = await RequestsCollection.find({ status: "Borrowed" })
         res.status(200).json({
             message: "data fetched successfully",
-            data: approvedRequests.length
+            data: BorrowedRequests.length
         })
 
 
@@ -106,4 +105,21 @@ const overDueCount = async (req, res) => {
         })
     }
 }
-module.exports = { adminNotification, UserpendingRequestData, requestCount, approvedRequestCount, overDueCount }
+
+const membersActivity = async(req,res) =>{
+    try {
+          const allHistory = await RequestsCollection.find({ status: {$nin:["Pending","Rejected"]} }).populate("userId", "id name").populate("bookId", "Title") 
+               res.status(200).json({
+            message: "data fetched successfully",
+            data: allHistory
+        })  
+        console.log(allHistory);
+              
+    } catch (error) {
+          res.status(500).json({
+            message: "internal server error occured"
+        })      
+    }
+
+}
+module.exports = { adminNotification, UserpendingRequestData, requestCount, approvedRequestCount, overDueCount,membersActivity }
