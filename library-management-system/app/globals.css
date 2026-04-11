@@ -2,6 +2,7 @@
 @config "../tailwind.config.js";
 
 /* ── CSS Custom Properties ── */
+
 @theme {
   --color-primary: #864c25;
   --color-secondary: #515427;

@@ -78,6 +78,7 @@ export default function UserHomePage() {
         <div style={{ padding: "16px 18px 18px", flex: 1, display: "flex", flexDirection: "column" }}>
           <h3 style={{ color: "#515427", fontSize: "15px", fontWeight: "700", margin: "0 0 4px", fontFamily: "Georgia, serif", lineHeight: "1.3" }}>{book.Title}</h3>
           <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 9px", fontStyle: "italic" }}>{book.Author}</p>
+          <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 9px", fontStyle: "italic", fontFamily: "Georgia, serif" }}>Pages.{book.Pages}</p>
           <div style={{ marginTop: "auto", paddingTop: "14px" }}>
             <button
               onClick={() => onBorrowClick(book)}
@@ -112,7 +113,7 @@ export default function UserHomePage() {
           <div style={{ fontSize: "44px", marginBottom: "14px" }}>📖</div>
           <h3 style={{ color: "#515427", fontSize: "21px", margin: "0 0 8px", fontWeight: "700" }}>Borrow this book?</h3>
           <p style={{ color: "#515427", fontSize: "16px", fontWeight: "700", margin: "0 0 4px" }}>{book.Title}</p>
-          <p style={{ color: "#9b8a6a", fontSize: "13px", margin: "0 0 24px" }}>by {book.Author} · {book.Genre}</p>
+          <p style={{ color: "#9b8a6a", fontSize: "13px", margin: "0 0 24px" ,fontFamily: "Georgia, serif"}}>by {book.Author} · {book.Genre} . Pages.{book.Pages}</p>
           <p style={{ color: "#7a6f4e", fontSize: "13px", margin: "0 0 26px", lineHeight: "1.65" }}>
             Borrowing period is <strong style={{ color: "#515427" }}>14 days</strong>. The book will be reserved for you immediately.
           </p>
@@ -148,12 +149,12 @@ export default function UserHomePage() {
   const [modalBook, setModalBook] = useState(null);
   const [toast, setToast] = useState(null);
 
-  const filtered = books.filter((b) => {
+  const filtered =books && books.length > 0 ? books.filter((b) => {
     const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || b.Author.toLowerCase().includes(search.toLowerCase())
       || b.Genre?.toLowerCase().includes(search.toLowerCase())
     const matchGenre = activeGenre === "All" || b.Genre?.toLowerCase().trim() === activeGenre.toLowerCase().trim();
     return matchSearch && matchGenre;
-  });
+  }) : [];
 
   const handleConfirmBorrow = async(book) => {
     setModalBook(null);
@@ -215,10 +216,10 @@ export default function UserHomePage() {
 
             {/* Stats */}
             <div style={{ display: "flex", justifyContent: "center", gap: "48px", marginTop: "40px", flexWrap: "wrap" }}>
-              {[{ val: `${books.length} +`, label: "Books Available" }, { val: "180+", label: "Genres" }, { val: "14 Days", label: "Borrow Period" }].map((s) => (
+              {[{ val: `${books.length || " "} +`, label: "Books Available" }, { val: "180+", label: "Genres" }, { val: "14 Days", label: "Borrow Period" }].map((s) => (
                 <div key={s.label} style={{ textAlign: "center" }}>
-                  <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: "700", color: "#515427" }}>{s.val}</div>
-                  <div style={{ fontSize: "12px", color: "#9b8a6a", marginTop: "2px" }}>{s.label}</div>
+                  <div style={{ fontFamily: "Georgia, serif", fontSize: "24px", fontWeight: "700", color: "#515427" }}>{s.val || " "}</div>
+                  <div style={{ fontSize: "12px", color: "#9b8a6a", marginTop: "2px" }}>{s.label || " "}</div>
                 </div>
               ))}
             </div>

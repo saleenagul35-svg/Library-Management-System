@@ -2,18 +2,22 @@ const RequestsCollection = require("../models/borrowRequestModel")
 const bookCollection = require("../models/BooksModel");
 const cron = require('node-cron');
 
-let dueDateCounting = new Date();
-dueDateCounting.setDate(dueDateCounting.getDate() + 14)
+
 
 cron.schedule('* * * * *', async () => {
-    console.log('running a task every minute');
+
     const now = new Date();
-    await RequestsCollection.updateMany({ dueDate: { $lt: now }, status: "Borrowed", }, { $set: { status: "Overdued" } })
+    const overDueRequests = await RequestsCollection.find({ dueDate: { $lt: now }, status: "Borrowed", })
+    for (let req of overDueRequests) {
+        await RequestsCollection.updateOne({ _id: req._id }, { $set: { status: "Overdued" } })
+    }
+    const ExpiredApprovals = await RequestsCollection.find({ expireDate: { $lt: now }, status: "Approved" })
+    for (let req of ExpiredApprovals) {
+        await RequestsCollection.updateOne({ _id: req._id }, { $set: { status: "Expired" } })
+        await bookCollection.updateOne({ _id: req.bookId }, { $inc: { Copy: 1 } })
+    }
 
 });
-
-
-
 const borrowBook = async (req, res) => {
     const { bookId } = req.body
     const userId = req.ActiveID
@@ -21,74 +25,40 @@ const borrowBook = async (req, res) => {
         const CheckingBook = await bookCollection.findOne({ _id: bookId })
         if (CheckingBook) {
             const CheckRequest = await RequestsCollection.findOne({ userId: userId, bookId: bookId, }).sort({ requestDate: -1 })
+
             if (CheckRequest) {
+                const DateObj = CheckRequest.dueDate;
                 if (CheckRequest.status === "Pending") {
-                    res.status(401).json({
+                    return res.status(401).json({
                         message: "You have already requested to borrow this book",
                     })
-                    const DateObj = CheckRequest.dueDate;
+                } else if (CheckRequest.status === "Approved") {
+                    return res.status(401).json({
+                        message: "You have already requested to borrow this book and request has been approved .",
+                    })
+                } else if (CheckRequest.status === "Borrowed" && DateObj.getTime() < new Date().getTime()) {
+                    return res.status(401).json({
+                        message: "You have already borrowed this book and due Date is over",
+                    })
+                } else if (CheckRequest.status === "Borrowed" && DateObj.getTime() > new Date().getTime()) {
+                    return res.status(401).json({
+                        message: "You have already borrowed this book.",
 
-                    if (CheckRequest.status === "Borrowed" && DateObj.getTime() < new Date().getTime()) {
-                        res.status(401).json({
-                            message: "You have already borrowed this book.",
-                        })
-                    } else {
-                        res.status(401).json({
-                            message: "You have already borrowed this book and due Date is over",
-                        })
-                    }
-                }
-                if (CheckRequest.status === "returned") {
-                    const newRequest = new RequestsCollection({
-                        userId: userId,
-                        bookId: bookId,
-                        status: "Pending",
-                        requestDate: new Date(),
-                        issueDate: null,
-                        dueDate: null,
-                        returnDate: null,
-                        rejectionReason: null
-                    })
-                    await newRequest.save()
-                    res.status(200).json({
-                        message: "Request submitted successfully",
                     })
                 }
-                if (CheckRequest.status === "Rejected") {
-                    const newRequest = new RequestsCollection({
-                        userId: userId,
-                        bookId: bookId,
-                        status: "Pending",
-                        requestDate: new Date(),
-                        issueDate: null,
-                        dueDate: null,
-                        returnDate: null,
-                        rejectionReason: null
-                    })
-                    await newRequest.save()
-                    res.status(200).json({
-                        message: "Request submitted successfully",
-                    })
-                }
-
-            } else {
-                const newRequest = new RequestsCollection({
-                    userId: userId,
-                    bookId: bookId,
-                    status: "Pending",
-                    requestDate: new Date(),
-                    issueDate: null,
-                    dueDate: null,
-                    returnDate: null,
-                    rejectionReason: null
-                })
-                await newRequest.save()
-                res.status(200).json({
-                    message: "Request submitted successfully",
-                })
             }
+            const newRequest = new RequestsCollection({
+                userId: userId,
+                bookId: bookId,
+                status: "Pending",
+                requestDate: new Date(),
+            })
+            await newRequest.save()
+            return res.status(200).json({
+                message: "Request submitted successfully",
+            })
         } else {
-            res.status(200).json({
+            return res.status(200).json({
                 message: "This book is not in the library inventory",
             })
         }
@@ -110,6 +80,7 @@ const rejectRequest = async (req, res) => {
         await RequestsCollection.updateOne({ _id: id }, {
             $set: {
                 status: "Rejected",
+                rejectedDate: new Date(),
                 rejectionReason: reason
             }
         })
@@ -136,12 +107,13 @@ const acceptRequest = async (req, res) => {
             })
         } else {
             await bookCollection.updateOne({ _id: findRequest.bookId }, { $inc: { Copy: - 1 } })
-
+            let expireDateCounting = new Date();
+            expireDateCounting.setDate(expireDateCounting.getDate() + 2)
             await RequestsCollection.updateOne({ _id: id }, {
                 $set: {
-                    status: "Borrowed",
-                    issueDate: new Date(),
-                    dueDate: `${dueDateCounting}`,
+                    status: "Approved",
+                    approvedDate: new Date(),
+                    expireDate: expireDateCounting,
                 }
             })
             res.status(200).json({
@@ -157,4 +129,68 @@ const acceptRequest = async (req, res) => {
     }
 
 }
-module.exports = { borrowBook, rejectRequest, acceptRequest }
+const BookIssue = async (req, res) => {
+    const id = req.params.id
+    try {
+        const findRequest = await RequestsCollection.findOne({ _id: id })
+
+        const checkingCopies = await bookCollection.findOne({ _id: findRequest.bookId })
+
+        if (checkingCopies.Copy < 1) {
+            res.status(409).json({
+                message: "book is not available"
+            })
+        } else {
+
+            let dueDateCounting = new Date();
+            dueDateCounting.setDate(dueDateCounting.getDate() + 14)
+            await RequestsCollection.updateOne({ _id: id }, {
+                $set: {
+                    status: "Borrowed",
+                    issueDate: new Date(),
+                    dueDate: dueDateCounting,
+                    expireDate: null
+                }
+            })
+            res.status(200).json({
+                message: "borrow request approved"
+            })
+
+        }
+
+    } catch (error) {
+        res.status(500).json({
+            message: "error occured rejecting borrow request"
+        })
+    }
+
+}
+const returnBook = async (req, res) => {
+    const id = req.params.id
+    try {
+        const findRequest = await RequestsCollection.findOne({ _id: id })
+
+        const checkingCopies = await bookCollection.findOne({ _id: findRequest.bookId })
+        await bookCollection.updateOne({ _id: checkingCopies._id },{$inc:{Copy: 1}})
+        await RequestsCollection.updateOne({ _id: id }, {
+            $set: {
+                status: "Returned",
+                returnDate: new Date(),
+                dueDate: null,
+            }
+        })
+        res.status(200).json({
+            message: "book returned"
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "server error occured"
+        })
+    }
+
+}
+
+module.exports = { borrowBook, rejectRequest, acceptRequest, BookIssue,returnBook }

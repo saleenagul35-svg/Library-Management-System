@@ -4,7 +4,7 @@ import { useState } from "react";
 
 
 export default function AddNewBookForm() {
-  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Status: "", Description: "" })
+  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "" })
 
   const formData = (e) => {
     const { name, value } = e.target;
@@ -27,12 +27,12 @@ export default function AddNewBookForm() {
         method: "POST",
         headers: {
           "authorization": `Bearer ${token}`,
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(handleform)
       })
 
-      if(response.ok){
+      if (response.ok) {
         window.location.href = "/admin/inventory"
       }
 
@@ -307,26 +307,20 @@ export default function AddNewBookForm() {
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Total physical copies being added to stock</p>
               </div>
 
-              {/* Initial Status */}
+              {/* Initial Pages */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Status<span className="text-red-500">*</span>
+                  Pages<span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <select
-                    name="Status"
-                    value={handleform.Status}
+                  <input
+                    type="number"
+                    name="Pages"
+                    value={handleform.Pages}
+                    min={10}
                     onChange={formData}
-                    className="w-full px-3 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer">
-                    <option value="Available">Available</option>
-                    <option value="Unavailable">Unavailable</option>
-                   
-                  </select>
-                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <svg className="w-3.5 h-3.5 text-[#b5a898]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                    className="w-full px-3 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer" />
+
                 </div>
               </div>
             </div>

@@ -18,7 +18,7 @@ const formatDate = (rawDate) => {
   const date = new Date(rawDate);
   const day = date.getDate();
   const year = date.getFullYear();
-  const month = date.toLocaleString("en-US", { month: "long" });
+  const month = date.toLocaleString("en-US", { month: "short" });
   return `${day} ${month} ${year}`;
 };
 
@@ -32,8 +32,19 @@ function Avatar({ name, index }) {
 }
 
 function Badge({ label }) {
+  const lower = String(label).toLowerCase();
+
+  let style = "bg-[#e8ead0] text-[#3a3d12] border border-[#c9c9a0]"; // default
+  if (lower === "eligible") {
+    style = " bg-secondary/10 text-secondary-700 border border-secondary/20";
+  } else if (lower.includes("overdue")) {
+    style = "bg-[#fbeaea] text-[#8b2020] border border-[#e8aaaa]";
+  } else if (lower.includes("borrowed")) {
+    style = "bg-[#f5ede0] text-[#6b3e1e] border border-[#c9aa8a]";
+  }
+
   return (
-    <span className="bg-[#e8ead0] text-[#3a3d12] inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-md whitespace-nowrap">
+    <span className={`${style} inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-md whitespace-nowrap`}>
       {label}
     </span>
   );

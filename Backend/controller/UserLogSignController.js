@@ -4,26 +4,25 @@ const bcrypt = require("bcrypt")
 const saltRounds = 10;
 
 const registerUsers =  async (req, res) => {
-    const { id, name, email, phone, password, confirm } = req.body
+    const { id, name, email, phone, password } = req.body
 
     try {
         const existEmail = await signUp.findOne({ email: email })
         if (existEmail) {
-            res.status(401).json({
+            res.status(404).json({
                 message: "email is already registered"
             })
         } else {
             const salt = await bcrypt.genSalt(saltRounds)
 
             const hash = await bcrypt.hash(password, salt)
-            const repeatHash = await bcrypt.hash(confirm, salt)
+           
             const gmailInfo = new signUp({
-                id: id,
+                id: Date.now(),
                 name: name,
                 email: email,
                 phone: phone,
                 password: hash,
-                confirm: repeatHash,
                 memberSince: new Date()
             })
             await gmailInfo.save()
@@ -32,7 +31,7 @@ const registerUsers =  async (req, res) => {
                 process.env.JWT_SECRET_KEY,
                 { expiresIn: "2h" }
             )
-            res.status(200).json({
+            res.status(201).json({
                 message: "user signed up",
                 accessToken: accessToken
 

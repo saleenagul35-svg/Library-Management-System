@@ -16,7 +16,7 @@ import Link from 'next/link';
 const STATUS_STYLES = {
   available: 'bg-secondary/10 text-secondary-700',
   borrowed: 'bg-primary/10 text-primary-700',
-  overdue: 'bg-red-100 text-red-700',
+  unavailable: 'bg-red-100 text-red-700',
 };
 
 const BOOKS_PER_PAGE = 10;
@@ -26,10 +26,10 @@ function BookDetailsModal({ book, onClose }) {
   if (!book) return null;
 
   const detailFields = [
-    { icon: Hash,       label: 'ISBN',           value: book.ISBN },
-    { icon: Calendar,   label: 'Published',      value: book.Year },
-    { icon: Globe,      label: 'Language',       value: book.Language },
-    { icon: Building2,  label: 'Publisher',      value: book.Publisher },
+    { icon: Hash, label: 'ISBN', value: book.ISBN },
+    { icon: Calendar, label: 'Published', value: book.Year },
+    { icon: Globe, label: 'Language', value: book.Language },
+    { icon: Building2, label: 'Publisher', value: book.Publisher },
   ].filter(f => f.value !== undefined && f.value !== null && f.value !== '');
 
   return (
@@ -79,11 +79,17 @@ function BookDetailsModal({ book, onClose }) {
                       {book.Genre}
                     </span>
                   )}
+                  {book.Pages !== undefined && (
+                    <span className="rounded-full bg-brand-bg border border-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary-800/60">
+                      {book.Pages} {book.Pages === 1 ? 'page' : 'pages'}
+                    </span>
+                  )}
                   {book.Copy !== undefined && (
                     <span className="rounded-full bg-brand-bg border border-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary-800/60">
                       {book.Copy} {book.Copy === 1 ? 'copy' : 'copies'}
                     </span>
                   )}
+
                   {book.Status && (
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize ${STATUS_STYLES[book.Status] ?? ''}`}>
                       <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -425,6 +431,7 @@ export default function InventoryPage() {
                       </button>
                     </th>
                   ))}
+                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Pages</th>
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Copies</th>
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Status</th>
                   <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-800/50">Actions</th>
@@ -474,9 +481,15 @@ export default function InventoryPage() {
                       {/* Copies */}
                       <td className="px-5 py-4">
                         <span className="rounded-full bg-brand-bg px-2.5 py-1 text-[11px] font-medium text-primary-800/60">
+                          {book.Pages}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-brand-bg px-2.5 py-1 text-[11px] font-medium text-primary-800/60">
                           {book.Copy}
                         </span>
                       </td>
+
 
                       {/* Status */}
                       <td className="px-5 py-4">

@@ -11,8 +11,11 @@ const RequestSchema = new mongoose.Schema({
   status: String,
   requestDate: String,
   issueDate: Date,
+  approvedDate: Date,
+  expireDate:Date,
   dueDate: Date,
   returnDate: Date,
+  rejectedDate: Date,
   rejectionReason: String,
 })
 const RequestsCollection = mongoose.model("RequestsCollection", RequestSchema)

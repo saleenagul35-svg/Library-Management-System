@@ -1,7 +1,7 @@
 const bookCollection = require("../models/BooksModel");
 
 const storeBooks = async (req, res) => {
-    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Status, Description } = req.body
+    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description } = req.body
     try {
         const book = new bookCollection({
             Title: Title,
@@ -12,7 +12,8 @@ const storeBooks = async (req, res) => {
             Year: Year,
             Language: Language,
             Copy: Copy,
-            Status: Status,
+            Pages: Pages,
+            Status: "available",
             Description: Description
         })
         await book.save()
@@ -61,7 +62,7 @@ const deleteBook = async (req, res) => {
 }
 const editBook = async (req, res) => {
     const id = req.params.id
-    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Status, Description } = req.body
+    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description } = req.body
 
     try {
         await bookCollection.updateOne({ _id: id }, {
@@ -74,7 +75,8 @@ const editBook = async (req, res) => {
                 Year: Year,
                 Language: Language,
                 Copy: Copy,
-                Status: Status,
+                Pages: Pages,
+                Status: "available",
                 Description: Description
             }
         })
@@ -105,13 +107,13 @@ const bookCount = async (req, res) => {
 }
 const updateBookCopies = async (req, res) => {
     const id = req.params.id
-    const {Copy, Status } = req.body
+    const { Copy, Status } = req.body
 
     try {
         await bookCollection.updateOne({ _id: id }, {
             $set: {
                 Copy: Copy,
-                Status: Status,            
+                Status: Status,
             }
         })
         res.status(200).json({
@@ -124,4 +126,4 @@ const updateBookCopies = async (req, res) => {
         })
     }
 }
-module.exports = { storeBooks, fetchBooks, deleteBook, editBook,updateBookCopies,bookCount };
+module.exports = { storeBooks, fetchBooks, deleteBook, editBook, updateBookCopies, bookCount };

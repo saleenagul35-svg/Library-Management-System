@@ -7,7 +7,7 @@ import { useState } from "react";
 
 // ================= LOGIN PAGE =================
 export default function AdminLoginPage() {
-
+  const [errors, setErrors] = useState({})
   const [handleform, setHandleForm] = useState({ email: "", password: "" })
 
   const formData = (e) => {
@@ -17,32 +17,44 @@ export default function AdminLoginPage() {
       [name]: value
     }))
   }
+  const validation = () => {
+    let newErrors = {}
+    if (handleform.email.length === 0) {
+      newErrors.email = "Enter your email address"
+    }
+    if (handleform.password.length === 0) {
+      newErrors.password = "Enter your password"
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
   const adminPage = async (e) => {
     e.preventDefault()
-    try {
-      const response = await fetch("http://localhost:5000/api/adminVerification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(handleform)
+    if (validation()) {
+      try {
+        const response = await fetch("http://localhost:5000/api/adminVerification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(handleform)
 
 
-      })
+        })
 
-      if (response.ok) {
-        const data = await response.json()
-        console.log(data);
-        localStorage.setItem("Admintoken", data.accessToken)
-        window.location.href = "/admin"
+        if (response.ok) {
+          const data = await response.json()
+          console.log(data);
+          localStorage.setItem("Admintoken", data.accessToken)
+          window.location.href = "/admin"
+        }
+
+
+      } catch (error) {
+        console.log(error);
+
       }
-
-
-    } catch (error) {
-      console.log(error);
-
     }
-
 
   }
   return (
@@ -81,9 +93,12 @@ export default function AdminLoginPage() {
                 onChange={formData}
                 autoComplete="email"
                 placeholder="example@mail.com"
-                
+
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
+              {errors.email &&
+                <p className="text-sm text-red-700">{errors.email}</p>
+              }
             </div>
 
             {/* Password */}
@@ -97,13 +112,16 @@ export default function AdminLoginPage() {
                 value={handleform.password}
                 onChange={formData}
                 placeholder="********"
-                
+
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
+              {errors.password &&
+                <p className="text-sm text-red-700">{errors.password}</p>
+              }
             </div>
 
             {/* Button */}
-            <button 
+            <button
               className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
               Login
             </button>

@@ -7,7 +7,7 @@ import { useState } from "react";
 
 // ================= LOGIN PAGE =================
 export default function UserLoginPage() {
-
+  const [errors, setErrors] = useState({})
   const [handleForm, setHandleForm] = useState({ email: "", password: "" })
   const submitForm = (e) => {
     const { name, value } = e.target
@@ -18,35 +18,46 @@ export default function UserLoginPage() {
     }))
   }
 
-
+  const validation = () => {
+    let newErrors = {}
+    if (handleForm.email.length === 0) {
+      newErrors.email = "Enter your email address"
+    }
+    if (handleForm.password.length === 0) {
+      newErrors.password = "Enter your password"
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
   const userpage = async (e) => {
     e.preventDefault()
-    try {
-      const response = await fetch("http://localhost:5000/api/userLogin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(handleForm)
+    if (validation()) {
+      try {
+        const response = await fetch("http://localhost:5000/api/userLogin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(handleForm)
 
 
-      })
+        })
 
 
 
-      if (response.ok) {
-        const data = await response.json()
-        localStorage.setItem("UserLoginToken", data.accessToken)
-        window.location.href = "/user"
+        if (response.ok) {
+          const data = await response.json()
+          localStorage.setItem("UserLoginToken", data.accessToken)
+          window.location.href = "/user"
+        }
+
+
+      } catch (error) {
+        console.log(error);
+
       }
 
-
-    } catch (error) {
-      console.log(error);
-
     }
-
-
   }
 
 
@@ -87,9 +98,12 @@ export default function UserLoginPage() {
                 onChange={submitForm}
                 placeholder="example@mail.com"
                 autoComplete="email"
-                
+
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
+              {errors.email &&
+                <p className="text-sm text-red-700">{errors.email}</p>
+              }
             </div>
 
             {/* Password */}
@@ -106,10 +120,13 @@ export default function UserLoginPage() {
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-[#864c25] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#864c25]"
               />
+              {errors.password &&
+                <p className="text-sm text-red-700">{errors.password}</p>
+              }
             </div>
 
             {/* Button */}
-            <button 
+            <button
               className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
 
               Login

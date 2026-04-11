@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const ACTION_CONFIG = {
+  Approved: { icon: BookMarked, label: 'Borrowed', style: 'bg-secondary/10 text-secondary-700', dot: 'bg-secondary' },
   Borrowed: { icon: BookMarked, label: 'Borrowed', style: 'bg-secondary/10 text-secondary-700', dot: 'bg-secondary' },
   Returned: { icon: RefreshCw, label: 'Returned', style: 'bg-primary/10 text-primary-700', dot: 'bg-primary' },
   Overdued: { icon: AlertTriangle, label: 'overdued', style: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
@@ -138,7 +139,7 @@ export default function UserLogsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-primary-800/60 text-xs">
-                      <p>{log.issueDate}</p>
+                      <p>{log.approvedDate}</p>
 
                     </td>
                     <td className="px-5 py-4 text-xs">

@@ -49,7 +49,41 @@ const NAV_ITEMS = [
     exact: false,
     badge: null,
   },
-
+  {
+    href: '/admin/issuedOverdue',
+    label: 'Issued Books',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
+    {
+    href: '/admin/approvedBooks',
+    label: 'Approved Books',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
+      {
+    href: '/admin/ExpiredApprovals',
+    label: 'Expired Approvals',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
+        {
+    href: '/admin/rejectedRequests',
+    label: 'Rejected Requests',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
+          {
+    href: '/admin/returnedBooks',
+    label: 'Returned Books',
+    icon: ScrollText,
+    exact: false,
+    badge: null,
+  },
   // '/admin/BorrowedBooks': 'Books Borrowed',
 ];
 
@@ -388,6 +422,7 @@ export default function AdminLayout({ children }) {
           {children}
         </main>
       </div>
+
     </div>
   );
 }

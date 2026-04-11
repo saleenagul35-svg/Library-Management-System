@@ -8,6 +8,7 @@ const BookSchema = new mongoose.Schema({
     Year: Number,
     Language: String,
     Copy: Number,
+    Pages:Number,
     Status: String,
     Description: String
 })

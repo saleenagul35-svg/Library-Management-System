@@ -45,5 +45,42 @@ const adminVerification = async (req, res) => {
         })
     }
 }
+const saltRounds = 10;
+const adminsignup = async (req, res) => {
+    const { email, password } = req.body
 
-module.exports = {adminVerification}
+    try {
+        const testEmail = await adminVerify.findOne({ email: email })
+        if (testEmail) {
+            res.status(200).json({
+                message: "Email Exists Please Login",
+
+            })
+        } else {
+            const salt = await bcrypt.genSalt(saltRounds)
+
+            const hash = await bcrypt.hash(password, salt)
+            const gmailInfo = new adminVerify({
+                email: email,
+
+                password: hash,
+
+            })
+            await gmailInfo.save()
+            res.status(200).json({
+                message: "Admin signed up",
+
+            })
+        }
+
+
+    } catch (error) {
+        console.log(error.message);
+
+        res.status(500).json({
+            message: "server error occured"
+        })
+    }
+}
+
+module.exports = { adminVerification, adminsignup }

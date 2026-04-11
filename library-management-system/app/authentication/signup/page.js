@@ -1,11 +1,14 @@
 "use client";
 import { useState } from "react";
-
+const styles = `        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }`
 export default function SignupPage() {
+  const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
-    id: Date.now(), name: "", email: "", phone: "", password: "", confirm: "",
+     name: "", email: "", phone: "", password: "", confirm: "",
   });
-
+  const [alert, setAlert] = useState(false)
   const [focused, setFocused] = useState({
     name: false, email: false, phone: false, password: false, confirm: false,
   });
@@ -18,23 +21,47 @@ export default function SignupPage() {
 
   const onBlur = (field) =>
     setFocused((prev) => ({ ...prev, [field]: false }));
-
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/signUp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("user_Signup_Token", data.accessToken);
-        window.location.href = "/user";
-      }
-    } catch (error) {
-      console.log(error);
+  const validation = () => {
+    let newErrors = {}
+    if (!/^[A-Za-z\s]{3,}$/.test(form.name)) {
+      newErrors.name = "Enter a valid name"
     }
+    if (!/^03\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Enter a valid phone number"
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Enter a valid email"
+    }
+    if (form.password.length < 8) {
+      newErrors.password = "Password must be 8 characters"
+    }
+    if (!(form.password === form.confirm)) {
+      newErrors.confirmation = "Password don't match"
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (validation()) {
+      try {
+
+        const response = await fetch("http://localhost:5000/api/signUp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem("user_Signup_Token", data.accessToken);
+          window.location.href = "/user";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
   };
 
   const labelStyle = {
@@ -55,11 +82,6 @@ export default function SignupPage() {
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-      `}</style>
 
       <div style={{
         minHeight: "100vh", background: "#fcf5e1",
@@ -104,6 +126,9 @@ export default function SignupPage() {
               autoComplete="name"
               style={inputStyle("name")}
             />
+            {errors.name &&
+              <p className="text-sm text-red-700">{errors.name}</p>
+            }
           </div>
 
           {/* ── Email ── */}
@@ -119,6 +144,9 @@ export default function SignupPage() {
               autoComplete="email"
               style={inputStyle("email")}
             />
+            {errors.email &&
+              <p className="text-sm text-red-700">{errors.email}</p>
+            }
           </div>
 
           {/* ── Phone ── */}
@@ -130,10 +158,13 @@ export default function SignupPage() {
               onChange={update("phone")}
               onFocus={() => onFocus("phone")}
               onBlur={() => onBlur("phone")}
-              placeholder="+92 300 0000000"
+              placeholder="0300 0000000"
               autoComplete="tel"
               style={inputStyle("phone")}
             />
+            {errors.phone &&
+              <p className="text-sm text-red-700">{errors.phone}</p>
+            }
           </div>
 
           {/* ── Password ── */}
@@ -145,10 +176,14 @@ export default function SignupPage() {
               onChange={update("password")}
               onFocus={() => onFocus("password")}
               onBlur={() => onBlur("password")}
+
               placeholder="Min. 8 characters"
               autoComplete="new-password"
               style={inputStyle("password")}
             />
+                        {errors.password &&
+              <p className="text-sm text-red-700">{errors.password}</p>
+            }
           </div>
 
           {/* ── Confirm Password ── */}
@@ -160,10 +195,14 @@ export default function SignupPage() {
               onChange={update("confirm")}
               onFocus={() => onFocus("confirm")}
               onBlur={() => onBlur("confirm")}
+
               placeholder="Repeat your password"
-               autoComplete="new-password"
+              autoComplete="new-password"
               style={inputStyle("confirm")}
             />
+                        {errors.confirmation &&
+              <p className="text-sm text-red-700">{errors.confirmation}</p>
+            }
           </div>
 
           {/* ── Submit Button ── */}

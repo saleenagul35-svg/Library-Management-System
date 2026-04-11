@@ -40,7 +40,7 @@ export default function AdminDashboardPage() {
       const [res1, res2, res3, res4] = await Promise.all([
         fetch("http://localhost:5000/api/bookCount", { method: "GET", headers }),
         fetch("http://localhost:5000/api/membersCount", { method: "GET", headers }),
-        fetch("http://localhost:5000/api/approvedRequestCount", { method: "GET", headers }),
+        fetch("http://localhost:5000/api/borrowedRequestCount", { method: "GET", headers }),
         fetch("http://localhost:5000/api/overDueCount", { method: "GET", headers }),
       ])
       const [data1, data2, data3, data4] = await Promise.all([
@@ -344,7 +344,7 @@ export default function AdminDashboardPage() {
                 <p className="text-xs text-primary-800/45 mt-0.5">Latest borrow & return events</p>
               </div>
               <Link
-                href="/admin/logs"
+                href="/admin/UserActivity"
                 className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-700 transition-colors"
               >
                 View All <ArrowRight size={13} />

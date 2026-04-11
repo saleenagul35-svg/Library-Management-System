@@ -6,7 +6,6 @@ const signUpSchema = new mongoose.Schema({
     email: String,
     phone: Number,
     password: String,
-    confirm: String,
     memberSince: Date
 })
 const signUp = mongoose.model("signUp", signUpSchema)

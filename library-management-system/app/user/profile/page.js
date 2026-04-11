@@ -297,7 +297,7 @@ export default function ProfilePage() {
       {/* ── Phone Modal (UI only) ── */}
       {showPhoneModal && (
         <Modal title="Update Phone Number" onClose={() => setShowPhoneModal(false)}>
-          <Field label="New Phone Number" type="tel" placeholder="+92 300 0000000" />
+          <Field label="New Phone Number" type="tel" placeholder="0300 0000000" />
           <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
             <button
               onClick={() => setShowPhoneModal(false)}
