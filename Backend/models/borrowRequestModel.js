@@ -17,7 +17,8 @@ const RequestSchema = new mongoose.Schema({
   returnDate: Date,
   rejectedDate: Date,
   rejectionReason: String,
-})
+  activityDate: Date
+},{ timestamps: true })
 const RequestsCollection = mongoose.model("RequestsCollection", RequestSchema)
 
 module.exports = RequestsCollection

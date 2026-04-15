@@ -26,14 +26,14 @@ export default function SignupPage() {
     if (!/^[A-Za-z\s]{3,}$/.test(form.name)) {
       newErrors.name = "Enter a valid name"
     }
-    if (!/^03\d{9}$/.test(form.phone)) {
+    if (!/^03\d{2}-?\d{7}$/.test(form.phone)) {
       newErrors.phone = "Enter a valid phone number"
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email"
     }
-    if (form.password.length < 8) {
-      newErrors.password = "Password must be 8 characters"
+    if (form.password.trim().length < 8) {
+      newErrors.password = "Password must be atleast 8 characters"
     }
     if (!(form.password === form.confirm)) {
       newErrors.confirmation = "Password don't match"
@@ -48,6 +48,7 @@ export default function SignupPage() {
 
         const response = await fetch("http://localhost:5000/api/signUp", {
           method: "POST",
+           credentials:"include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });

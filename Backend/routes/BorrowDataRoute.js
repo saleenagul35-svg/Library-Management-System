@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {adminNotification,returnedBooks,BorrowedBooks,UserpendingRequestData,rejectedRequetsData,expiredApprovalsData,requestCount,borrowedRequestCount,overDueCount,membersActivity,approvedRequestsData} = require("../controller/BorrowDataController")
+const {adminNotification,returnedBooks,RecentActvity,BorrowedBooks,UserpendingRequestData,rejectedRequetsData,expiredApprovalsData,requestCount,borrowedRequestCount,overDueCount,membersActivity,approvedRequestsData} = require("../controller/BorrowDataController")
 const Token_Verfication = require("../middleware/authMiddleware")
 
 router.get("/adminNotification",Token_Verfication,adminNotification)
@@ -14,4 +14,5 @@ router.get("/expiredApprovalsData",Token_Verfication,expiredApprovalsData)
 router.get("/rejectedRequetsData",Token_Verfication,rejectedRequetsData)
 router.get("/BorrowedBooks",Token_Verfication,BorrowedBooks)
 router.get("/returnedBooks",Token_Verfication,returnedBooks)
+router.get("/RecentActvity",Token_Verfication,RecentActvity)
 module.exports = router

@@ -22,14 +22,32 @@ import { useState, useEffect } from 'react';
 export default function AdminDashboardPage() {
 
 
+const countingTime = (time) =>{
+const diff = new Date() - new Date(time);
 
+const seconds = Math.floor(diff/1000)
+const minutes = Math.floor(seconds/60) 
+const hours = Math.floor(minutes/60) 
+const days = Math.floor(hours/24) 
+const weeks = Math.floor(days/7) 
+const months = Math.floor(days/30) 
+const years = Math.floor(days/365)
+if(seconds<60) return `${seconds}s ago`
+if(minutes<60) return `${minutes}m ago`
+if(hours<24) return `${hours}h ago`
+if(days<7) return `${days}d ago`
+if(days<30) return `${weeks}w ago`
+if(days<365) return `${months}w ago`
+ return `${years}y ago`
+}
 
   //============================== APIs ===========================//
   const [loader, setLoader] = useState(true)
   const [totalBooks, setTotalBooks] = useState(null)
   const [totalStudents, setTotalStudents] = useState(null)
   const [totalBorrowings, setTotalBorrowings] = useState(null)
-  const [overDueBooks,setOverDueBooks] = useState(null)
+  const [overDueBooks, setOverDueBooks] = useState(null)
+  const [topBooks, setTopBooks] = useState([])
   const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem("Admintoken")
@@ -37,17 +55,19 @@ export default function AdminDashboardPage() {
         "authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       }
-      const [res1, res2, res3, res4] = await Promise.all([
+      const [res1, res2, res3, res4, res5] = await Promise.all([
         fetch("http://localhost:5000/api/bookCount", { method: "GET", headers }),
         fetch("http://localhost:5000/api/membersCount", { method: "GET", headers }),
         fetch("http://localhost:5000/api/borrowedRequestCount", { method: "GET", headers }),
         fetch("http://localhost:5000/api/overDueCount", { method: "GET", headers }),
+        fetch("http://localhost:5000/api/RecentActvity", { method: "GET", headers }),
       ])
-      const [data1, data2, data3, data4] = await Promise.all([
+      const [data1, data2, data3, data4, data5] = await Promise.all([
         res1.ok ? res1.json() : null,
         res2.ok ? res2.json() : null,
         res3.ok ? res3.json() : null,
-        res4.ok ? res4.json() : null
+        res4.ok ? res4.json() : null,
+        res5.ok ? res5.json() : null
       ])
 
       if (data1) {
@@ -70,6 +90,14 @@ export default function AdminDashboardPage() {
       if (data4) {
         let length = data4.data
         setOverDueBooks(length)
+
+
+      }
+      if (data5) {
+        let length = data5.data
+        setTopBooks(length)
+     
+
 
 
       }
@@ -124,19 +152,10 @@ export default function AdminDashboardPage() {
       label: 'Overdue Books',
       value: `${overDueBooks}`,
       icon: AlertTriangle,
-      iconBg: 'bg-red-500/10',
+      iconBg: 'bg-red-700/10',
       iconColor: 'text-red-600',
       accent: 'border-red-200/40',
     },
-  ];
-
-  const RECENT_ACTIVITY = [
-    { id: 1, type: 'borrow', user: 'Amelia Hassan', book: 'The Name of the Rose', time: '2 min ago', status: 'success' },
-    { id: 2, type: 'return', user: 'Liam Chen', book: 'Sapiens', time: '14 min ago', status: 'success' },
-    { id: 3, type: 'overdue', user: 'Noah Williams', book: 'Meditations', time: '1 hr ago', status: 'warning' },
-    { id: 4, type: 'borrow', user: 'Sophia Park', book: 'Dune', time: '2 hr ago', status: 'success' },
-    { id: 5, type: 'return', user: 'James Okafor', book: 'A Brief History of Time', time: '3 hr ago', status: 'success' },
-    { id: 6, type: 'borrow', user: 'Mia Fernandez', book: 'Crime and Punishment', time: '5 hr ago', status: 'success' },
   ];
 
   const TOP_BOOKS = [
@@ -200,14 +219,14 @@ export default function AdminDashboardPage() {
 
   /** Activity type config */
   const ACTIVITY_CONFIG = {
-    borrow: { icon: BookMarked, label: 'Borrowed', color: 'bg-secondary/10 text-secondary-700', dot: 'bg-secondary' },
-    return: { icon: RefreshCw, label: 'Returned', color: 'bg-primary/10 text-primary-700', dot: 'bg-primary' },
-    overdue: { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
+    Borrowed: { icon: BookMarked, label: 'Borrowed', color: 'bg-secondary/10 text-secondary-700', dot: 'bg-secondary' },
+    Returned: { icon: RefreshCw, label: 'Returned', color: 'bg-primary/10 text-primary-700', dot: 'bg-primary' },
+    Overdued: { icon: AlertTriangle, label: 'Overdued', color: 'bg-red-100 text-red-700', dot: 'bg-red-700' },
   };
 
   /** Single activity row */
   function ActivityRow({ item, index }) {
-    const cfg = ACTIVITY_CONFIG[item.type];
+    const cfg = ACTIVITY_CONFIG[item.status];
     const Icon = cfg.icon;
 
     return (
@@ -219,9 +238,9 @@ export default function AdminDashboardPage() {
           <Icon size={14} strokeWidth={2} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-primary-900 truncate">{item.user}</p>
+          <p className="text-sm font-medium text-primary-900 truncate">{item.userId.name}</p>
           <p className="text-xs text-primary-800/50 truncate">
-            <span className="italic">{item.book}</span>
+            <span className="italic">{item.bookId.Title}</span>
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -231,7 +250,7 @@ export default function AdminDashboardPage() {
           </span>
           <span className="flex items-center gap-1 text-[10px] text-primary-800/40">
             <Clock size={9} />
-            {item.time}
+            {countingTime(item.activityDate)}
           </span>
         </div>
       </div>
@@ -351,8 +370,8 @@ export default function AdminDashboardPage() {
               </Link>
             </div>
             <div className="px-5 divide-y divide-primary/[0.04]">
-              {RECENT_ACTIVITY.map((item, i) => (
-                <ActivityRow key={item.id} item={item} index={i} />
+              {topBooks.map((item, i) => (
+                <ActivityRow key={item._id} item={item} index={i} />
               ))}
             </div>
           </div>
@@ -380,7 +399,7 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
             <QuickAction icon={Plus} label="Add New Book" href="/admin/inventory/new" color="bg-primary/10 text-primary" />
             <QuickAction icon={Users} label="Manage Users" href="/admin/logs" color="bg-secondary/10 text-secondary" />
-            <QuickAction icon={BookCopy} label="View Borrowings" href="/admin/logs" color="bg-amber-500/10 text-amber-700" />
+            <QuickAction icon={BookCopy} label="View Borrowings" href="/admin/issuedOverdue" color="bg-amber-500/10 text-amber-700" />
             <QuickAction icon={BarChart2} label="Analytics" href="/admin/analytics" color="bg-blue-500/10 text-blue-700" />
           </div>
         </div>

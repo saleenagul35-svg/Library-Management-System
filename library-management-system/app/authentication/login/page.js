@@ -1,12 +1,14 @@
 "use client"
 import Image from "next/image";
 import user from "../../../public/images/users.png"
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 
 // ================= LOGIN PAGE =================
 export default function UserLoginPage() {
+  const [alert, setAlert] = useState(false)
   const [errors, setErrors] = useState({})
   const [handleForm, setHandleForm] = useState({ email: "", password: "" })
   const submitForm = (e) => {
@@ -20,10 +22,10 @@ export default function UserLoginPage() {
 
   const validation = () => {
     let newErrors = {}
-    if (handleForm.email.length === 0) {
+    if (!handleForm.email.trim()) {
       newErrors.email = "Enter your email address"
     }
-    if (handleForm.password.length === 0) {
+    if (!handleForm.password.trim()) {
       newErrors.password = "Enter your password"
     }
     setErrors(newErrors)
@@ -35,6 +37,7 @@ export default function UserLoginPage() {
       try {
         const response = await fetch("http://localhost:5000/api/userLogin", {
           method: "POST",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json"
           },
@@ -42,13 +45,15 @@ export default function UserLoginPage() {
 
 
         })
-
-
+        const data = await response.json()
 
         if (response.ok) {
-          const data = await response.json()
+
           localStorage.setItem("UserLoginToken", data.accessToken)
           window.location.href = "/user"
+        } else {
+          setAlert(`${data.message}`)
+
         }
 
 
@@ -61,13 +66,19 @@ export default function UserLoginPage() {
   }
 
 
-
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fcf5e1] px-4 py-6" id="LoginPage">
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 bg-[#fdfdef] rounded-2xl shadow-lg overflow-hidden">
 
         {/* Left Image */}
+
         <div className="hidden md:flex items-center justify-center p-4 ">
           <Image
             src={user}
@@ -141,7 +152,11 @@ export default function UserLoginPage() {
               </a>
             </p>
           </form>
+
         </div>
+        {alert && <Stack spacing={2} className="fixed top-5 right-16 w-100 ">
+          <Alert sx={{ backgroundColor: "#fdfdef" }} severity="error">{alert}</Alert>
+        </Stack>}
       </div>
     </div>
   );

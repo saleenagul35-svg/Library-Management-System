@@ -11,7 +11,7 @@ export default function updateBookForm() {
 
   const book = useSrchPrms.get("book")
 
-
+  const [errors, setErrors] = useState({})
   const [parsed, setParsed] = useState(null);
   const formData = (e) => {
     const { name, value } = e.target;
@@ -21,28 +21,113 @@ export default function updateBookForm() {
     }))
   }
 
+  const validation = () => {
+    const currentYear = new Date().getFullYear()
+    const yearnum = handleform.Year
+    let newErrors = {}
+    if (handleform.Title.trim().length < 3) {
+      newErrors.Title = "Title must be atleast 3 characters"
+    }
+    if (!handleform.Title.trim()) {
+      newErrors.Title = "Title*"
+    }
+    if (handleform.Author.trim().length < 3) {
+      newErrors.Author = "Author name must be atleast 3 characters"
+    }
+    if (!handleform.Author.trim()) {
+      newErrors.Author = "Author*"
+    }
+    if (!/^[A-Za-z\s]{3,}$/.test(handleform.Genre)) {
+      newErrors.Genre = "Enter a valid Genre"
+    }
+    if (!handleform.Genre.trim()) {
+      newErrors.Genre = "Genre*"
+    }
+    if (handleform.Publisher.trim().length < 3) {
+      newErrors.Publisher = "Publisher name must be atleast 3 characters"
+    }
+    if (!handleform.Publisher.trim()) {
+      newErrors.Publisher = "Publisher*"
+    }
+    if (!/^[A-Za-z\s]{3,}$/.test(handleform.Language)) {
+      newErrors.Language = "Enter a valid Language"
+    }
+    if (!handleform.Language.trim()) {
+      newErrors.Language = "Language*"
+    }
+    if (handleform.Description.trim().length < 30) {
+      newErrors.Description = "Synopsis must be atleast 30 characters"
+    }
+    if (handleform.Description.trim().length > 1000) {
+      newErrors.Description = "Synopsis cannot be greater than 1000 characters"
+    }
+    if (!handleform.Description.trim()) {
+      newErrors.Description = "Synopsis*"
+    }
 
+    if (!/^\d{1,}$/.test(handleform.Pages)) {
+      newErrors.Pages = "Enter valid page count"
+    }
+
+    if (handleform.Pages < 5) {
+      newErrors.Pages = "Page count must be atleast 5*"
+    }
+    if (handleform.Pages.length === 0) {
+      newErrors.Pages = "Pages*"
+    }
+    if (!/^\d{1,}$/.test(handleform.Copy)) {
+      newErrors.Copy = "Enter valid Copy count"
+    }
+    if (handleform.Copy == 0) {
+      newErrors.Copy = "Copy count must be atleast 1"
+    }
+    if (handleform.Copy.length === 0) {
+      newErrors.Copy = "Copy*"
+    }
+    if (!/^\d{3}-\d{1}-\d{2}-\d{6}-\d{1}$/.test(handleform.ISBN)) {
+      newErrors.ISBN = "Enter valid ISBN"
+    }
+    if (handleform.ISBN.length === 0) {
+      newErrors.ISBN = "ISBN*"
+    }
+    if (!/^\d{4}$/.test(handleform.Year)) {
+      newErrors.Year = "Enter four digit year"
+    }
+    if (currentYear < yearnum) {
+      newErrors.Year = `Year cannot be greater than ${currentYear}`
+    }
+    if (handleform.Year.length === 0) {
+      newErrors.Year = "Year*"
+    }
+
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const bookId = parsed._id
-      const token = localStorage.getItem('Admintoken')
-      const headers = {
-        "authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-      const response = await fetch(`http://localhost:5000/api/editBook/${bookId}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(handleform)
-      })
-      if (response.ok) {
-        router.push("/admin/inventory")
-      }
+    if (validation()) {
 
-    } catch (error) {
-      console.log(error);
+      try {
+        const bookId = parsed._id
+        const token = localStorage.getItem('Admintoken')
+        const headers = {
+          "authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+        const response = await fetch(`http://localhost:5000/api/editBook/${bookId}`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(handleform)
+        })
+        if (response.ok) {
+          router.push("/admin/inventory")
+        }
 
+      } catch (error) {
+        console.log(error);
+
+      }
     }
   };
 
@@ -96,7 +181,7 @@ export default function updateBookForm() {
       {/* Required note */}
       <div className="px-6 mb-4">
         <p className="text-[11px] text-[#9a8e7f]">
-          <span className="text-red-500">*</span> Fields marked with an asterisk are required.
+          <span className="text-red-700">*</span> Fields marked with an asterisk are required.
         </p>
       </div>
 
@@ -123,7 +208,7 @@ export default function updateBookForm() {
           <div className="px-5 py-5 space-y-4">
             <div>
               <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                Book Title <span className="text-red-500">*</span>
+                Book Title <span className="text-red-700">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -140,11 +225,14 @@ export default function updateBookForm() {
                   className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                 />
               </div>
+              {errors.Title &&
+                <p className="text-sm pl-1 text-red-700">{errors.Title}</p>
+              }
             </div>
 
             <div>
               <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                Author <span className="text-red-500">*</span>
+                Author <span className="text-red-700">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -160,14 +248,18 @@ export default function updateBookForm() {
                   placeholder="e.g. Umberto Eco"
                   className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                 />
+
               </div>
+              {errors.Author &&
+                <p className="text-sm pl-1 text-red-700">{errors.Author}</p>
+              }
               <p className="mt-1.5 text-[11px] text-[#9a8e7f]">First name Last name format preferred</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  ISBN <span className="text-red-500">*</span>
+                  ISBN <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -177,20 +269,24 @@ export default function updateBookForm() {
                   </div>
                   <input
                     type="text"
-                    max={13}
+
                     name="ISBN"
                     value={handleform.ISBN}
                     onChange={formData}
                     placeholder="978-0-15-144547-8"
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                  {errors.ISBN &&
+                    <p className="text-sm pl-1 text-red-700">{errors.ISBN}</p>
+                  }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">13 digit format</p>
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Genre <span className="text-red-500">*</span>
+                  Genre <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -205,7 +301,11 @@ export default function updateBookForm() {
                     placeholder="e.g. Fiction, History"
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                   {errors.Genre &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Genre}</p>
+                  }               
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">e.g. Fiction, Science, History</p>
               </div>
             </div>
@@ -233,7 +333,7 @@ export default function updateBookForm() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Publisher <span className="text-red-500">*</span>
+                  Publisher <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -249,12 +349,16 @@ export default function updateBookForm() {
                     placeholder="e.g. Harcourt"
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                   {errors.Publisher &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Publisher}</p>
+                  }               
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Year Published <span className="text-red-500">*</span>
+                  Year Published <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -269,16 +373,20 @@ export default function updateBookForm() {
                     type="number"
                     placeholder="e.g. 2024"
                     min={1000}
-                    max={new Date().getFullYear()}
+
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                   {errors.Year &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Year}</p>
+                  }               
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Between 1000–2026</p>
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Language <span className="text-red-500">*</span>
+                  Language <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -293,7 +401,11 @@ export default function updateBookForm() {
                     placeholder="e.g. English, Urdu"
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                   {errors.Language &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Language}</p>
+                  }               
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Primary language of the book</p>
               </div>
             </div>
@@ -321,7 +433,7 @@ export default function updateBookForm() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Number of Copies <span className="text-red-500">*</span>
+                  Number of Copies <span className="text-red-700">*</span>
                 </label>
                 <div className="relative flex items-center">
                   <div className="absolute left-3 flex items-center pointer-events-none">
@@ -334,25 +446,31 @@ export default function updateBookForm() {
                     name="Copy"
                     value={handleform.Copy}
                     onChange={formData}
-                    min={1}
+
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
+
                 </div>
+                {errors.Copy &&
+                  <p className="text-sm pl-1 text-red-700">{errors.Copy}</p>
+                }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Total physical copies in stock</p>
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-                  Pages <span className="text-red-500">*</span>
+                  Pages <span className="text-red-700">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="number"
                     name="Pages"
                     value={handleform.Pages}
-                    min={10}
                     onChange={formData}
                     className="w-full px-3 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer" />
+                  {errors.Pages &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Pages}</p>
+                  }
                 </div>
               </div>
             </div>
@@ -377,12 +495,16 @@ export default function updateBookForm() {
           </div>
 
           <div className="px-5 py-5">
+
             <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
-              Synopsis <span className="text-red-500">*</span>
+              Synopsis <span className="text-red-700">*</span>
             </label>
+            {errors.Description &&
+              <p className="text-sm pl-1 text-red-700">{errors.Description}</p>
+            }
             <textarea
               rows={5}
-              maxLength={1000}
+
               name="Description"
               value={handleform.Description}
               onChange={formData}
@@ -392,6 +514,7 @@ export default function updateBookForm() {
             <div className="flex justify-end mt-1">
               <span className="text-[11px] text-[#9a8e7f]">{handleform.Description.length}/1000</span>
             </div>
+
           </div>
         </section>
 

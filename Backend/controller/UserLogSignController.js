@@ -3,20 +3,20 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const saltRounds = 10;
 
-const registerUsers =  async (req, res) => {
+const registerUsers = async (req, res) => {
     const { id, name, email, phone, password } = req.body
 
     try {
         const existEmail = await signUp.findOne({ email: email })
         if (existEmail) {
-            res.status(404).json({
+            res.status(400).json({
                 message: "email is already registered"
             })
         } else {
             const salt = await bcrypt.genSalt(saltRounds)
 
             const hash = await bcrypt.hash(password, salt)
-           
+
             const gmailInfo = new signUp({
                 id: Date.now(),
                 name: name,
@@ -26,11 +26,23 @@ const registerUsers =  async (req, res) => {
                 memberSince: new Date()
             })
             await gmailInfo.save()
+            const refreshToken = jwt.sign(
+                { id: gmailInfo._id, email: gmailInfo.email, role: "user" },
+                process.env.JWT_REFRESH_SECRET_KEY,
+                { expiresIn: "2d" }
+            )
+
             const accessToken = jwt.sign(
                 { id: gmailInfo._id, email: gmailInfo.email, role: "user" },
                 process.env.JWT_SECRET_KEY,
                 { expiresIn: "2h" }
             )
+            res.cookie("refreshToken",refreshToken,{
+                httpOnly:true,
+                secure: true,
+                sameSite: "Strict",
+                maxAge: 2 * 24 * 60 * 60 * 1000
+            })
             res.status(201).json({
                 message: "user signed up",
                 accessToken: accessToken
@@ -69,13 +81,13 @@ const loginUser = async (req, res) => {
                 })
             } else {
                 res.status(401).json({
-                    message: "email or password is incorrect"
+                    message: "Invalid email or password"
                 })
             }
 
         } else {
             res.status(404).json({
-                message: "Email is not registered"
+                message: "Email is not registered. Kindly sign up"
             })
         }
 
@@ -100,9 +112,9 @@ const profileInfo = async (req, res) => {
     }
 
 }
-const membersData =  async (req, res) => {
+const membersData = async (req, res) => {
     try {
-        const data = await signUp.find({},{password:0})
+        const data = await signUp.find({}, { password: 0 })
         res.status(200).json({
             message: "Student data found",
             data: data
@@ -115,7 +127,7 @@ const membersData =  async (req, res) => {
         })
     }
 }
-const membersCount =  async (req, res) => {
+const membersCount = async (req, res) => {
     try {
         const data = await signUp.countDocuments()
         res.status(200).json({
@@ -133,4 +145,4 @@ const membersCount =  async (req, res) => {
 
 
 
-module.exports = {registerUsers,loginUser,profileInfo,membersData,membersCount}
+module.exports = { registerUsers, loginUser, profileInfo, membersData, membersCount }

@@ -1,12 +1,15 @@
 "use client"
 import Image from "next/image";
 import admin from "../../../public/images/admin.png"
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 
 
 // ================= LOGIN PAGE =================
 export default function AdminLoginPage() {
+   const [alert, setAlert] = useState(false)
   const [errors, setErrors] = useState({})
   const [handleform, setHandleForm] = useState({ email: "", password: "" })
 
@@ -19,10 +22,10 @@ export default function AdminLoginPage() {
   }
   const validation = () => {
     let newErrors = {}
-    if (handleform.email.length === 0) {
+    if (!handleform.email.trim()) {
       newErrors.email = "Enter your email address"
     }
-    if (handleform.password.length === 0) {
+    if (!handleform.password.trim()) {
       newErrors.password = "Enter your password"
     }
     setErrors(newErrors)
@@ -34,6 +37,7 @@ export default function AdminLoginPage() {
       try {
         const response = await fetch("http://localhost:5000/api/adminVerification", {
           method: "POST",
+           credentials:"include",
           headers: {
             "Content-Type": "application/json"
           },
@@ -41,12 +45,14 @@ export default function AdminLoginPage() {
 
 
         })
-
+        const data = await response.json()
         if (response.ok) {
-          const data = await response.json()
-          console.log(data);
+
+
           localStorage.setItem("Admintoken", data.accessToken)
           window.location.href = "/admin"
+        } else {
+          setAlert(`${data.message}`)
         }
 
 
@@ -57,6 +63,12 @@ export default function AdminLoginPage() {
     }
 
   }
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fcf5e1] px-4 py-6" id="LoginPage">
       <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 bg-[#fcfdea] rounded-2xl shadow-lg overflow-hidden">
@@ -130,6 +142,9 @@ export default function AdminLoginPage() {
 
           </form>
         </div>
+                  {alert && <Stack spacing={2} className="fixed top-5 right-16 w-100 ">
+            <Alert sx={{ backgroundColor: "#fdfdef" }} severity="error">{alert}</Alert>
+          </Stack>}
       </div>
     </div>
   );

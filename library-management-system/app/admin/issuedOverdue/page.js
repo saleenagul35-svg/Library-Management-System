@@ -217,7 +217,7 @@ export default function IssuedBooks() {
         const data = await response.json();
         setRecords(data.data);
         console.log(data.data);
-        
+
       }
     } catch (error) {
       console.log(error);

@@ -25,13 +25,13 @@ const adminVerification = async (req, res) => {
                 })
             } else {
                 res.status(401).json({
-                    message: "incorrect email or password "
+                    message: "Invalid email or password "
                 })
 
             }
         } else {
             res.status(401).json({
-                message: "incorrect email or password "
+                message: "Invalid email or password "
             })
 
 

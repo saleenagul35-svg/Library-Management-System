@@ -10,7 +10,10 @@ const userRoute = require("./routes/userRoute")
 const requestRoute = require("./routes/requestRoute")
 const BorrowDataRequest = require("./routes/BorrowDataRoute")
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin:"http://localhost:3000",
+    credentials:true
+}))
 
 connectDB();
 app.use("/api",bookRoute)
