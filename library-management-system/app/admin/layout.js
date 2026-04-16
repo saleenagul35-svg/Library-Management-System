@@ -16,7 +16,12 @@ import {
   LogOut,
   Menu,
   X,
-  TrendingUp,
+  BookCheck,
+  Activity,
+  BookUp,
+  BookDown,
+  CalendarX,
+  OctagonX
 } from 'lucide-react';
 
 // ─── Navigation config ────────────────────────────────────────────────────────
@@ -43,46 +48,47 @@ const NAV_ITEMS = [
     badge: null,
   },
   {
-    href: '/admin/UserActivity',
     label: 'User Activity',
-    icon: ScrollText,
+    icon: Activity,
     exact: false,
     badge: null,
-  },
-  {
-    href: '/admin/issuedOverdue',
-    label: 'Issued Books',
-    icon: ScrollText,
-    exact: false,
-    badge: null,
-  },
-    {
-    href: '/admin/approvedBooks',
-    label: 'Approved Books',
-    icon: ScrollText,
-    exact: false,
-    badge: null,
-  },
+    children: [
       {
-    href: '/admin/ExpiredApprovals',
-    label: 'Expired Approvals',
-    icon: ScrollText,
-    exact: false,
-    badge: null,
-  },
-        {
-    href: '/admin/rejectedRequests',
-    label: 'Rejected Requests',
-    icon: ScrollText,
-    exact: false,
-    badge: null,
-  },
-          {
-    href: '/admin/returnedBooks',
-    label: 'Returned Books',
-    icon: ScrollText,
-    exact: false,
-    badge: null,
+        href: '/admin/issuedOverdue',
+        label: 'Issued Books',
+        icon: BookUp,
+        exact: false,
+        badge: null,
+      },
+      {
+        href: '/admin/approvedBooks',
+        label: 'Approved Books',
+        icon: BookCheck,
+        exact: false,
+        badge: null,
+      },
+      {
+        href: '/admin/ExpiredApprovals',
+        label: 'Expired Approvals',
+        icon: CalendarX,
+        exact: false,
+        badge: null,
+      },
+      {
+        href: '/admin/rejectedRequests',
+        label: 'Rejected Requests',
+        icon: OctagonX,
+        exact: false,
+        badge: null,
+      },
+      {
+        href: '/admin/returnedBooks',
+        label: 'Returned Books',
+        icon: BookDown,
+        exact: false,
+        badge: null,
+      },
+    ]
   },
   // '/admin/BorrowedBooks': 'Books Borrowed',
 ];
@@ -112,13 +118,58 @@ function SidebarBrand() {
 }
 
 /** Single nav link with active state */
-function NavItem({ item, onClick }) {
+function NavItem({ item, onClick,dropdown ,setDropdown}) {
   const pathname = usePathname();
   const isActive = item.exact
     ? pathname === item.href
     : pathname.startsWith(item.href);
   const Icon = item.icon;
+  if (item.children) {
+    return (
+      <div>
+        {/* Main button — Link nahi, button hoga */}
+        <button
+          onClick={() => setDropdown(!dropdown)}  // 👈 toggle
+          className={`
+            group relative flex items-center gap-3 rounded-xl px-4 py-3 mx-3 w-[calc(100%-24px)]
+            text-sm font-medium transition-all duration-200
+            ${dropdown
+              ? 'bg-white/[0.12] text-white shadow-sm'
+              : 'text-white/50 hover:bg-white/[0.07] hover:text-white/90'
+            }
+          `}
+        >
+          <span className={`
+            flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0
+            transition-all duration-200
+            ${dropdown
+              ? 'bg-primary/30 text-primary-200'
+              : 'bg-white/[0.06] text-white/40 group-hover:bg-white/[0.10] group-hover:text-white/70'
+            }
+          `}>
+            <Icon size={16} strokeWidth={dropdown ? 2 : 1.75} />
+          </span>
 
+          <span className="flex-1 text-left">{item.label}</span>
+
+          {/* Arrow — rotate when open */}
+          <ChevronRight
+            size={13}
+            className={`text-white/30 transition-transform duration-200 ${dropdown ? 'rotate-90' : ''}`}
+          />
+        </button>
+
+        {/* Children — show when dropdown true */}
+        {dropdown && (
+          <div className="mt-0.5 ml-4 space-y-0.5">
+            {item.children.map((child) => (
+              <NavItem key={child.href} item={child} onClick={onClick} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <Link
       href={item.href}
@@ -192,7 +243,7 @@ function SidebarUserCard() {
 }
 
 /** The full sidebar — used in both desktop (fixed) and mobile (drawer) */
-function Sidebar({ onClose }) {
+function Sidebar({ onClose, dropdown, setDropdown}) {
   return (
     <aside
       className="flex h-full w-64 flex-col"
@@ -245,7 +296,7 @@ function Sidebar({ onClose }) {
           Navigation
         </p>
         {NAV_ITEMS.map((item) => (
-          <NavItem key={item.href} item={item} onClick={onClose} />
+            <NavItem key={item.href} item={item} onClick={onClose} setDropdown={setDropdown} dropdown={dropdown} />
         ))}
 
         {/* Divider */}
@@ -324,7 +375,7 @@ function TopBar({ onMenuClick, pageTitle, breadcrumb, requestCount }) {
 // ─── Layout ───────────────────────────────────────────────────────────────────
 export default function AdminLayout({ children }) {
   const [loader, setLoader] = useState(true)
-
+  const [dropdown, setDropdown] = useState(false)
 
   const [requestCount, setRequestCount] = useState(null)
   console.log(requestCount);
@@ -386,7 +437,7 @@ export default function AdminLayout({ children }) {
       {/* ── Desktop sidebar (always visible) ── */}
       <div className="hidden lg:flex lg:flex-shrink-0 relative" >
         <div className="w-64 h-screen">
-          <Sidebar requestCount={requestCount} />
+          <Sidebar requestCount={requestCount} dropdown={dropdown} setDropdown={setDropdown}/>
         </div>
       </div>
 
@@ -406,7 +457,7 @@ export default function AdminLayout({ children }) {
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <Sidebar onClose={() => setMobileOpen(false)} />
+        <Sidebar onClose={() => setMobileOpen(false)}  dropdown={dropdown} setDropdown={setDropdown}/>
       </div>
 
       {/* ── Main content column ── */}

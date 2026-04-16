@@ -5,19 +5,77 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import {
-    BookOpen,
+    FileX,
     Calendar,
-    RotateCcw,
+
     Search,
-    Filter,
-    ChevronDown,
+    AlignLeft,
     CheckCircle2,
-    Loader2,
+    MessageSquareX,
     BookMarked,
-    Hash,
+    X
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+function BookDetailsModal({ record, onClose, setSelectedRecord }) {
+    if (!record) return null;
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(6px)' }}
+            onClick={onClose}
+        >
+            <div className="relative w-full max-w-xl rounded-2xl bg-[#fffff3] shadow-2xl animate-fade-up overflow-hidden max-h-[90vh] flex flex-col">
+
+                {/* top accent strip */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-primary to-primary-600 flex-shrink-0" />
+
+                {/* close button */}
+                <button
+                    //   onClick={onClose}
+                    className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-primary/30 hover:bg-primary/8 hover:text-primary transition-all z-10">
+                    <X size={15} />
+                </button>
+
+                {/* Scrollable body */}
+                <div className="overflow-y-auto flex-1 px-6 pb-6 pt-5">
+
+                    {/* Header */}
+                    <div className="mb-5 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary-600 flex-shrink-0">
+                            <MessageSquareX size={18} strokeWidth={1.75} />
+                        </div>
+                        <div>
+                            <h2 className="font-display text-lg font-bold text-primary-950">Rejection Reason</h2>
+                        </div>
+                    </div>
+                    {/* Synopsis Section */}
+                    {record.rejectionReason && (
+                        <div className="mb-4 rounded-xl border border-primary/10 bg-brand-bg/60 p-4">
+                            <div className="flex items-center gap-2 mb-2.5">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary/60">
+                                    <AlignLeft size={12} strokeWidth={2} />
+                                </div>
+                                <p className="text-[11px] uppercase tracking-[0.07em] font-semibold text-primary-800/50">Synopsis</p>
+                            </div>
+                            <p className="text-sm h-auto  wrap-break-word text-primary-800/70 leading-relaxed">{record.rejectionReason}</p>
+                        </div>
+                    )}
+
+                    {/* Footer action */}
+                    <div className="flex justify-end pt-1">
+                        <button
+                            onClick={onClose}
+                            className="rounded-xl border border-primary/15 bg-[#fffff3] px-5 py-2 text-sm font-medium text-primary/70 hover:border-primary/30 hover:text-primary transition-all">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function formatDate(dateStr) {
     if (!dateStr) return '—';
     const date = new Date(dateStr);
@@ -29,7 +87,7 @@ function formatDate(dateStr) {
 
 
 // ─── Book Card (Mobile) ───────────────────────────────────────────────────────
-function BookCard({ record }) {
+function BookCard({ record, setSelectedRecord }) {
     return (
         <div className="rounded-2xl border p-4 transition-all duration-200 bg-card-bg border-primary/15">
             {/* Book title row */}
@@ -83,7 +141,7 @@ function BookCard({ record }) {
 }
 
 // ─── Table Row (Desktop) ──────────────────────────────────────────────────────
-function TableRow({ record, index }) {
+function TableRow({ record, index, setSelectedRecord }) {
     return (
         <tr
             className="border-b border-primary/[0.08] transition-colors duration-150 group hover:bg-primary/[0.02]"
@@ -144,14 +202,12 @@ function TableRow({ record, index }) {
 
             {/* Status */}
             <td className="px-5 py-4 max-w-[200px]"> {/* Max width dena zaroori hai */}
-                <div className="group relative">
-                    <span className="line-clamp-2 text-[11px] font-semibold text-primary-800/30">
+                <div className="line-clamp-1 cursor-pointer" onClick={() => setSelectedRecord(record)}>
+                    <span className=" text-[11px]  inline relative group/rejectionReason font-semibold text-primary-800/70" >
                         {record.rejectionReason}
+                        <span className="absolute left-0 -bottom-0.5 h-[1.5px] w-0 bg-primary group-hover/rejectionReason:w-full transition-all duration-300 ease-out rounded-full" />
                     </span>
-                    {/* Hover karne par poora text dikhane ke liye tooltip style ya click par modal */}
-                    <div className="hidden group-hover:block absolute z-10 p-2 bg-white border rounded shadow-lg text-[10px] w-64">
-                        {record.rejectionReason}
-                    </div>
+
                 </div>
             </td>
         </tr>
@@ -160,6 +216,7 @@ function TableRow({ record, index }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function RejectedRequests() {
+    const [selectedRecord, setSelectedRecord] = useState(null)
     const [records, setRecords] = useState([]);
     const [search, setSearch] = useState('');
 
@@ -222,13 +279,17 @@ export default function RejectedRequests() {
 
     return (
         <div className="p-4 sm:p-6 space-y-6 min-h-full">
-
+            <BookDetailsModal
+                record={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+                onClose={() => setSelectedRecord(null)}
+            />
             {/* ── Header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3 mb-1">
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                            <BookOpen size={18} className="text-primary" strokeWidth={1.75} />
+                            <FileX size={18} className="text-primary" strokeWidth={1.75} />
                         </div>
                         <h1 className="text-xl font-bold text-primary-950">
                             Rejected Requests
@@ -269,7 +330,7 @@ export default function RejectedRequests() {
             {filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5">
-                        <BookOpen size={28} className="text-primary-800/40" strokeWidth={1.5} />
+                        <FileX size={28} className="text-primary-800/40" strokeWidth={1.5} />
                     </div>
                     <div className="text-center">
                         <p className="text-sm font-medium text-primary-800/60">
@@ -325,7 +386,7 @@ export default function RejectedRequests() {
                                 <TableRow
                                     key={record._id}
                                     record={record}
-
+                                    setSelectedRecord={setSelectedRecord}
                                     index={i}
                                 />
                             ))}
