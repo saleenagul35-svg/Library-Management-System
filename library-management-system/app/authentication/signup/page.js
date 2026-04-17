@@ -6,7 +6,7 @@ const styles = `        @import url('https://fonts.googleapis.com/css2?family=Co
 export default function SignupPage() {
   const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
-     name: "", email: "", phone: "", password: "", confirm: "",
+    name: "", email: "", phone: "", password: "", confirm: "",
   });
   const [alert, setAlert] = useState(false)
   const [focused, setFocused] = useState({
@@ -48,7 +48,7 @@ export default function SignupPage() {
 
         const response = await fetch("http://localhost:5000/api/signUp", {
           method: "POST",
-           credentials:"include",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
@@ -182,7 +182,7 @@ export default function SignupPage() {
               autoComplete="new-password"
               style={inputStyle("password")}
             />
-                        {errors.password &&
+            {errors.password &&
               <p className="text-sm text-red-700">{errors.password}</p>
             }
           </div>
@@ -201,7 +201,7 @@ export default function SignupPage() {
               autoComplete="new-password"
               style={inputStyle("confirm")}
             />
-                        {errors.confirmation &&
+            {errors.confirmation &&
               <p className="text-sm text-red-700">{errors.confirmation}</p>
             }
           </div>

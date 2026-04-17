@@ -60,6 +60,25 @@ const UserpendingRequestData = async (req, res) => {
     }
 
 }
+const UserData = async (req, res) => {
+    const id = req.ActiveID
+    try {
+        const data = await RequestsCollection.find({ userId: id, status: {$in:["Borrowed","Overdued","Returned"]} }).populate("bookId", "Title Author Pages Genre")
+
+        res.status(200).json({
+            message: "data fetched successfully",
+            data: data
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+
+}
 const requestCount = async (req, res) => {
     try {
         const pendingRequests = await RequestsCollection.find({ status: "Pending" })
@@ -218,4 +237,4 @@ const RecentActvity = async (req, res) => {
     }
 
 }
-module.exports = { adminNotification,BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData,rejectedRequetsData ,expiredApprovalsData,returnedBooks,RecentActvity}
+module.exports = {UserData, adminNotification,BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData,rejectedRequetsData ,expiredApprovalsData,returnedBooks,RecentActvity}

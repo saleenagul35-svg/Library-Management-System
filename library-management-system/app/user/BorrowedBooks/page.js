@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
 // ─── SAMPLE DATA (replace with real borrowed books state) ──────────────────────
 const SAMPLE_BORROWED = [
-  { _id: "1", Title: "Atomic Habits", Author: "James Clear", Genre: "Productivity", Rating: 4.8, Pages: 320, color: "#6b7f5e", borrowedDate: "2025-03-10", dueDate: "2025-03-24", status: "overdue" },
+  { _id: "1", Title: "Atomic Habits", Author: "James Clear", Genre: "Productivity", Rating: 4.8, Pages: 320, color: "#6b7f5e", borrowedDate: "2025-03-10", dueDate: "2025-03-24", status: "Overdued" },
   { _id: "2", Title: "The Psychology of Money", Author: "Morgan Housel", Genre: "Psychology", Rating: 4.7, Pages: 256, color: "#7a6f9b", borrowedDate: "2025-03-15", dueDate: "2025-03-29", status: "due-soon" },
-  { _id: "3", Title: "Sapiens", Author: "Yuval Noah Harari", Genre: "History", Rating: 4.9, Pages: 443, color: "#8b5e3c", borrowedDate: "2025-03-18", dueDate: "2025-04-01", status: "active" },
-  { _id: "4", Title: "1984", Author: "George Orwell", Genre: "Fiction", Rating: 4.7, Pages: 328, color: "#4a6b7a", borrowedDate: "2025-03-01", dueDate: "2025-03-15", status: "returned" },
-  { _id: "5", Title: "Man's Search for Meaning", Author: "Viktor Frankl", Genre: "Philosophy", Rating: 4.9, Pages: 200, color: "#7a5c6b", borrowedDate: "2025-03-20", dueDate: "2025-04-03", status: "active" },
+  { _id: "3", Title: "Sapiens", Author: "Yuval Noah Harari", Genre: "History", Rating: 4.9, Pages: 443, color: "#8b5e3c", borrowedDate: "2025-03-18", dueDate: "2025-04-01", status: "Borrowed" },
+  { _id: "4", Title: "1984", Author: "George Orwell", Genre: "Fiction", Rating: 4.7, Pages: 328, color: "#4a6b7a", borrowedDate: "2025-03-01", dueDate: "2025-03-15", status: "Returned" },
+  { _id: "5", Title: "Man's Search for Meaning", Author: "Viktor Frankl", Genre: "Philosophy", Rating: 4.9, Pages: 200, color: "#7a5c6b", borrowedDate: "2025-03-20", dueDate: "2025-04-03", status: "Borrowed" },
 ];
 
 const STATUS_CONFIG = {
-  active:    { label: "Active",     bg: "#e8f0e0", color: "#4a6b3a", dot: "#6b9e50" },
-  "due-soon":{ label: "Due Soon",   bg: "#fef3e2", color: "#8b5e1a", dot: "#e6a832" },
-  overdue:   { label: "Overdue",    bg: "#fde8e8", color: "#8b2a2a", dot: "#d94f4f" },
-  returned:  { label: "Returned",   bg: "#ece8f0", color: "#5a4a6b", dot: "#9b80c8" },
+  Borrowed: { label: "Active", bg: "#e8f0e0", color: "#4a6b3a", dot: "#6b9e50" },
+  "due-soon": { label: "Due Soon", bg: "#fef3e2", color: "#8b5e1a", dot: "#e6a832" },
+  Overdued: { label: "Overdue", bg: "#fde8e8", color: "#8b2a2a", dot: "#d94f4f" },
+  Returned: { label: "Returned", bg: "#ece8f0", color: "#5a4a6b", dot: "#9b80c8" },
 };
 
 function getDaysLeft(dueDate) {
@@ -30,12 +31,17 @@ function formatDate(dateStr) {
 }
 
 // ─── Book Row Card ────────────────────────────────────────────────────────────
-function BorrowedBookRow({ book, onReturn, onRenew }) {
+function BorrowedBookRow({ book,index }) {
+  const colors = ["#515427", "#8b5e1a", "#7a6f4e","#864c25" ]
   const [hovered, setHovered] = useState(false);
   const status = STATUS_CONFIG[book.status];
   const daysLeft = getDaysLeft(book.dueDate);
-  const initials = book.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-
+  const initials = book.bookId.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  const colordecision = () => {
+  
+    let selectedColor = colors[index % colors.length]
+    return selectedColor
+  }
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -56,7 +62,7 @@ function BorrowedBookRow({ book, onReturn, onRenew }) {
     >
       {/* Cover thumbnail */}
       <div style={{
-        width: "64px", height: "80px", background: book.color,
+        width: "64px", height: "80px", background: `${colordecision()}`,
         borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,.18)",
         position: "relative", overflow: "hidden",
@@ -68,24 +74,24 @@ function BorrowedBookRow({ book, onReturn, onRenew }) {
       {/* Book info */}
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
-          <h3 style={{ color: "#515427", fontSize: "15px", fontWeight: "700", fontFamily: "Georgia, serif", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{book.Title}</h3>
+          <h3 style={{ color: "#515427", fontSize: "15px", fontWeight: "700", fontFamily: "Georgia, serif", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{book.bookId.Title}</h3>
           <span style={{ background: status.bg, color: status.color, fontSize: "10px", fontWeight: "600", padding: "2px 9px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
             <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: status.dot, display: "inline-block" }} />
             {status.label}
           </span>
         </div>
-        <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 8px", fontStyle: "italic" }}>by {book.Author} · {book.Genre} · {book.Pages} pages</p>
+        <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 8px", fontStyle: "italic" }}>by {book.bookId.Author} · {book.bookId.Genre} · {book.bookId.Pages} pages</p>
         <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
           <div style={{ fontSize: "11px", color: "#b0a080" }}>
-            <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Borrowed:</span> {formatDate(book.borrowedDate)}
+            <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Borrowed:</span> {formatDate(book.issueDate)}
           </div>
           <div style={{ fontSize: "11px" }}>
             <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Due:</span>{" "}
-            <span style={{ color: book.status === "overdue" ? "#d94f4f" : book.status === "due-soon" ? "#e6a832" : "#7a6f4e", fontWeight: book.status === "overdue" ? "600" : "400" }}>
+            <span style={{ color: book.status === "Overdued" ? "#d94f4f" : book.status === "due-soon" ? "#e6a832" : "#7a6f4e", fontWeight: book.status === "overdue" ? "600" : "400" }}>
               {formatDate(book.dueDate)}
-              {book.status !== "returned" && (
+              {book.status !== "Returned" && (
                 <span style={{ marginLeft: "6px", fontSize: "10px" }}>
-                  {book.status === "overdue" ? `(${Math.abs(daysLeft)}d overdue)` : `(${daysLeft}d left)`}
+                  {book.status === "Overdued" ? `(${Math.abs(daysLeft)}d Overdued)` : `(${daysLeft}d left)`}
                 </span>
               )}
             </span>
@@ -95,20 +101,9 @@ function BorrowedBookRow({ book, onReturn, onRenew }) {
 
       {/* Actions */}
       <div style={{ display: "flex", flexDirection: "column", gap: "7px", flexShrink: 0 }}>
-        {book.status !== "returned" ? (
-          <>
-            <button
-              onClick={() => onRenew(book)}
-              style={{ padding: "8px 18px", borderRadius: "8px", border: "1.5px solid rgba(200,185,154,.5)", background: "transparent", color: "#7a6f4e", cursor: "pointer", fontSize: "12px", fontWeight: "500", fontFamily: "inherit", transition: "all .18s", whiteSpace: "nowrap" }}
-            >↻ Renew</button>
-            <button
-              onClick={() => onReturn(book)}
-              style={{ padding: "8px 18px", borderRadius: "8px", border: "none", background: "#515427", color: "#fffff3", cursor: "pointer", fontSize: "12px", fontWeight: "600", fontFamily: "inherit", boxShadow: "0 3px 10px rgba(81,84,39,.25)", whiteSpace: "nowrap" }}
-            >✓ Return</button>
-          </>
-        ) : (
+        {book.status === "Returned" &&
           <span style={{ fontSize: "12px", color: "#9b8a6a", padding: "8px 18px", textAlign: "center" }}>Returned</span>
-        )}
+        }
       </div>
     </div>
   );
@@ -136,30 +131,65 @@ function ProgressRing({ value, max, color, label, sublabel }) {
 }
 
 // ─── Main BorrowedBooksPage ────────────────────────────────────────────────────
-export default function BorrowedBooksPage({ borrowedBooks = SAMPLE_BORROWED, onReturn, onRenew }) {
+export default function BorrowedBooksPage() {
+  const [loader, setLoader] = useState(true)
+
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("dueDate");
-
+  const [userdata, setUserData] = useState([])
   const filters = ["All", "Active", "Due Soon", "Overdue", "Returned"];
-  const filterMap = { "All": null, "Active": "active", "Due Soon": "due-soon", "Overdue": "overdue", "Returned": "returned" };
+  const filterMap = { "All": null, "Active": "Borrowed", "Due Soon": "due-soon", "Overdue": "Overdued", "Returned": "Returned" };
+  const fetchingData = async () => {
+    try {
+      const token = localStorage.getItem('UserLoginToken');
+      const response = await fetch("http://localhost:5000/api/UserData", {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserData(data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false)
+    }
+  };
 
-  const filtered = borrowedBooks
+
+
+  const filtered = userdata
     .filter(b => !filterMap[filter] || b.status === filterMap[filter])
     .sort((a, b) => {
       if (sortBy === "dueDate") return new Date(a.dueDate) - new Date(b.dueDate);
-      if (sortBy === "title") return a.Title.localeCompare(b.Title);
-      if (sortBy === "borrowedDate") return new Date(b.borrowedDate) - new Date(a.borrowedDate);
+      if (sortBy === "title") return a.bookId.Title.localeCompare(b.bookId.Title);
+      if (sortBy === "issueDate") return new Date(b.issueDate) - new Date(a.issueDate);
       return 0;
     });
 
   const stats = {
-    active: borrowedBooks.filter(b => b.status === "active").length,
-    overdue: borrowedBooks.filter(b => b.status === "overdue").length,
-    dueSoon: borrowedBooks.filter(b => b.status === "due-soon").length,
-    returned: borrowedBooks.filter(b => b.status === "returned").length,
-    total: borrowedBooks.length,
+    active: userdata.filter(b => b.status === "Borrowed").length,
+    overdue: userdata.filter(b => b.status === "Overdued").length,
+    dueSoon: userdata.filter(b => b.status === "due-soon").length,
+    returned: userdata.filter(b => b.status === "Returned").length,
+    total: userdata.length,
   };
+  useEffect(() => {
+    fetchingData()
+  }, [])
+  if (loader) {
+    return (
+      <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
+        <CircularProgress sx={{ color: "#52512a" }} />
+
+      </Stack>
+    )
+  }
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px 72px", fontFamily: "'Inter', sans-serif" }}>
 
@@ -204,7 +234,7 @@ export default function BorrowedBooksPage({ borrowedBooks = SAMPLE_BORROWED, onR
           <h3 style={{ fontFamily: "Georgia, serif", fontSize: "16px", color: "#515427", margin: "0 0 4px" }}>Borrowing Quota</h3>
           <p style={{ fontSize: "12px", color: "#9b8a6a", margin: 0 }}>Premium members can borrow up to 5 books simultaneously</p>
         </div>
-        <ProgressRing value={stats.active + stats.dueSoon + stats.overdue} max={5} color="#864c25" label="Books Borrowed" sublabel="2 slots remaining" />
+        <ProgressRing value={stats.active + stats.dueSoon + stats.overdue} max={5} color="#864c25" label="Books Borrowed" />
       </div>
 
       {/* ── Filters & Sort ── */}
@@ -221,7 +251,7 @@ export default function BorrowedBooksPage({ borrowedBooks = SAMPLE_BORROWED, onR
             }}>{f}
               {f !== "All" && filterMap[f] && (
                 <span style={{ marginLeft: "5px", fontSize: "10px", opacity: .8 }}>
-                  ({borrowedBooks.filter(b => b.status === filterMap[f]).length})
+                  ({userdata.filter(b => b.status === filterMap[f]).length})
                 </span>
               )}
             </button>
@@ -235,7 +265,7 @@ export default function BorrowedBooksPage({ borrowedBooks = SAMPLE_BORROWED, onR
             cursor: "pointer", outline: "none",
           }}>
             <option value="dueDate">Due Date</option>
-            <option value="borrowedDate">Borrowed Date</option>
+            <option value="issueDate">Borrowed Date</option>
             <option value="title">Title A–Z</option>
           </select>
         </div>
@@ -250,12 +280,11 @@ export default function BorrowedBooksPage({ borrowedBooks = SAMPLE_BORROWED, onR
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {filtered.map((book) => (
+          {filtered.map((book,index) => (
             <BorrowedBookRow
               key={book._id}
               book={book}
-              onReturn={onReturn || ((b) => alert(`Return: ${b.Title}`))}
-              onRenew={onRenew || ((b) => alert(`Renew: ${b.Title}`))}
+              index={index}
             />
           ))}
         </div>

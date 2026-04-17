@@ -86,7 +86,7 @@ function DesktopRow({ r, index, isLast }) {
         <Avatar name={r.bookId.Title} index={index} />
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-[#2e2c1e] truncate">{r.bookId.Title}</p>
-        
+
         </div>
       </div>
       <div className="min-w-0 pr-4">
@@ -94,7 +94,7 @@ function DesktopRow({ r, index, isLast }) {
         <p className="text-[10.5px] text-[#b0a98f] mt-0.5 truncate">{r.bookId.Author}</p>
       </div>
       <div className="flex items-center">
-         <p className="text-[10.5px] text-[#b0a98f] mt-0.5 truncate">{r.bookId.ISBN}</p>
+        <p className="text-[10.5px] text-[#b0a98f] mt-0.5 truncate">{r.bookId.ISBN}</p>
       </div>
       <div>
         <p className="text-[12px] font-medium text-[#2e2c1e]">{formatDate(r.requestDate)}</p>
