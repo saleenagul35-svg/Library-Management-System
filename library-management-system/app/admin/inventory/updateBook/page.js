@@ -19,7 +19,6 @@ export default function updateBookForm() {
     }
   }
   const book = useSrchPrms.get("book")
-  console.log(book);
 
   const [errors, setErrors] = useState({})
   const [parsed, setParsed] = useState(null);
@@ -47,7 +46,7 @@ export default function updateBookForm() {
     if (!handleform.Author.trim()) {
       newErrors.Author = "Author*"
     }
-    if (!/^[A-Za-z\s]{3,}$/.test(handleform.Genre)) {
+    if (!/^[A-Za-z\s\-]{3,}$/.test(handleform.Genre)) {
       newErrors.Genre = "Enter a valid Genre"
     }
     if (!handleform.Genre.trim()) {
@@ -589,7 +588,7 @@ export default function updateBookForm() {
               <label
                 htmlFor="book-upload"
                 className="flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed border-[#d4c9b0] bg-[#fdfaea] hover:border-[#864c25] hover:bg-[#fffcf0] transition-all cursor-pointer overflow-hidden"
-              >{fileName ? fileName : handleform.ImageURL  }</label>
+              >{(fileName ? fileName : handleform.ImageURL) || `Choose File` }</label>
               {imageError &&
                 <p className="text-sm pl-1 text-red-700">{imageError}</p>
               }

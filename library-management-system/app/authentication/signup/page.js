@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-const styles = `        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+const styles = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
         * { box-sizing: border-box; margin: 0; padding: 0; }`
 export default function SignupPage() {
@@ -9,6 +9,7 @@ export default function SignupPage() {
     name: "", email: "", phone: "", password: "", confirm: "",
   });
   const [alert, setAlert] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [focused, setFocused] = useState({
     name: false, email: false, phone: false, password: false, confirm: false,
   });
@@ -43,6 +44,8 @@ export default function SignupPage() {
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validation()) return
+    setSubmitting(true)
     if (validation()) {
       try {
 
@@ -60,6 +63,8 @@ export default function SignupPage() {
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        setSubmitting(false)
       }
     }
 
@@ -209,6 +214,7 @@ export default function SignupPage() {
           {/* ── Submit Button ── */}
           <button
             onClick={handleSubmit}
+            disabled={submitting}
             style={{
               width: "100%", padding: "14px", marginTop: "6px",
               borderRadius: "12px", border: "none",
@@ -221,7 +227,7 @@ export default function SignupPage() {
             onMouseEnter={e => e.currentTarget.style.opacity = ".88"}
             onMouseLeave={e => e.currentTarget.style.opacity = "1"}
           >
-            Create My Account →
+            {submitting ? `Creating ` : ` Create My Account →`}
           </button>
 
           <p style={{

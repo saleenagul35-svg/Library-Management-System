@@ -20,26 +20,42 @@ import { useState, useEffect } from 'react';
 
 // ─── Data (replace with API calls in production) ──────────────────────────────
 export default function AdminDashboardPage() {
+  const getGreeting = () => {
+    const greeting = new Date().getHours()
+    if (greeting > 5 && greeting < 12) {
+      return "Good Morning, "
+    }
+    if (greeting >= 12 && greeting <= 14) {
+      return "Good noon, "
+    }
+    if (greeting >= 15 && greeting < 17) {
+      return "Good Afternoon, "
+    }
+    if (greeting >= 17 && greeting < 18) {
+      return "Good Evening, "
+    }
 
+      return "Night Owl, "
+  }
 
-const countingTime = (time) =>{
-const diff = new Date() - new Date(time);
+  const countingTime = (time) => {
+    const diff = new Date() - new Date(time);
 
-const seconds = Math.floor(diff/1000)
-const minutes = Math.floor(seconds/60) 
-const hours = Math.floor(minutes/60) 
-const days = Math.floor(hours/24) 
-const weeks = Math.floor(days/7) 
-const months = Math.floor(days/30) 
-const years = Math.floor(days/365)
-if(seconds<60) return `${seconds}s ago`
-if(minutes<60) return `${minutes}m ago`
-if(hours<24) return `${hours}h ago`
-if(days<7) return `${days}d ago`
-if(days<30) return `${weeks}w ago`
-if(days<365) return `${months}w ago`
- return `${years}y ago`
-}
+    const seconds = Math.floor(diff / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    const weeks = Math.floor(days / 7)
+    const months = Math.floor(days / 30)
+    const years = Math.floor(days / 365)
+    if (seconds < 60) return `${seconds}s ago`
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return `${hours}h ago`
+    if (days < 7) return `${days}d ago`
+    if (days < 30) return `${weeks}w ago`
+    if (days < 365) return `${months}w ago`
+    return `${years}y ago`
+  }
 
   //============================== APIs ===========================//
   const [loader, setLoader] = useState(true)
@@ -96,7 +112,7 @@ if(days<365) return `${months}w ago`
       if (data5) {
         let length = data5.data
         setTopBooks(length)
-     
+
 
 
 
@@ -329,7 +345,7 @@ if(days<365) return `${months}w ago`
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="font-display text-3xl font-bold text-primary-950 leading-tight">
-                Good morning, Admin
+                {getGreeting()} Admin
               </h1>
               <p className="mt-1 text-sm text-primary-800/50">{timeString}</p>
             </div>
@@ -362,12 +378,6 @@ if(days<365) return `${months}w ago`
                 <h2 className="font-display text-lg font-semibold text-primary-950">Recent Activity</h2>
                 <p className="text-xs text-primary-800/45 mt-0.5">Latest borrow & return events</p>
               </div>
-              <Link
-                href="/admin/UserActivity"
-                className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-700 transition-colors"
-              >
-                View All <ArrowRight size={13} />
-              </Link>
             </div>
             <div className="px-5 divide-y divide-primary/[0.04]">
               {topBooks.map((item, i) => (
@@ -400,7 +410,7 @@ if(days<365) return `${months}w ago`
             <QuickAction icon={Plus} label="Add New Book" href="/admin/inventory/new" color="bg-primary/10 text-primary" />
             <QuickAction icon={Users} label="Manage Users" href="/admin/logs" color="bg-secondary/10 text-secondary" />
             <QuickAction icon={BookCopy} label="View Borrowings" href="/admin/issuedOverdue" color="bg-amber-500/10 text-amber-700" />
-            <QuickAction icon={BarChart2} label="Analytics" href="/admin/analytics" color="bg-blue-500/10 text-blue-700" />
+            <QuickAction icon={BarChart2} label="Manage Inventory" href="/admin/inventory" color="bg-blue-500/10 text-blue-700" />
           </div>
         </div>
 

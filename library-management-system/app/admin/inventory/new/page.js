@@ -154,7 +154,6 @@ export default function AddNewBookForm() {
         })
 
         if (response.ok) {
-          console.log(handleform);
 
           window.location.href = "/admin/inventory"
         }

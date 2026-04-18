@@ -159,9 +159,7 @@ export default function returnedBooks() {
 
     // ── Fetch returned Books──
     const fetchingAPIs = async () => {
-        try {
-            console.log("hello");
-
+        try{
             const token = localStorage.getItem('Admintoken');
             const response = await fetch("http://localhost:5000/api/returnedBooks", {
                 method: "GET",
@@ -173,7 +171,6 @@ export default function returnedBooks() {
             if (response.ok) {
                 const data = await response.json();
                 setRecords(data.data);
-                console.log(data.data);
 
             }
         } catch (error) {

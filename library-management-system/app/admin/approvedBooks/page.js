@@ -193,8 +193,6 @@ export default function ApprovedBooks() {
   // ── Fetch approved books ──
   const fetchingAPIs = async () => {
     try {
-      console.log("hello");
-
       const token = localStorage.getItem('Admintoken');
       const response = await fetch("http://localhost:5000/api/approvedRequestsData", {
         method: "GET",
@@ -206,8 +204,6 @@ export default function ApprovedBooks() {
       if (response.ok) {
         const data = await response.json();
         setRecords(data.data);
-        console.log(data.data);
-
       }
     } catch (error) {
       console.log(error);

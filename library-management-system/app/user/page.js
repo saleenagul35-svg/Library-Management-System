@@ -4,13 +4,50 @@ import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import Image from "next/image";
+function BookCover({ book }) {
+  const initials = book.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  return (
+    <div className="w-full h-[250px] flex items-center justify-center relative" style={{ backgroundColor: "#c8b99a" }}>
+      {/* <div className=" relative w-[80px] h-[100px] bg-white/15 rounded-[4px] border-2 border-white/30 flex items-center justify-center"> */}
+        {/* <span className="text-[22px] text-white/90 font-serif font-bold">{initials}</span> */}
+        <Image src={book.ImageURL} fill alt={book.Title} />
+      {/* </div> */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+      <span className="absolute top-[10px] right-[10px] uppercase bg-[#515427] text-white text-[10px] font-semibold px-[9px] py-[3px] rounded-[20px]">
+        {book.Genre}
+      </span>
+    </div>
+  );
+}
+function BookCard({ book, onBorrowClick }) {
+  return (
+    <div className="bg-[#fffff3] rounded-[15px] overflow-hidden shadow-[0_4px_18px_rgba(81,84,39,.09),0_1px_4px_rgba(0,0,0,.04)] hover:shadow-[0_18px_52px_rgba(81,84,39,.16),0_4px_12px_rgba(0,0,0,.06)] border border-[#c8b99a]/22 flex flex-col hover:-translate-y-[5px] transition-all duration-300 ease-out group">
+      <BookCover book={book} />
+      <div className="p-[16px_18px_18px] flex-1 flex flex-col">
+        <h3 className="text-[#515427] text-[15px] font-bold mb-[4px] font-serif leading-tight">{book.Title}</h3>
+        <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic">{book.Author}</p>
+        <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic font-serif">Pages. {book.Pages}</p>
+        <p className="line-clamp-1 text-[#9b8a6a] text-[12px] mb-[9px] italic font-serif">{book.Description}</p>
+        <div className="mt-auto pt-[14px]">
+          <button
+            onClick={() => onBorrowClick(book)}
+            className="w-full p-[10px] rounded-[9px] border-none bg-[#864c25] text-[#fffff3] cursor-pointer text-[13px] font-semibold shadow-[0_4px_12px_rgba(134,76,37,.28)] transition-all duration-200 active:scale-95"
+          >
+            Request To Borrow
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function UserHomePage() {
   // ─── Data ─────────────────────────────────────────────────────────────────────
   const [loader, setLoader] = useState(true);
   const [books, setBooks] = useState([]);
-  let token = null;
+  console.log(books);
 
+  let token = null;
   const fetchingAPIs = async () => {
     try {
       if (localStorage.getItem("UserLoginToken")) {
@@ -24,7 +61,7 @@ export default function UserHomePage() {
       };
       const res1 = await fetch("http://localhost:5000/api/bookData", { method: "GET", headers });
       const data1 = await res1.json();
-      
+
       if (data1) {
         setBooks(data1.data);
       }
@@ -43,49 +80,16 @@ export default function UserHomePage() {
 
   // ─── Sub-components ────────────────────────────────────────────────────────────
 
-  function BookCover({ book }) {
-    const initials = book.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-    return (
-      <div className="w-full h-[215px] flex items-center justify-center relative" style={{ backgroundColor: book.color }}>
-        <div className="w-[80px] h-[100px] bg-white/15 rounded-[4px] border-2 border-white/30 flex items-center justify-center">
-          <span className="text-[22px] text-white/90 font-serif font-bold">{initials}</span>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
-        <span className="absolute top-[10px] right-[10px] uppercase bg-[#515427]/20 text-[#515427] text-[10px] font-semibold px-[9px] py-[3px] rounded-[20px]">
-          {book.Genre}
-        </span>
-      </div>
-    );
-  }
 
-  function BookCard({ book, onBorrowClick }) {
-    return (
-      <div className="bg-[#fffff3] rounded-[15px] overflow-hidden shadow-[0_4px_18px_rgba(81,84,39,.09),0_1px_4px_rgba(0,0,0,.04)] hover:shadow-[0_18px_52px_rgba(81,84,39,.16),0_4px_12px_rgba(0,0,0,.06)] border border-[#c8b99a]/22 flex flex-col hover:-translate-y-[5px] transition-all duration-300 ease-out group">
-        <BookCover book={book} />
-        <div className="p-[16px_18px_18px] flex-1 flex flex-col">
-          <h3 className="text-[#515427] text-[15px] font-bold mb-[4px] font-serif leading-tight">{book.Title}</h3>
-          <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic">{book.Author}</p>
-          <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic font-serif">Pages. {book.Pages}</p>
-          <div className="mt-auto pt-[14px]">
-            <button
-              onClick={() => onBorrowClick(book)}
-              className="w-full p-[10px] rounded-[9px] border-none bg-[#864c25] text-[#fffff3] cursor-pointer text-[13px] font-semibold shadow-[0_4px_12px_rgba(134,76,37,.28)] transition-all duration-200 active:scale-95"
-            >
-              Request To Borrow
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   function ConfirmModal({ book, onConfirm, onCancel }) {
     return (
-      <div 
+      <div
         onClick={onCancel}
         className="fixed inset-0 bg-[#121008]/55 backdrop-blur-[5px] flex items-center justify-center z-[999] p-5"
       >
-        <div 
+        <div
           onClick={(e) => e.stopPropagation()}
           className="bg-[#fffff3] rounded-[20px] p-[36px_40px] max-w-[400px] w-full shadow-[0_28px_80px_rgba(0,0,0,.24)] text-center font-serif"
         >
@@ -128,19 +132,19 @@ export default function UserHomePage() {
   const [toast, setToast] = useState(null);
 
   const filtered = books && books.length > 0 ? books.filter((b) => {
-    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) || 
-                        b.Author.toLowerCase().includes(search.toLowerCase()) || 
-                        b.Genre?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = b.Title.toLowerCase().includes(search.toLowerCase()) ||
+      b.Author.toLowerCase().includes(search.toLowerCase()) ||
+      b.Genre?.toLowerCase().includes(search.toLowerCase());
     const matchGenre = activeGenre === "All" || b.Genre?.toLowerCase().trim() === activeGenre.toLowerCase().trim();
     return matchSearch && matchGenre;
   }) : [];
 
   const handleConfirmBorrow = async (book) => {
     setModalBook(null);
-   
+
     try {
       const token = localStorage.getItem("UserLoginToken");
-    const response = await fetch("http://localhost:5000/api/borrowRequest", {
+      const response = await fetch("http://localhost:5000/api/borrowRequest", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,9 +152,9 @@ export default function UserHomePage() {
         },
         body: JSON.stringify({ bookId: `${book._id}` })
       });
-      const data =await response.json()
-         setToast(`${data.message}`);
-      
+      const data = await response.json()
+      setToast(`${data.message}`);
+
     } catch (error) {
       console.log(error);
     }
@@ -166,7 +170,7 @@ export default function UserHomePage() {
 
   return (
     <div className="min-h-screen bg-[#fffff3] font-sans antialiased text-[#515427]">
-      
+
       {/* ── HERO ────────────────────────────────────────── */}
       <div className="bg-gradient-to-br from-[#f5f4df] via-[#fffff3] to-[#fffff3] border-b border-[#c8b99a]/18">
         <div className="max-w-[1100px] mx-auto px-8 py-[60px] pb-[52px] text-center">
@@ -184,12 +188,12 @@ export default function UserHomePage() {
           <div className="max-w-[570px] mx-auto">
             <div className="flex items-center bg-white rounded-[14px] border-[1.5px] border-[#c8b99a]/45 shadow-[0_6px_28px_rgba(81,84,39,.09)] overflow-hidden">
               <svg className="ml-[18px] shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0a080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-              <input 
-                type="text" 
-                placeholder="Find your next masterpiece..." 
-                value={search} 
-                onChange={(e) => setSearch(e.target.value)} 
-                className="flex-1 px-[14px] py-4 border-none bg-transparent text-[15px] text-[#515427] placeholder-[#b0a080] focus:outline-none" 
+              <input
+                type="text"
+                placeholder="Find your next masterpiece..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 px-[14px] py-4 border-none bg-transparent text-[15px] text-[#515427] placeholder-[#b0a080] focus:outline-none"
               />
               <button className="m-[7px] px-[22px] py-[10px] bg-[#864c25] text-[#fffff3] rounded-[10px] text-[13px] font-bold shadow-[0_4px_12px_rgba(134,76,37,.28)] active:scale-95 transition-transform">
                 Search
@@ -218,14 +222,13 @@ export default function UserHomePage() {
           </div>
           <div className="flex gap-[7px] flex-wrap">
             {GENRES.map((g) => (
-              <button 
-                key={g} 
-                onClick={() => setActiveGenre(g)} 
-                className={`px-[15px] py-1.5 rounded-[20px] border-[1.5px] text-[12px] transition-all duration-200 ${
-                  activeGenre === g 
-                  ? "bg-[#515427] text-[#fffff3] border-[#515427] font-semibold" 
-                  : "bg-transparent text-[#7a6f4e] border-[#c8b99a]/45 hover:bg-[#515427] hover:text-[#fffff3] hover:border-[#515427]"
-                }`}
+              <button
+                key={g}
+                onClick={() => setActiveGenre(g)}
+                className={`px-[15px] py-1.5 rounded-[20px] border-[1.5px] text-[12px] transition-all duration-200 ${activeGenre === g
+                    ? "bg-[#515427] text-[#fffff3] border-[#515427] font-semibold"
+                    : "bg-transparent text-[#7a6f4e] border-[#c8b99a]/45 hover:bg-[#515427] hover:text-[#fffff3] hover:border-[#515427]"
+                  }`}
               >
                 {g}
               </button>

@@ -226,8 +226,6 @@ export default function RejectedRequests() {
     // ── Fetch rejected requests ──
     const fetchingAPIs = async () => {
         try {
-            console.log("hello");
-
             const token = localStorage.getItem('Admintoken');
             const response = await fetch("http://localhost:5000/api/rejectedRequetsData", {
                 method: "GET",

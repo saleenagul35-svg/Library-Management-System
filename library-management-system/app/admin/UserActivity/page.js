@@ -20,8 +20,6 @@ export default function UserLogsPage() {
 
   const fetchingAPIs = async () => {
     try {
-      console.log("hello");
-
       const token = localStorage.getItem('Admintoken');
       const response = await fetch("http://localhost:5000/api/membersActivity", {
         method: "GET",
@@ -33,7 +31,6 @@ export default function UserLogsPage() {
       if (response.ok) {
         const data = await response.json();
         setActivityData(data.data);
-        console.log(data.data);
 
       }
     } catch (error) {

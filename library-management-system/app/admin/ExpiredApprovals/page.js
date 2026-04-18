@@ -160,8 +160,6 @@ export default function ExpiredApprovals() {
   // ── Fetch expired requests ──
   const fetchingAPIs = async () => {
     try {
-      console.log("hello");
-
       const token = localStorage.getItem('Admintoken');
       const response = await fetch("http://localhost:5000/api/expiredApprovalsData", {
         method: "GET",
@@ -172,9 +170,7 @@ export default function ExpiredApprovals() {
       });
       if (response.ok) {
         const data = await response.json();
-        setRecords(data.data);
-        console.log(data.data);
-
+        setRecords(data.data)
       }
     } catch (error) {
       console.log(error);
