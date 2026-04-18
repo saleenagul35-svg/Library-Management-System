@@ -51,7 +51,7 @@ export default function UserHomePage() {
           <span className="text-[22px] text-white/90 font-serif font-bold">{initials}</span>
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
-        <span className="absolute top-[10px] right-[10px] bg-[#fffff3]/88 text-[#515427] text-[10px] font-semibold px-[9px] py-[3px] rounded-[20px]">
+        <span className="absolute top-[10px] right-[10px] uppercase bg-[#515427]/20 text-[#515427] text-[10px] font-semibold px-[9px] py-[3px] rounded-[20px]">
           {book.Genre}
         </span>
       </div>

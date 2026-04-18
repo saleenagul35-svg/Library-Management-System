@@ -1,10 +1,22 @@
 "use client";
 
+import { Cloud } from "lucide-react";
 import { useState } from "react";
 
 
 export default function AddNewBookForm() {
-  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "" })
+  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "", ImageURL: "" })
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [imageError, setImageError] = useState(null)
+  const [fileName, setFileName] = useState(null)
+  const imageHandler = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+      setFileName(file.name)
+    }
+  }
   const [errors, setErrors] = useState({})
   const formData = (e) => {
     const { name, value } = e.target;
@@ -31,7 +43,7 @@ export default function AddNewBookForm() {
     if (!handleform.Author.trim()) {
       newErrors.Author = "Author*"
     }
-    if (!/^[A-Za-z\s]{3,}$/.test(handleform.Genre)) {
+    if (!/^[A-Za-z\s\-]{3,}$/.test(handleform.Genre)) {
       newErrors.Genre = "Enter a valid Genre"
     }
     if (!handleform.Genre.trim()) {
@@ -94,16 +106,39 @@ export default function AddNewBookForm() {
       newErrors.Year = "Year*"
     }
 
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
+  const CloudinaryUploading = async () => {
+
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile)
+      formData.append("upload_preset", "books_preset")
+      try {
+        const response = await fetch("https://api.cloudinary.com/v1_1/dvu3gnyjt/image/upload", {
+          method: "POST",
+          body: formData
+        })
+        const data = await response.json()
+        return data.secure_url
+
+
+      } catch (error) {
+        console.log(error);
+
+      }
+    } else {
+      setImageError("Image*")
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(!validation()) return
+    setSubmitting(true)
+    const URL = await CloudinaryUploading()
+    if (URL) {
 
-    console.log(handleform);
-
-    if (validation()) {
       try {
         const token = localStorage.getItem("Admintoken")
         const response = await fetch("http://localhost:5000/api/addBooks", {
@@ -112,15 +147,22 @@ export default function AddNewBookForm() {
             "authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(handleform)
+          body: JSON.stringify({
+            ...handleform,
+            ImageURL: URL
+          })
         })
 
         if (response.ok) {
+          console.log(handleform);
+
           window.location.href = "/admin/inventory"
         }
 
       } catch (error) {
         console.log(error);
+      } finally {
+        setSubmitting(false)
       }
     }
   };
@@ -335,7 +377,7 @@ export default function AddNewBookForm() {
                     type="number"
                     placeholder="e.g. 2024"
                     min={1000}
-                  
+
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
                 </div>
@@ -405,7 +447,7 @@ export default function AddNewBookForm() {
                     name="Copy"
                     value={handleform.Copy}
                     onChange={formData}
-                  
+
                     className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors"
                   />
                 </div>
@@ -425,12 +467,12 @@ export default function AddNewBookForm() {
                     type="number"
                     name="Pages"
                     value={handleform.Pages}
-                  
+
                     onChange={formData}
                     className="w-full px-3 py-2.5 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors appearance-none cursor-pointer" />
-                {errors.Pages &&
-                  <p className="text-sm pl-1 text-red-700">{errors.Pages}</p>
-                }
+                  {errors.Pages &&
+                    <p className="text-sm pl-1 text-red-700">{errors.Pages}</p>
+                  }
                 </div>
               </div>
             </div>
@@ -454,19 +496,57 @@ export default function AddNewBookForm() {
             <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
               Synopsis<span className="text-red-700">*</span>
             </label>
-                {errors.Description &&
-                  <p className="text-sm pl-1 text-red-700">{errors.Description}</p>
-                }            
+
             <div className="relative">
               <textarea
                 rows={5}
-             
+
                 name="Description"
                 value={handleform.Description}
                 onChange={formData}
                 placeholder="A brief description of the book's content, themes, and audience..."
                 className="w-full px-4 py-3 rounded-lg border border-[#d4c9b0] text-sm text-[#3a2e1e] placeholder-[#c5bbb0] bg-[#fdfaea] outline-none focus:ring-2 focus:ring-[#d4c9b0] focus:border-[#a89880] transition-colors resize-none"
               />
+            </div>
+            {errors.Description &&
+              <p className="text-sm pl-1 text-red-700">{errors.Description}</p>
+            }
+          </div>
+        </section>
+
+        {/* Image */}
+        <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[#3a2e1e]">Book Media</h2>
+            </div>
+          </div>
+
+          <div className="px-5 py-5">
+            <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
+              Book Cover Image<span className="text-red-700">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                id="book-upload"
+                accept="image/*"
+                onChange={imageHandler}
+                className="hidden"
+
+              />
+              <label
+                htmlFor="book-upload"
+                className="flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed border-[#d4c9b0] bg-[#fdfaea] hover:border-[#864c25] hover:bg-[#fffcf0] transition-all cursor-pointer overflow-hidden"
+              >{fileName ? fileName : `Choose File`}</label>
+              {imageError &&
+                <p className="text-sm pl-1 text-red-700">{imageError}</p>
+              }
             </div>
           </div>
         </section>
@@ -482,12 +562,13 @@ export default function AddNewBookForm() {
           </button>
           <button
             type="submit"
+            disabled={submitting}
             className="px-5 py-2.5 rounded-lg bg-[#54552b] text-sm font-medium text-[#f5f0e0] hover:bg-[#3a2e1e] transition-colors shadow-sm flex items-center gap-2"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add Book to Catalogue
+            {submitting ? `Adding....` : `Add Book to Catalogue`}
           </button>
         </div>
       </form>

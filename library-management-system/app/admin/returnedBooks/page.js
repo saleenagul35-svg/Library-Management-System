@@ -5,16 +5,12 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import {
-    BookOpen,
+
     Calendar,
     RotateCcw,
     Search,
-    Filter,
-    ChevronDown,
     CheckCircle2,
-    Loader2,
     BookMarked,
-    Hash,
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -223,7 +219,7 @@ export default function returnedBooks() {
                 <div>
                     <div className="flex items-center gap-3 mb-1">
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                            <BookOpen size={18} className="text-primary" strokeWidth={1.75} />
+                            <RotateCcw size={18} className="text-primary" strokeWidth={1.75} />
                         </div>
                         <h1 className="text-xl font-bold text-primary-950">
                             Returned Books 
@@ -264,7 +260,7 @@ export default function returnedBooks() {
             {filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5">
-                        <BookOpen size={28} className="text-primary-800/40" strokeWidth={1.5} />
+                        <RotateCcw size={28} className="text-primary-800/40" strokeWidth={1.5} />
                     </div>
                     <div className="text-center">
                         <p className="text-sm font-medium text-primary-800/60">

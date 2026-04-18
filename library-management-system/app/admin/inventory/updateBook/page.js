@@ -6,10 +6,20 @@ import { useSearchParams } from "next/navigation";
 export default function updateBookForm() {
   const router = useRouter()
   const useSrchPrms = useSearchParams()
-
-  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "" })
-
+  const [submitting, setSubmitting] = useState(false)
+  const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "", ImageURL: "" })
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [imageError, setImageError] = useState(null)
+  const [fileName, setFileName] = useState(null)
+  const imageHandler = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+      setFileName(file.name)
+    }
+  }
   const book = useSrchPrms.get("book")
+  console.log(book);
 
   const [errors, setErrors] = useState({})
   const [parsed, setParsed] = useState(null);
@@ -49,7 +59,7 @@ export default function updateBookForm() {
     if (!handleform.Publisher.trim()) {
       newErrors.Publisher = "Publisher*"
     }
-    if (!/^[A-Za-z\s]{3,}$/.test(handleform.Language)) {
+    if (!/^[A-Za-z\s\-]{3,}$/.test(handleform.Language)) {
       newErrors.Language = "Enter a valid Language"
     }
     if (!handleform.Language.trim()) {
@@ -104,9 +114,38 @@ export default function updateBookForm() {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
+  const CloudinaryUploading = async () => {
+
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile)
+      formData.append("upload_preset", "books_preset")
+      try {
+        const response = await fetch("https://api.cloudinary.com/v1_1/dvu3gnyjt/image/upload", {
+          method: "POST",
+          body: formData
+        })
+        const data = await response.json()
+        console.log(data.secure_url);
+
+        return data.secure_url
+
+
+      } catch (error) {
+        console.log(error);
+
+      }
+    } else {
+      return handleform.ImageURL
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validation()) {
+
+    if (!validation()) return
+    setSubmitting(true)
+    const URL = await CloudinaryUploading()
+    if (URL) {
 
       try {
         const bookId = parsed._id
@@ -118,7 +157,10 @@ export default function updateBookForm() {
         const response = await fetch(`http://localhost:5000/api/editBook/${bookId}`, {
           method: "PUT",
           headers,
-          body: JSON.stringify(handleform)
+          body: JSON.stringify({
+            ...handleform,
+            ImageURL: URL
+          })
         })
         if (response.ok) {
           router.push("/admin/inventory")
@@ -127,6 +169,8 @@ export default function updateBookForm() {
       } catch (error) {
         console.log(error);
 
+      } finally {
+        setSubmitting(false)
       }
     }
   };
@@ -138,9 +182,8 @@ export default function updateBookForm() {
     if (book) {
       const parsedBook = JSON.parse(book)
       setParsed(parsedBook)
-      setHandleForm({ Title: parsedBook.Title || "", Author: parsedBook.Author || "", ISBN: parsedBook.ISBN || "", Genre: parsedBook.Genre || "", Publisher: parsedBook.Publisher || "", Year: parsedBook.Year || "", Language: parsedBook.Language || "", Copy: parsedBook.Copy || "", Pages: parsedBook.Pages || "", Description: parsedBook.Description || "" })
+      setHandleForm({ Title: parsedBook.Title || "", Author: parsedBook.Author || "", ISBN: parsedBook.ISBN || "", Genre: parsedBook.Genre || "", Publisher: parsedBook.Publisher || "", Year: parsedBook.Year || "", Language: parsedBook.Language || "", Copy: parsedBook.Copy || "", Pages: parsedBook.Pages || "", Description: parsedBook.Description || "", ImageURL: parsedBook.ImageURL || "" })
     }
-    console.log("runn");
 
   }, [book])
 
@@ -278,9 +321,9 @@ export default function updateBookForm() {
                   />
 
                 </div>
-                  {errors.ISBN &&
-                    <p className="text-sm pl-1 text-red-700">{errors.ISBN}</p>
-                  }
+                {errors.ISBN &&
+                  <p className="text-sm pl-1 text-red-700">{errors.ISBN}</p>
+                }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">13 digit format</p>
               </div>
 
@@ -303,9 +346,9 @@ export default function updateBookForm() {
                   />
 
                 </div>
-                   {errors.Genre &&
-                    <p className="text-sm pl-1 text-red-700">{errors.Genre}</p>
-                  }               
+                {errors.Genre &&
+                  <p className="text-sm pl-1 text-red-700">{errors.Genre}</p>
+                }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">e.g. Fiction, Science, History</p>
               </div>
             </div>
@@ -351,9 +394,9 @@ export default function updateBookForm() {
                   />
 
                 </div>
-                   {errors.Publisher &&
-                    <p className="text-sm pl-1 text-red-700">{errors.Publisher}</p>
-                  }               
+                {errors.Publisher &&
+                  <p className="text-sm pl-1 text-red-700">{errors.Publisher}</p>
+                }
               </div>
 
               <div>
@@ -378,9 +421,9 @@ export default function updateBookForm() {
                   />
 
                 </div>
-                   {errors.Year &&
-                    <p className="text-sm pl-1 text-red-700">{errors.Year}</p>
-                  }               
+                {errors.Year &&
+                  <p className="text-sm pl-1 text-red-700">{errors.Year}</p>
+                }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Between 1000–2026</p>
               </div>
 
@@ -403,9 +446,9 @@ export default function updateBookForm() {
                   />
 
                 </div>
-                   {errors.Language &&
-                    <p className="text-sm pl-1 text-red-700">{errors.Language}</p>
-                  }               
+                {errors.Language &&
+                  <p className="text-sm pl-1 text-red-700">{errors.Language}</p>
+                }
                 <p className="mt-1.5 text-[11px] text-[#9a8e7f]">Primary language of the book</p>
               </div>
             </div>
@@ -517,7 +560,42 @@ export default function updateBookForm() {
 
           </div>
         </section>
+        {/* Image */}
+        <section className="bg-[#fdfaea] rounded-xl border border-[#e8e0cc] shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#f0e8d8] flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-md bg-[#f5f0e0] border border-[#e8e0cc] flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-[#7a6e5f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[#3a2e1e]">Book Media</h2>
+            </div>
+          </div>
 
+          <div className="px-5 py-5">
+            <label className="block text-[11px] font-semibold text-[#5c4f3a] uppercase tracking-wider mb-1.5">
+              Book Cover Image<span className="text-red-700">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                id="book-upload"
+                accept="image/*"
+                onChange={imageHandler}
+                className="hidden"
+
+              />
+              <label
+                htmlFor="book-upload"
+                className="flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed border-[#d4c9b0] bg-[#fdfaea] hover:border-[#864c25] hover:bg-[#fffcf0] transition-all cursor-pointer overflow-hidden"
+              >{fileName ? fileName : handleform.ImageURL  }</label>
+              {imageError &&
+                <p className="text-sm pl-1 text-red-700">{imageError}</p>
+              }
+            </div>
+          </div>
+        </section>
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-2">
           <button
@@ -533,12 +611,13 @@ export default function updateBookForm() {
 
           <button
             type="submit"
+            disabled={submitting}
             className="px-5 py-2.5 rounded-lg bg-[#54552b] text-sm font-medium text-[#f5f0e0] hover:bg-[#3a2e1e] transition-colors shadow-sm flex items-center gap-2"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            Save Changes
+            {submitting ? `Updating....` : `Save Changes`}
           </button>
         </div>
       </form>

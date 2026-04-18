@@ -1,6 +1,5 @@
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { Viewport } from "next"
 // ── Font configuration ──────────────────────────────────────────────────────
 const playfair = Playfair_Display({
   subsets:  ['latin'],

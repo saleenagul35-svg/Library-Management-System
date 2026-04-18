@@ -10,7 +10,8 @@ const BookSchema = new mongoose.Schema({
     Copy: Number,
     Pages:Number,
     Status: String,
-    Description: String
+    Description: String,
+    ImageURL: String
 })
 const bookCollection = mongoose.model("BooksData", BookSchema);
 

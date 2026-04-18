@@ -3,14 +3,6 @@
 import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-// ─── SAMPLE DATA (replace with real borrowed books state) ──────────────────────
-const SAMPLE_BORROWED = [
-  { _id: "1", Title: "Atomic Habits", Author: "James Clear", Genre: "Productivity", Rating: 4.8, Pages: 320, color: "#6b7f5e", borrowedDate: "2025-03-10", dueDate: "2025-03-24", status: "Overdued" },
-  { _id: "2", Title: "The Psychology of Money", Author: "Morgan Housel", Genre: "Psychology", Rating: 4.7, Pages: 256, color: "#7a6f9b", borrowedDate: "2025-03-15", dueDate: "2025-03-29", status: "due-soon" },
-  { _id: "3", Title: "Sapiens", Author: "Yuval Noah Harari", Genre: "History", Rating: 4.9, Pages: 443, color: "#8b5e3c", borrowedDate: "2025-03-18", dueDate: "2025-04-01", status: "Borrowed" },
-  { _id: "4", Title: "1984", Author: "George Orwell", Genre: "Fiction", Rating: 4.7, Pages: 328, color: "#4a6b7a", borrowedDate: "2025-03-01", dueDate: "2025-03-15", status: "Returned" },
-  { _id: "5", Title: "Man's Search for Meaning", Author: "Viktor Frankl", Genre: "Philosophy", Rating: 4.9, Pages: 200, color: "#7a5c6b", borrowedDate: "2025-03-20", dueDate: "2025-04-03", status: "Borrowed" },
-];
 
 const STATUS_CONFIG = {
   Borrowed: { label: "Active", bg: "#e8f0e0", color: "#4a6b3a", dot: "#6b9e50" },
@@ -18,6 +10,19 @@ const STATUS_CONFIG = {
   Overdued: { label: "Overdue", bg: "#fde8e8", color: "#8b2a2a", dot: "#d94f4f" },
   Returned: { label: "Returned", bg: "#ece8f0", color: "#5a4a6b", dot: "#9b80c8" },
 };
+
+// ✅ SIRF YEH FUNCTION ADD HUA — due-soon frontend pe calculate hoga
+// Overdue, Borrowed, Returned backend se aate hain, unhe touch nahi kiya
+function computeStatus(book) {
+  if (book.status !== "Borrowed") return book.status; // Overdued, Returned → as-is
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(book.dueDate);
+  due.setHours(0, 0, 0, 0);
+  const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+  if (daysLeft >= 0 && daysLeft <= 3) return "due-soon"; // 0-3 din bachay → due-soon
+  return book.status; // baqi sab unchanged
+}
 
 function getDaysLeft(dueDate) {
   const today = new Date();
@@ -31,17 +36,21 @@ function formatDate(dateStr) {
 }
 
 // ─── Book Row Card ────────────────────────────────────────────────────────────
-function BorrowedBookRow({ book,index }) {
-  const colors = ["#515427", "#8b5e1a", "#7a6f4e","#864c25" ]
+function BorrowedBookRow({ book, index }) {
+  const colors = ["#515427", "#8b5e1a", "#7a6f4e", "#864c25"];
   const [hovered, setHovered] = useState(false);
-  const status = STATUS_CONFIG[book.status];
+
+  // ✅ SIRF YEH LINE BADLI — book.status ki jagah computeStatus(book)
+  const status = STATUS_CONFIG[computeStatus(book)];
+  const computedStatus = computeStatus(book); // due date text color ke liye
+
   const daysLeft = getDaysLeft(book.dueDate);
   const initials = book.bookId.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const colordecision = () => {
-  
-    let selectedColor = colors[index % colors.length]
-    return selectedColor
-  }
+    let selectedColor = colors[index % colors.length];
+    return selectedColor;
+  };
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -87,7 +96,8 @@ function BorrowedBookRow({ book,index }) {
           </div>
           <div style={{ fontSize: "11px" }}>
             <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Due:</span>{" "}
-            <span style={{ color: book.status === "Overdued" ? "#d94f4f" : book.status === "due-soon" ? "#e6a832" : "#7a6f4e", fontWeight: book.status === "overdue" ? "600" : "400" }}>
+            {/* ✅ SIRF YEH — book.status ki jagah computedStatus */}
+            <span style={{ color: computedStatus === "Overdued" ? "#d94f4f" : computedStatus === "due-soon" ? "#e6a832" : "#7a6f4e", fontWeight: book.status === "overdue" ? "600" : "400" }}>
               {formatDate(book.dueDate)}
               {book.status !== "Returned" && (
                 <span style={{ marginLeft: "6px", fontSize: "10px" }}>
@@ -132,13 +142,14 @@ function ProgressRing({ value, max, color, label, sublabel }) {
 
 // ─── Main BorrowedBooksPage ────────────────────────────────────────────────────
 export default function BorrowedBooksPage() {
-  const [loader, setLoader] = useState(true)
-
+  const [loader, setLoader] = useState(true);
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("dueDate");
-  const [userdata, setUserData] = useState([])
+  const [userdata, setUserData] = useState([]);
+
   const filters = ["All", "Active", "Due Soon", "Overdue", "Returned"];
   const filterMap = { "All": null, "Active": "Borrowed", "Due Soon": "due-soon", "Overdue": "Overdued", "Returned": "Returned" };
+
   const fetchingData = async () => {
     try {
       const token = localStorage.getItem('UserLoginToken');
@@ -156,14 +167,13 @@ export default function BorrowedBooksPage() {
     } catch (error) {
       console.log(error);
     } finally {
-      setLoader(false)
+      setLoader(false);
     }
   };
 
-
-
+  // ✅ SIRF YEH — filtering aur counts ke liye computeStatus use karo
   const filtered = userdata
-    .filter(b => !filterMap[filter] || b.status === filterMap[filter])
+    .filter(b => !filterMap[filter] || computeStatus(b) === filterMap[filter])
     .sort((a, b) => {
       if (sortBy === "dueDate") return new Date(a.dueDate) - new Date(b.dueDate);
       if (sortBy === "title") return a.bookId.Title.localeCompare(b.bookId.Title);
@@ -174,22 +184,24 @@ export default function BorrowedBooksPage() {
   const stats = {
     active: userdata.filter(b => b.status === "Borrowed").length,
     overdue: userdata.filter(b => b.status === "Overdued").length,
-    dueSoon: userdata.filter(b => b.status === "due-soon").length,
+    // ✅ SIRF YEH — dueSoon frontend se compute hoga
+    dueSoon: userdata.filter(b => computeStatus(b) === "due-soon").length,
     returned: userdata.filter(b => b.status === "Returned").length,
     total: userdata.length,
   };
+
   useEffect(() => {
-    fetchingData()
-  }, [])
+    fetchingData();
+  }, []);
+
   if (loader) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
-
         <CircularProgress sx={{ color: "#52512a" }} />
-
       </Stack>
-    )
+    );
   }
+
   return (
     <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px 72px", fontFamily: "'Inter', sans-serif" }}>
 
@@ -208,7 +220,7 @@ export default function BorrowedBooksPage() {
         gap: "16px", marginBottom: "32px",
       }}>
         {[
-          { label: "Currently Borrowed", val: stats.active + stats.dueSoon, sub: "books in hand", color: "#6b9e50", bg: "#f0f5eb" },
+          { label: "Currently Borrowed", val: stats.active, sub: "books in hand", color: "#6b9e50", bg: "#f0f5eb" },
           { label: "Overdue", val: stats.overdue, sub: "need immediate return", color: "#d94f4f", bg: "#fde8e8" },
           { label: "Due This Week", val: stats.dueSoon, sub: "return soon", color: "#e6a832", bg: "#fef3e2" },
           { label: "Total Borrowed", val: stats.total, sub: "all time", color: "#9b80c8", bg: "#ece8f0" },
@@ -234,7 +246,7 @@ export default function BorrowedBooksPage() {
           <h3 style={{ fontFamily: "Georgia, serif", fontSize: "16px", color: "#515427", margin: "0 0 4px" }}>Borrowing Quota</h3>
           <p style={{ fontSize: "12px", color: "#9b8a6a", margin: 0 }}>Premium members can borrow up to 5 books simultaneously</p>
         </div>
-        <ProgressRing value={stats.active + stats.dueSoon + stats.overdue} max={5} color="#864c25" label="Books Borrowed" />
+        <ProgressRing value={stats.active + stats.overdue} max={5} color="#864c25" label="Books Borrowed" />
       </div>
 
       {/* ── Filters & Sort ── */}
@@ -249,9 +261,10 @@ export default function BorrowedBooksPage() {
               cursor: "pointer", fontSize: "12px", fontWeight: filter === f ? "600" : "400",
               fontFamily: "inherit", transition: "all .18s",
             }}>{f}
+              {/* ✅ SIRF YEH — filter count bhi computeStatus se */}
               {f !== "All" && filterMap[f] && (
                 <span style={{ marginLeft: "5px", fontSize: "10px", opacity: .8 }}>
-                  ({userdata.filter(b => b.status === filterMap[f]).length})
+                  ({userdata.filter(b => computeStatus(b) === filterMap[f]).length})
                 </span>
               )}
             </button>
@@ -280,12 +293,8 @@ export default function BorrowedBooksPage() {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {filtered.map((book,index) => (
-            <BorrowedBookRow
-              key={book._id}
-              book={book}
-              index={index}
-            />
+          {filtered.map((book, index) => (
+            <BorrowedBookRow key={book._id} book={book} index={index} />
           ))}
         </div>
       )}

@@ -1,7 +1,7 @@
 const bookCollection = require("../models/BooksModel");
 
 const storeBooks = async (req, res) => {
-    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description } = req.body
+    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description,ImageURL } = req.body
     const CheckValidity = await bookCollection.findOne({ ISBN: ISBN })
 
     try {
@@ -17,7 +17,8 @@ const storeBooks = async (req, res) => {
                 Copy: Copy,
                 Pages: Pages,
                 Status: "available",
-                Description: Description
+                Description: Description,
+                ImageURL:ImageURL
             })
             await book.save()
             res.status(200).json({
@@ -71,7 +72,7 @@ const deleteBook = async (req, res) => {
 }
 const editBook = async (req, res) => {
     const id = req.params.id
-    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description } = req.body
+    const { Title, Author, ISBN, Genre, Publisher, Year, Language, Copy, Pages, Description,ImageURL } = req.body
 
     try {
         await bookCollection.updateOne({ _id: id }, {
@@ -86,7 +87,8 @@ const editBook = async (req, res) => {
                 Copy: Copy,
                 Pages: Pages,
                 Status: "available",
-                Description: Description
+                Description: Description,
+                ImageURL:ImageURL
             }
         })
         res.status(200).json({
