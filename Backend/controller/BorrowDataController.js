@@ -60,6 +60,63 @@ const UserpendingRequestData = async (req, res) => {
     }
 
 }
+const UserApprovedRequestData = async (req, res) => {
+    const id = req.ActiveID
+    try {
+        const approvedRequests = await RequestsCollection.find({ userId: id, status: "Approved" }).populate("bookId", "Title Author ISBN")
+
+        res.status(200).json({
+            message: "data fetched successfully",
+            data: approvedRequests
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+
+}
+const UserRejectedRequestData = async (req, res) => {
+    const id = req.ActiveID
+    try {
+        const approvedRequests = await RequestsCollection.find({ userId: id, status: "Rejected" }).populate("bookId", "Title Author ISBN")
+
+        res.status(200).json({
+            message: "data fetched successfully",
+            data: approvedRequests
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+
+}
+const UserExpiredApprovalsData = async (req, res) => {
+    const id = req.ActiveID
+    try {
+        const approvedRequests = await RequestsCollection.find({ userId: id, status: "Expired" }).populate("bookId", "Title Author ISBN")
+
+        res.status(200).json({
+            message: "data fetched successfully",
+            data: approvedRequests
+        })
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+
+}
 const UserData = async (req, res) => {
     const id = req.ActiveID
     try {
@@ -237,4 +294,4 @@ const RecentActvity = async (req, res) => {
     }
 
 }
-module.exports = {UserData, adminNotification,BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData,rejectedRequetsData ,expiredApprovalsData,returnedBooks,RecentActvity}
+module.exports = {UserData,UserRejectedRequestData, UserExpiredApprovalsData,UserApprovedRequestData, adminNotification,BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData,rejectedRequetsData ,expiredApprovalsData,returnedBooks,RecentActvity}

@@ -16,11 +16,11 @@ export default function UserNavbar({ borrowedCount = 0 }) {
       path: "/user/myRequests",
       children: [
 
-        { label: "Pending Requests", path: "/user/myRequests/pending" },
-        { label: "Approved Requests", path: "/user/myRequests/pending" },
-        { label: "Rejected Requests", path: "/user/myRequests/pending" },
-        { label: "Expired Approvals", path: "/user/myRequests/pending" },
-        { label: "All Requests", path: "/user/myRequests" },
+        { label: "Pending Requests", path: "/user/pending" },
+        { label: "Approved Requests", path: "/user/approved" },
+        { label: "Rejected Requests", path: "/user/rejected" },
+        { label: "Expired Approvals", path: "/user/expired" },
+      
       ],
     },
     { label: "Profile", path: "/user/profile" },

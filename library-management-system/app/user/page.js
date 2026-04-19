@@ -5,13 +5,12 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import Image from "next/image";
 function BookCover({ book }) {
-  const initials = book.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+
   return (
     <div className="w-full h-[250px] flex items-center justify-center relative" style={{ backgroundColor: "#c8b99a" }}>
-      {/* <div className=" relative w-[80px] h-[100px] bg-white/15 rounded-[4px] border-2 border-white/30 flex items-center justify-center"> */}
-        {/* <span className="text-[22px] text-white/90 font-serif font-bold">{initials}</span> */}
-        <Image src={book.ImageURL} fill alt={book.Title} />
-      {/* </div> */}
+
+      <Image src={book.ImageURL} fill alt={book.Title} />
+
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
       <span className="absolute top-[10px] right-[10px] uppercase bg-[#515427] text-white text-[10px] font-semibold px-[9px] py-[3px] rounded-[20px]">
         {book.Genre}
@@ -19,7 +18,7 @@ function BookCover({ book }) {
     </div>
   );
 }
-function BookCard({ book, onBorrowClick }) {
+function BookCard({ book, onBorrowClick, onDetaillClick }) {
   return (
     <div className="bg-[#fffff3] rounded-[15px] overflow-hidden shadow-[0_4px_18px_rgba(81,84,39,.09),0_1px_4px_rgba(0,0,0,.04)] hover:shadow-[0_18px_52px_rgba(81,84,39,.16),0_4px_12px_rgba(0,0,0,.06)] border border-[#c8b99a]/22 flex flex-col hover:-translate-y-[5px] transition-all duration-300 ease-out group">
       <BookCover book={book} />
@@ -27,7 +26,7 @@ function BookCard({ book, onBorrowClick }) {
         <h3 className="text-[#515427] text-[15px] font-bold mb-[4px] font-serif leading-tight">{book.Title}</h3>
         <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic">{book.Author}</p>
         <p className="text-[#9b8a6a] text-[12px] mb-[9px] italic font-serif">Pages. {book.Pages}</p>
-        <p className="line-clamp-1 text-[#9b8a6a] text-[12px] mb-[9px] italic font-serif">{book.Description}</p>
+        <p className="line-clamp-1 text-[#9b8a6a] cursor-pointer text-[12px] mb-[9px] italic font-serif" onClick={() => onDetaillClick(book)} >{book.Description}</p>
         <div className="mt-auto pt-[14px]">
           <button
             onClick={() => onBorrowClick(book)}
@@ -41,11 +40,11 @@ function BookCard({ book, onBorrowClick }) {
   );
 }
 
+
 export default function UserHomePage() {
   // ─── Data ─────────────────────────────────────────────────────────────────────
   const [loader, setLoader] = useState(true);
   const [books, setBooks] = useState([]);
-  console.log(books);
 
   let token = null;
   const fetchingAPIs = async () => {
@@ -108,6 +107,23 @@ export default function UserHomePage() {
       </div>
     );
   }
+  function DetailModal({ book, onDetaillClick }) {
+    return (
+      <div
+        onClick={() => onDetaillClick(null)}
+        className="fixed inset-0 bg-[#121008]/55 backdrop-blur-[5px] flex items-center justify-center z-[999] p-5"
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="bg-[#fffff3] rounded-[20px] p-[36px_40px] max-w-[400px] w-full shadow-[0_28px_80px_rgba(0,0,0,.24)] text-center font-serif"
+        >
+          <div className="text-[44px] mb-[14px]">📖</div>
+          <h3 className="text-[#515427] text-[21px] mb-2 font-bold">{book.Title}</h3>
+          <p className="text-[#9b8a6a] text-[13px] mb-6">{book.Description}</p>
+        </div>
+      </div>
+    );
+  }
 
   function Toast({ message, onClose }) {
     useEffect(() => {
@@ -129,6 +145,7 @@ export default function UserHomePage() {
   const [search, setSearch] = useState("");
   const [activeGenre, setActiveGenre] = useState("All");
   const [modalBook, setModalBook] = useState(null);
+  const [detail, setDetail] = useState(null);
   const [toast, setToast] = useState(null);
 
   const filtered = books && books.length > 0 ? books.filter((b) => {
@@ -226,8 +243,8 @@ export default function UserHomePage() {
                 key={g}
                 onClick={() => setActiveGenre(g)}
                 className={`px-[15px] py-1.5 rounded-[20px] border-[1.5px] text-[12px] transition-all duration-200 ${activeGenre === g
-                    ? "bg-[#515427] text-[#fffff3] border-[#515427] font-semibold"
-                    : "bg-transparent text-[#7a6f4e] border-[#c8b99a]/45 hover:bg-[#515427] hover:text-[#fffff3] hover:border-[#515427]"
+                  ? "bg-[#515427] text-[#fffff3] border-[#515427] font-semibold"
+                  : "bg-transparent text-[#7a6f4e] border-[#c8b99a]/45 hover:bg-[#515427] hover:text-[#fffff3] hover:border-[#515427]"
                   }`}
               >
                 {g}
@@ -246,7 +263,7 @@ export default function UserHomePage() {
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-[26px] animate-in fade-in slide-in-from-bottom-4 duration-500">
             {filtered.map((book) => (
-              <BookCard key={book._id} book={book} onBorrowClick={setModalBook} />
+              <BookCard key={book._id} book={book} onBorrowClick={setModalBook} onDetaillClick={setDetail} />
             ))}
           </div>
         )}
@@ -259,6 +276,7 @@ export default function UserHomePage() {
 
       {/* Modal & Toast */}
       {modalBook && <ConfirmModal book={modalBook} onConfirm={handleConfirmBorrow} onCancel={() => setModalBook(null)} />}
+      {detail && <DetailModal book={detail} onDetaillClick={setDetail} />}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );

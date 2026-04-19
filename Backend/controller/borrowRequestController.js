@@ -62,7 +62,7 @@ const borrowBook = async (req, res) => {
                 })
                 await newRequest.save()
                 return res.status(200).json({
-                    message: "Request submitted successfully!",
+                    message: "Request submitted successfully! Please pickup your book within 48 hours.",
                 })
             } else {
                 return res.status(409).json({

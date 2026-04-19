@@ -5,103 +5,95 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const STATUS_CONFIG = {
-  Borrowed: { label: "Active", bg: "#e8f0e0", color: "#4a6b3a", dot: "#6b9e50" },
-  "due-soon": { label: "Due Soon", bg: "#fef3e2", color: "#8b5e1a", dot: "#e6a832" },
-  Overdued: { label: "Overdue", bg: "#fde8e8", color: "#8b2a2a", dot: "#d94f4f" },
-  Returned: { label: "Returned", bg: "#ece8f0", color: "#5a4a6b", dot: "#9b80c8" },
+  Borrowed: { label: "Active", bg: "bg-[#e8f0e0]", color: "text-[#4a6b3a]", dot: "bg-[#6b9e50]" },
+  "due-soon": { label: "Due Soon", bg: "bg-[#fef3e2]", color: "text-[#8b5e1a]", dot: "bg-[#8b5e1a]" },
+  Overdued: { label: "Overdue", bg: "bg-[#fde8e8]", color: "text-[#8b2a2a]", dot: "bg-[#d94f4f]" },
+  Returned: { label: "Returned", bg: "bg-[#ece8f0]", color: "text-[#5a4a6b]", dot: "bg-[#9b80c8]" },
 };
 
-// ✅ SIRF YEH FUNCTION ADD HUA — due-soon frontend pe calculate hoga
-// Overdue, Borrowed, Returned backend se aate hain, unhe touch nahi kiya
 function computeStatus(book) {
-  if (book.status !== "Borrowed") return book.status; // Overdued, Returned → as-is
+  if (book.status !== "Borrowed") return book.status;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const due = new Date(book.dueDate);
   due.setHours(0, 0, 0, 0);
   const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-  if (daysLeft >= 0 && daysLeft <= 3) return "due-soon"; // 0-3 din bachay → due-soon
-  return book.status; // baqi sab unchanged
+  if (daysLeft >= 0 && daysLeft <= 3) return "due-soon";
+  return book.status;
 }
 
 function getDaysLeft(dueDate) {
   const today = new Date();
   const due = new Date(dueDate);
-  const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-  return diff;
+  return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
 }
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
-// ─── Book Row Card ────────────────────────────────────────────────────────────
+// ─── Book Row Card ─────────────────────────────────────────────────────────────
 function BorrowedBookRow({ book, index }) {
-  const colors = ["#515427", "#8b5e1a", "#7a6f4e", "#864c25"];
+  const colors = ["bg-[#515427]", "bg-[#8b5e1a]", "bg-[#7a6f4e]", "bg-[#864c25]"];
   const [hovered, setHovered] = useState(false);
 
-  // ✅ SIRF YEH LINE BADLI — book.status ki jagah computeStatus(book)
   const status = STATUS_CONFIG[computeStatus(book)];
-  const computedStatus = computeStatus(book); // due date text color ke liye
-
+  const computedStatus = computeStatus(book);
   const daysLeft = getDaysLeft(book.dueDate);
   const initials = book.bookId.Title.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-  const colordecision = () => {
-    let selectedColor = colors[index % colors.length];
-    return selectedColor;
-  };
+  const bgColor = colors[index % colors.length];
+
+  const dueDateColor =
+    computedStatus === "Overdued"
+      ? "text-[#d94f4f]"
+      : computedStatus === "due-soon"
+      ? "text-[#e6a832]"
+      : "text-[#7a6f4e]";
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "64px 1fr auto",
-        gap: "18px",
-        alignItems: "center",
-        background: hovered ? "#fafaf0" : "#fffff3",
-        border: "1px solid",
-        borderColor: hovered ? "rgba(200,185,154,.5)" : "rgba(200,185,154,.2)",
-        borderRadius: "14px",
-        padding: "18px 22px",
-        transition: "all .25s cubic-bezier(.16,1,.3,1)",
-        boxShadow: hovered ? "0 8px 32px rgba(81,84,39,.1)" : "0 2px 8px rgba(81,84,39,.04)",
-      }}
+      className={`grid items-center gap-[18px] rounded-[14px] px-[22px] py-[18px] border transition-all duration-[250ms] ease-[cubic-bezier(.16,1,.3,1)]
+        ${hovered
+          ? "bg-[#fafaf0] border-[rgba(200,185,154,.5)] shadow-[0_8px_32px_rgba(81,84,39,.1)]"
+          : "bg-[#fffff3] border-[rgba(200,185,154,.2)] shadow-[0_2px_8px_rgba(81,84,39,.04)]"
+        }`}
+      style={{ gridTemplateColumns: "64px 1fr auto" }}
     >
       {/* Cover thumbnail */}
-      <div style={{
-        width: "64px", height: "80px", background: `${colordecision()}`,
-        borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center",
-        flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,.18)",
-        position: "relative", overflow: "hidden",
-      }}>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 60%)" }} />
-        <span style={{ fontSize: "15px", color: "rgba(255,255,255,.92)", fontFamily: "Georgia, serif", fontWeight: "700", position: "relative", zIndex: 1 }}>{initials}</span>
+      <div className={`${bgColor} w-[64px] h-[80px] rounded-[8px] flex items-center justify-center flex-shrink-0 shadow-[0_4px_14px_rgba(0,0,0,.18)] relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+        <span className="text-[15px] text-white/92 font-serif font-bold relative z-10">{initials}</span>
       </div>
 
       {/* Book info */}
-      <div style={{ minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "4px" }}>
-          <h3 style={{ color: "#515427", fontSize: "15px", fontWeight: "700", fontFamily: "Georgia, serif", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{book.bookId.Title}</h3>
-          <span style={{ background: status.bg, color: status.color, fontSize: "10px", fontWeight: "600", padding: "2px 9px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: status.dot, display: "inline-block" }} />
+      <div className="min-w-0">
+        <div className="flex items-center gap-[10px] flex-wrap mb-1">
+          <h3 className="text-[#515427] text-[15px] font-bold font-serif m-0 whitespace-nowrap overflow-hidden text-ellipsis">
+            {book.bookId.Title}
+          </h3>
+          <span className={`${status.bg} ${status.color} text-[10px] font-semibold px-[9px] py-[2px] rounded-[20px] flex items-center gap-1 flex-shrink-0`}>
+            <span className={`${status.dot} w-[5px] h-[5px] rounded-full inline-block`} />
             {status.label}
           </span>
         </div>
-        <p style={{ color: "#9b8a6a", fontSize: "12px", margin: "0 0 8px", fontStyle: "italic" }}>by {book.bookId.Author} · {book.bookId.Genre} · {book.bookId.Pages} pages</p>
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-          <div style={{ fontSize: "11px", color: "#b0a080" }}>
-            <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Borrowed:</span> {formatDate(book.issueDate)}
+        <p className="text-[#9b8a6a] text-[12px] mb-2 italic">
+          by {book.bookId.Author} · {book.bookId.Genre} · {book.bookId.Pages} pages
+        </p>
+        <div className="flex gap-5 flex-wrap">
+          <div className="text-[11px] text-[#b0a080]">
+            <span className="text-[#9b8a6a] font-medium">Borrowed:</span> {formatDate(book.issueDate)}
           </div>
-          <div style={{ fontSize: "11px" }}>
-            <span style={{ color: "#9b8a6a", fontWeight: "500" }}>Due:</span>{" "}
-            {/* ✅ SIRF YEH — book.status ki jagah computedStatus */}
-            <span style={{ color: computedStatus === "Overdued" ? "#d94f4f" : computedStatus === "due-soon" ? "#e6a832" : "#7a6f4e", fontWeight: book.status === "overdue" ? "600" : "400" }}>
+          <div className="text-[11px]">
+            <span className="text-[#9b8a6a] font-medium">Due:</span>{" "}
+            <span className={`${dueDateColor} ${book.status === "Overdued" ? "font-semibold" : "font-normal"}`}>
               {formatDate(book.dueDate)}
               {book.status !== "Returned" && (
-                <span style={{ marginLeft: "6px", fontSize: "10px" }}>
-                  {book.status === "Overdued" ? `(${Math.abs(daysLeft)}d Overdued)` : `(${daysLeft}d left)`}
+                <span className="ml-[6px] text-[10px]">
+                  {book.status === "Overdued"
+                    ? `(${Math.abs(daysLeft)}d Overdued)`
+                    : `(${daysLeft}d left)`}
                 </span>
               )}
             </span>
@@ -110,31 +102,35 @@ function BorrowedBookRow({ book, index }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "7px", flexShrink: 0 }}>
-        {book.status === "Returned" &&
-          <span style={{ fontSize: "12px", color: "#9b8a6a", padding: "8px 18px", textAlign: "center" }}>Returned</span>
-        }
+      <div className="flex flex-col gap-[7px] flex-shrink-0">
+        {book.status === "Returned" && (
+          <span className="text-[12px] text-[#9b8a6a] px-[18px] py-2 text-center">Returned</span>
+        )}
       </div>
     </div>
   );
 }
 
-// ─── Progress Ring ────────────────────────────────────────────────────────────
+// ─── Progress Ring ─────────────────────────────────────────────────────────────
 function ProgressRing({ value, max, color, label, sublabel }) {
   const r = 32, circ = 2 * Math.PI * r;
   const pct = Math.min(value / max, 1);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+    <div className="flex items-center gap-4">
       <svg width="80" height="80" style={{ transform: "rotate(-90deg)" }}>
         <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(200,185,154,.2)" strokeWidth="6" />
-        <circle cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="6"
+        <circle
+          cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="6"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
-          strokeLinecap="round" style={{ transition: "stroke-dashoffset .8s ease" }} />
+          strokeLinecap="round" style={{ transition: "stroke-dashoffset .8s ease" }}
+        />
       </svg>
       <div>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: "22px", fontWeight: "700", color: "#515427" }}>{value}<span style={{ fontSize: "13px", color: "#9b8a6a", fontFamily: "inherit" }}>/{max}</span></div>
-        <div style={{ fontSize: "12px", fontWeight: "600", color: "#7a6f4e" }}>{label}</div>
-        <div style={{ fontSize: "11px", color: "#b0a080" }}>{sublabel}</div>
+        <div className="font-serif text-[22px] font-bold text-[#515427]">
+          {value}<span className="text-[13px] text-[#9b8a6a] font-serif">/{max}</span>
+        </div>
+        <div className="text-[12px] font-semibold text-[#7a6f4e]">{label}</div>
+        <div className="text-[11px] text-[#b0a080]">{sublabel}</div>
       </div>
     </div>
   );
@@ -171,7 +167,6 @@ export default function BorrowedBooksPage() {
     }
   };
 
-  // ✅ SIRF YEH — filtering aur counts ke liye computeStatus use karo
   const filtered = userdata
     .filter(b => !filterMap[filter] || computeStatus(b) === filterMap[filter])
     .sort((a, b) => {
@@ -184,7 +179,6 @@ export default function BorrowedBooksPage() {
   const stats = {
     active: userdata.filter(b => b.status === "Borrowed").length,
     overdue: userdata.filter(b => b.status === "Overdued").length,
-    // ✅ SIRF YEH — dueSoon frontend se compute hoga
     dueSoon: userdata.filter(b => computeStatus(b) === "due-soon").length,
     returned: userdata.filter(b => b.status === "Returned").length,
     total: userdata.length,
@@ -203,80 +197,71 @@ export default function BorrowedBooksPage() {
   }
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px 72px", fontFamily: "'Inter', sans-serif" }}>
+    <div className="max-w-[900px] mx-auto px-8 pt-10 pb-[72px] font-sans">
 
       {/* ── Page Header ── */}
-      <div style={{ marginBottom: "32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-          <span style={{ fontSize: "28px" }}>📖</span>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: "700", color: "#515427", margin: 0 }}>My Borrowed Books</h1>
+      <div className="mb-8">
+        <div className="flex items-center gap-[10px] mb-[6px]">
+          <span className="text-[28px]">📖</span>
+          <h1 className="font-serif text-[28px] font-bold text-[#515427] m-0">My Borrowed Books</h1>
         </div>
-        <p style={{ color: "#9b8a6a", fontSize: "14px", margin: 0 }}>Track your reading journey and manage your borrowed collection</p>
+        <p className="text-[#9b8a6a] text-[14px] m-0">Track your reading journey and manage your borrowed collection</p>
       </div>
 
       {/* ── Stats Row ── */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: "16px", marginBottom: "32px",
-      }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-8">
         {[
-          { label: "Currently Borrowed", val: stats.active, sub: "books in hand", color: "#6b9e50", bg: "#f0f5eb" },
-          { label: "Overdue", val: stats.overdue, sub: "need immediate return", color: "#d94f4f", bg: "#fde8e8" },
-          { label: "Due This Week", val: stats.dueSoon, sub: "return soon", color: "#e6a832", bg: "#fef3e2" },
-          { label: "Total Borrowed", val: stats.total, sub: "all time", color: "#9b80c8", bg: "#ece8f0" },
+          { label: "Currently Borrowed", val: stats.active, sub: "books in hand", color: "text-[#6b9e50]", bg: "bg-[#f0f5eb]", border: "border-[#6b9e5022]" },
+          { label: "Overdue", val: stats.overdue, sub: "need immediate return", color: "text-[#d94f4f]", bg: "bg-[#fde8e8]", border: "border-[#d94f4f22]" },
+          { label: "Due This Week", val: stats.dueSoon, sub: "return soon", color: "text-[#e6a832]", bg: "bg-[#fef3e2]", border: "border-[#e6a83222]" },
+          { label: "Total Borrowed", val: stats.total, sub: "all time", color: "text-[#9b80c8]", bg: "bg-[#ece8f0]", border: "border-[#9b80c822]" },
         ].map((s) => (
-          <div key={s.label} style={{
-            background: s.bg, borderRadius: "14px", padding: "20px 22px",
-            border: `1px solid ${s.color}22`,
-          }}>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "30px", fontWeight: "700", color: s.color }}>{s.val}</div>
-            <div style={{ fontSize: "12px", fontWeight: "600", color: "#515427", marginTop: "2px" }}>{s.label}</div>
-            <div style={{ fontSize: "11px", color: "#9b8a6a", marginTop: "1px" }}>{s.sub}</div>
+          <div key={s.label} className={`${s.bg} ${s.border} rounded-[14px] px-[22px] py-5 border`}>
+            <div className={`font-serif text-[30px] font-bold ${s.color}`}>{s.val}</div>
+            <div className="text-[12px] font-semibold text-[#515427] mt-[2px]">{s.label}</div>
+            <div className="text-[11px] text-[#9b8a6a] mt-[1px]">{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* ── Quota Tracker ── */}
-      <div style={{
-        background: "#f8f7ec", borderRadius: "16px", padding: "24px 28px",
-        border: "1px solid rgba(200,185,154,.3)", marginBottom: "32px",
-        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px",
-      }}>
+      <div className="bg-[#f8f7ec] rounded-[16px] px-7 py-6 border border-[rgba(200,185,154,.3)] mb-8 flex items-center justify-between flex-wrap gap-5">
         <div>
-          <h3 style={{ fontFamily: "Georgia, serif", fontSize: "16px", color: "#515427", margin: "0 0 4px" }}>Borrowing Quota</h3>
-          <p style={{ fontSize: "12px", color: "#9b8a6a", margin: 0 }}>Premium members can borrow up to 5 books simultaneously</p>
+          <h3 className="font-serif text-[16px] text-[#515427] m-0 mb-1">Borrowing Quota</h3>
+          <p className="text-[12px] text-[#9b8a6a] m-0">Premium members can borrow up to 5 books simultaneously</p>
         </div>
-        <ProgressRing value={stats.active + stats.overdue} max={5} color="#864c25" label="Books Borrowed" />
+        <ProgressRing value={stats.active + stats.overdue} max={5} color="#864c25" label="Books Borrowed" sublabel="" />
       </div>
 
       {/* ── Filters & Sort ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div className="flex gap-[6px] flex-wrap">
           {filters.map((f) => (
-            <button key={f} onClick={() => setFilter(f)} style={{
-              padding: "6px 14px", borderRadius: "20px", border: "1.5px solid",
-              borderColor: filter === f ? "#515427" : "rgba(200,185,154,.45)",
-              background: filter === f ? "#515427" : "transparent",
-              color: filter === f ? "#fffff3" : "#7a6f4e",
-              cursor: "pointer", fontSize: "12px", fontWeight: filter === f ? "600" : "400",
-              fontFamily: "inherit", transition: "all .18s",
-            }}>{f}
-              {/* ✅ SIRF YEH — filter count bhi computeStatus se */}
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-[14px] py-[6px] rounded-[20px] border-[1.5px] text-[12px] cursor-pointer font-[inherit] transition-all duration-[180ms]
+                ${filter === f
+                  ? "bg-[#515427] text-[#fffff3] border-[#515427] font-semibold"
+                  : "bg-transparent text-[#7a6f4e] border-[rgba(200,185,154,.45)]"
+                }`}
+            >
+              {f}
               {f !== "All" && filterMap[f] && (
-                <span style={{ marginLeft: "5px", fontSize: "10px", opacity: .8 }}>
+                <span className="ml-[5px] text-[10px] opacity-80">
                   ({userdata.filter(b => computeStatus(b) === filterMap[f]).length})
                 </span>
               )}
             </button>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "12px", color: "#9b8a6a" }}>Sort by:</span>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{
-            padding: "6px 12px", borderRadius: "8px", border: "1.5px solid rgba(200,185,154,.45)",
-            background: "#fffff3", color: "#515427", fontSize: "12px", fontFamily: "inherit",
-            cursor: "pointer", outline: "none",
-          }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[12px] text-[#9b8a6a]">Sort by:</span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-[6px] rounded-[8px] border-[1.5px] border-[rgba(200,185,154,.45)] bg-[#fffff3] text-[#515427] text-[12px] font-[inherit] cursor-pointer outline-none"
+          >
             <option value="dueDate">Due Date</option>
             <option value="issueDate">Borrowed Date</option>
             <option value="title">Title A–Z</option>
@@ -286,13 +271,13 @@ export default function BorrowedBooksPage() {
 
       {/* ── Book List ── */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 20px", color: "#9b8a6a" }}>
-          <div style={{ fontSize: "36px", marginBottom: "12px" }}>📭</div>
-          <h3 style={{ fontSize: "18px", color: "#515427", fontFamily: "Georgia, serif", marginBottom: "6px" }}>No books here</h3>
-          <p style={{ fontSize: "14px" }}>You have no books in this category.</p>
+        <div className="text-center py-[60px] px-5 text-[#9b8a6a]">
+          <div className="text-[36px] mb-3">📭</div>
+          <h3 className="text-[18px] text-[#515427] font-serif mb-[6px]">No books here</h3>
+          <p className="text-[14px]">You have no books in this category.</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="flex flex-col gap-3">
           {filtered.map((book, index) => (
             <BorrowedBookRow key={book._id} book={book} index={index} />
           ))}
@@ -301,17 +286,13 @@ export default function BorrowedBooksPage() {
 
       {/* ── Overdue Banner ── */}
       {stats.overdue > 0 && (
-        <div style={{
-          marginTop: "28px", background: "#fde8e8", border: "1px solid #f5c0c0",
-          borderRadius: "14px", padding: "18px 22px",
-          display: "flex", alignItems: "center", gap: "14px",
-        }}>
-          <span style={{ fontSize: "22px" }}>⚠️</span>
+        <div className="mt-7 bg-[#fde8e8] border border-[#f5c0c0] rounded-[14px] px-[22px] py-[18px] flex items-center gap-[14px]">
+          <span className="text-[22px]">⚠️</span>
           <div>
-            <div style={{ fontSize: "14px", fontWeight: "600", color: "#8b2a2a", marginBottom: "2px" }}>
+            <div className="text-[14px] font-semibold text-[#8b2a2a] mb-[2px]">
               You have {stats.overdue} overdue book{stats.overdue > 1 ? "s" : ""}
             </div>
-            <div style={{ fontSize: "12px", color: "#b05050" }}>
+            <div className="text-[12px] text-[#b05050]">
               Late returns may affect your borrowing privileges. Please return them as soon as possible.
             </div>
           </div>
