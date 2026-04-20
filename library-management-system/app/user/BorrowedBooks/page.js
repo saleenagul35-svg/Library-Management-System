@@ -148,7 +148,7 @@ export default function BorrowedBooksPage() {
 
   const fetchingData = async () => {
     try {
-      const token = localStorage.getItem('UserLoginToken');
+      const token = localStorage.getItem('UserLoginToken') ||  localStorage.getItem("user_Signup_Token");
       const response = await fetch("http://localhost:5000/api/UserData", {
         method: "GET",
         headers: {

@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const {adminNotification,UserRejectedRequestData,UserData,UserExpiredApprovalsData,UserApprovedRequestData,returnedBooks,RecentActvity,BorrowedBooks,UserpendingRequestData,rejectedRequetsData,expiredApprovalsData,requestCount,borrowedRequestCount,overDueCount,membersActivity,approvedRequestsData} = require("../controller/BorrowDataController")
+const {topBooks,adminNotification,UserRejectedRequestData,UserData,UserExpiredApprovalsData,UserApprovedRequestData,returnedBooks,RecentActvity,BorrowedBooks,UserpendingRequestData,rejectedRequetsData,expiredApprovalsData,requestCount,borrowedRequestCount,overDueCount,membersActivity,approvedRequestsData} = require("../controller/BorrowDataController")
 const Token_Verfication = require("../middleware/authMiddleware")
-
+router.get("/topBooks",Token_Verfication,topBooks)
 router.get("/adminNotification",Token_Verfication,adminNotification)
 router.get("/UserpendingRequestData",Token_Verfication,UserpendingRequestData)
 router.get("/UserApprovedRequestData",Token_Verfication,UserApprovedRequestData)

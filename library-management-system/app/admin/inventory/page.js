@@ -273,8 +273,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 /* ─── Main Page ──────────────────────────────────────────────────────── */
 export default function InventoryPage() {
   const router = useRouter();
-  const [loader, setLoader] = useState(true);
-  const [books, setBooks] = useState([]);
 
   // modal states
   const [bookToDelete, setBookToDelete] = useState(null);
@@ -287,6 +285,20 @@ export default function InventoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   /* fetch */
+    const fetchData = (url) => {
+    const token = localStorage.getItem('Admintoken');
+    return fetch(url, {
+      headers: {
+        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }).then(res => res.json()).then(res => res.data)
+  }
+  const { data: books = [], isPending: P1 } = useQuery({
+    queryKey: ["approvedrecords"],
+    queryFn: () => fetchData("http://localhost:5000/api/bookData"),
+    refetchInterval: 15000
+  })
   const fetchingAPIs = async () => {
     try {
       const token = localStorage.getItem('Admintoken');
@@ -304,7 +316,6 @@ export default function InventoryPage() {
     }
   };
 
-  useEffect(() => { fetchingAPIs(); }, []);
   useEffect(() => { setCurrentPage(1); }, [search]);
 
   /* sort + filter */
@@ -366,11 +377,10 @@ export default function InventoryPage() {
       console.log(error);
     } finally {
       setBookToDelete(null);
-      fetchingAPIs();
     }
   };
 
-  if (loader) {
+  if (P1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: '#52512a' }} />

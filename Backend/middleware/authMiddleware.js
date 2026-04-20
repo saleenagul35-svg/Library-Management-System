@@ -19,17 +19,19 @@ const Token_Verfication = async (req, res, next) => {
             }
             else {
                 res.status(401).json({
-                    message: "request Denied"
+                    message: "Invalid token"
                 })
             }
 
         } else {
             res.status(401).json({
-                message: "Invalid token"
+                message: "token not found"
             })
         }
     } catch (error) {
-        res.status(401).json({ message: "token not found" })
+        console.log(error);
+        
+        res.status(500).json({ message: "Internal error" })
     }
 
 

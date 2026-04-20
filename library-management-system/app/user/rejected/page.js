@@ -1,8 +1,66 @@
 "use client"
 import { useState, useEffect } from "react";
+import { X, MessageSquareX, AlignLeft } from "lucide-react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+function BookDetailsModal({ record, onClose, }) {
+    if (!record) return null;
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(6px)' }}
+            onClick={onClose}
+        >
+            <div className="relative w-full max-w-xl rounded-2xl bg-[#fffff3] shadow-2xl animate-fade-up overflow-hidden max-h-[90vh] flex flex-col">
 
+                {/* top accent strip */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-primary to-primary-600 flex-shrink-0" />
+
+                {/* close button */}
+                <button
+                    //   onClick={onClose}
+                    className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-lg text-primary/30 hover:bg-primary/8 hover:text-primary transition-all z-10">
+                    <X size={15} />
+                </button>
+
+                {/* Scrollable body */}
+                <div className="overflow-y-auto flex-1 px-6 pb-6 pt-5">
+
+                    {/* Header */}
+                    <div className="mb-5 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary-600 flex-shrink-0">
+                            <MessageSquareX size={18} strokeWidth={1.75} />
+                        </div>
+                        <div>
+                            <h2 className="font-display text-lg font-bold text-primary-950">Rejection Reason</h2>
+                        </div>
+                    </div>
+                    {/* Synopsis Section */}
+                    {record && (
+                        <div className="mb-4 rounded-xl border border-primary/10 bg-brand-bg/60 p-4">
+                            <div className="flex items-center gap-2 mb-2.5">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary/60">
+                                    <AlignLeft size={12} strokeWidth={2} />
+                                </div>
+                                <p className="text-[11px] uppercase tracking-[0.07em] font-semibold text-primary-800/50">Reason</p>
+                            </div>
+                            <p className="text-sm h-auto  wrap-break-word text-red-700 leading-relaxed">{record}</p>
+                        </div>
+                    )}
+
+                    {/* Footer action */}
+                    <div className="flex justify-end pt-1">
+                        <button
+                            onClick={onClose}
+                            className="rounded-xl border border-primary/15 bg-[#fffff3] px-5 py-2 text-sm font-medium text-primary/70 hover:border-primary/30 hover:text-primary transition-all">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 const getInitials = (name = "") => {
     const parts = name.trim().split(" ");
     if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
@@ -28,11 +86,17 @@ function Avatar({ name, index }) {
     );
 }
 
-function Badge({ label }) {
+function Badge({ label, setSelectedRecord }) {
     return (
-        <span className="bg-[#e6a832]/10 text-[#e6a832] inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-md whitespace-nowrap">
-            {label}
-        </span>
+        <div className="px-5 py-4 max-w-[200px]"> {/* Max width dena zaroori hai */}
+            <div className="line-clamp-1 cursor-pointer" onClick={() => setSelectedRecord(label)}>
+                <span className=" text-red-700 text-[11px]  inline relative group/rejectionReason font-semibold">
+                    {label}
+                    <span className="absolute left-0 -bottom-0.5 h-[1.5px] w-0 bg-red-700 group-hover/rejectionReason:w-full transition-all duration-300 ease-out rounded-full" />
+
+                </span>
+            </div>
+        </div>
     );
 }
 
@@ -57,7 +121,7 @@ function EmptyState() {
 // ✅ Fixed: equal Member/Book columns, tighter Stock
 const GRID = "0.6fr 0.6fr 0.6fr 0.5fr 0.5fr";
 
-function DesktopTable({ requests }) {
+function DesktopTable({ requests,setSelectedRecord }) {
     return (
         <div className="hidden md:block bg-[#fffff3] rounded-xl border border-[#d9d4c2] overflow-hidden">
             <div className="grid bg-[#FCF5E1] border-b border-[#d9d4c2] px-5 py-2.5"
@@ -69,13 +133,13 @@ function DesktopTable({ requests }) {
                 ))}
             </div>
             {requests.map((r, idx) => (
-                <DesktopRow key={r.userId.id} r={r} index={idx} isLast={idx === requests.length - 1} />
+                <DesktopRow key={r.userId.id} r={r} index={idx} isLast={idx === requests.length - 1 } setSelectedRecord={setSelectedRecord}/>
             ))}
         </div>
     );
 }
 
-function DesktopRow({ r, index, isLast }) {
+function DesktopRow({ r, index, isLast, setSelectedRecord }) {
     return (
         <div
             className={`grid items-center px-5 py-3.5 hover:bg-[#faf8ef] transition-colors duration-150 ${!isLast ? "border-b border-[#ede9d8]" : ""}`}
@@ -99,14 +163,14 @@ function DesktopRow({ r, index, isLast }) {
                 <p className="text-[12px] font-medium text-[#2e2c1e]">{formatDate(r.rejectedDate)}</p>
             </div>
             <div className="flex items-center justify-center gap-2">
-                <Badge label={r.rejectionReason} />
+                <Badge label={r.rejectionReason} setSelectedRecord={setSelectedRecord} />
             </div>
         </div>
     );
 }
 
 // ✅ Fixed: date calculation moved inside map
-function MobileCards({ requests }) {
+function MobileCards({ requests, setSelectedRecord }) {
     return (
         <div className="md:hidden flex flex-col gap-3">
             {requests.map((r, idx) => (
@@ -126,7 +190,7 @@ function MobileCards({ requests }) {
                         <p className="text-[10.5px] text-[#b0a98f] mt-1">{formatDate(r.requestDate)}</p>
                         <span className="text-[11px] text-[#9a9280]">{formatDate(r.rejectedDate)}</span>
                         <div className="ml-auto flex items-center gap-2">
-                            <Badge label={r.rejectionReason} />
+                            <Badge label={r.rejectionReason} setSelectedRecord={setSelectedRecord} />
                         </div>
                     </div>
                 </div>
@@ -136,12 +200,13 @@ function MobileCards({ requests }) {
 }
 
 export default function rejectedApprovals() {
+    const [selectedRecord, setSelectedRecord] = useState(null)
     const [requests, setRequests] = useState([]);
     const [loader, setLoader] = useState(true)
 
     const fetchingAPIs = async () => {
         try {
-            const token = localStorage.getItem('UserLoginToken');
+            const token = localStorage.getItem('UserLoginToken') ||  localStorage.getItem("user_Signup_Token");
             const response = await fetch("http://localhost:5000/api/UserRejectedRequestData", {
                 method: "GET",
                 headers: {
@@ -174,30 +239,37 @@ export default function rejectedApprovals() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FCF5E1] px-4 sm:px-6 py-8 font-sans">
-            <div className="max-w-5xl mx-auto">
-                <div className="flex items-end justify-between mb-6">
-                    <div>
-                        <h1 className="font-serif text-[18px] font-medium text-[#2e2c1e] tracking-tight">
-                            Rejection Window
-                        </h1>
-                        <p className="text-xs text-[#9a9280] mt-1">Please review the rejection reason</p>
+        <>
+            {selectedRecord && <BookDetailsModal
+                record={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+                onClose={() => setSelectedRecord(null)}
+            />}
+            <div className="min-h-screen bg-[#FCF5E1] px-4 sm:px-6 py-8 font-sans">
+                <div className="max-w-5xl mx-auto">
+                    <div className="flex items-end justify-between mb-6">
+                        <div>
+                            <h1 className="font-serif text-[18px] font-medium text-[#2e2c1e] tracking-tight">
+                                Rejection Window
+                            </h1>
+                            <p className="text-xs text-[#9a9280] mt-1">Please review the rejection reason</p>
 
+                        </div>
+                        <span className="text-[11px] font-medium bg-red-100 text-red-700 border border-red-200 px-3.5 py-1.5 rounded-full">
+                            {requests.length} Rejections
+                        </span>
                     </div>
-                    <span className="text-[11px] font-medium bg-red-100 text-red-700 border border-red-200 px-3.5 py-1.5 rounded-full">
-                        {requests.length} Rejected
-                    </span>
-                </div>
 
-                {requests.length === 0 ? (
-                    <EmptyState />
-                ) : (
-                    <>
-                        <DesktopTable requests={requests} />
-                        <MobileCards requests={requests} />
-                    </>
-                )}
+                    {requests.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        <>
+                            <DesktopTable requests={requests} setSelectedRecord={setSelectedRecord} />
+                            <MobileCards requests={requests} setSelectedRecord={setSelectedRecord} />
+                        </>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 }

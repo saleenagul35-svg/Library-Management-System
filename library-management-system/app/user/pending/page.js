@@ -142,7 +142,7 @@ export default function UserBorrowRequests() {
 
   const fetchingAPIs = async () => {
     try {
-      const token = localStorage.getItem('UserLoginToken');
+      const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
       const response = await fetch("http://localhost:5000/api/UserpendingRequestData", {
         method: "GET",
         headers: {

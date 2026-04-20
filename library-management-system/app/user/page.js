@@ -46,14 +46,12 @@ export default function UserHomePage() {
   const [loader, setLoader] = useState(true);
   const [books, setBooks] = useState([]);
 
-  let token = null;
+
   const fetchingAPIs = async () => {
     try {
-      if (localStorage.getItem("UserLoginToken")) {
-        token = localStorage.getItem("UserLoginToken");
-      } else if (localStorage.getItem("user_Signup_Token")) {
-        token = localStorage.getItem("user_Signup_Token");
-      }
+      const  token = localStorage.getItem("UserLoginToken") || localStorage.getItem("user_Signup_Token");;
+console.log("sign", localStorage.getItem("user_Signup_Token"));
+
       const headers = {
         "authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
@@ -62,7 +60,7 @@ export default function UserHomePage() {
       const data1 = await res1.json();
 
       if (data1) {
-        setBooks(data1.data);
+        setBooks(data1.data || []);
       }
     } catch (error) {
       console.log(error);
@@ -134,7 +132,7 @@ export default function UserHomePage() {
       <div className="fixed top-7 right-7 z-[1000] bg-[#515427] text-[#fffff3] p-[14px_20px] rounded-[12px] shadow-[0_8px_32px_rgba(0,0,0,.3)] flex items-center gap-3 text-[14px] min-w-[270px] animate-in slide-in-from-right-10 duration-700">
         <span className="text-[20px]">📚</span>
         <div>
-          <div className="font-semibold mb-0.5">Book Reserved!</div>
+          <div className="font-semibold mb-0.5">Book Reservation!</div>
           <div className="text-[12px] text-[#c8b99a]">{message}</div>
         </div>
       </div>
@@ -160,7 +158,7 @@ export default function UserHomePage() {
     setModalBook(null);
 
     try {
-      const token = localStorage.getItem("UserLoginToken");
+      const token = localStorage.getItem("UserLoginToken") ||  localStorage.getItem("user_Signup_Token");
       const response = await fetch("http://localhost:5000/api/borrowRequest", {
         method: "POST",
         headers: {

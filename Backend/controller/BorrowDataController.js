@@ -1,5 +1,68 @@
 const RequestsCollection = require("../models/borrowRequestModel");
+const topBooks = async (req, res) => {
+    try {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        const result = await RequestsCollection.aggregate([
+            {
+               
+                $match: {
+                     status:{$in:["Borrowed", "Overdued", "Returned"]},
+                    issueDate: {
+                        $gte: startOfMonth,
+                        $lte: endOfMonth
+                    }
 
+                }
+            },
+            {
+                $group: {
+                    _id: "$bookId",
+                    totalBorrowed: { $sum: 1 }
+                }
+            },
+            {
+                $lookup:{
+                    from:"booksdatas",
+                    localField:"_id",
+                    foreignField:"_id",
+                    as:"bookDetails"
+                }
+            },
+            {
+                $unwind:"$bookDetails"
+            },
+            {
+                $sort:{
+                    totalBorrowed:-1
+                }
+            },
+            {
+                $limit:6
+            },
+            {
+                $project:{
+                    _id:0,
+                    bookID: "$_id", 
+                    Title: "$bookDetails.Title",
+                    Author: "$bookDetails.Author",
+                    totalBorrowed:1
+                }
+            }
+
+        ])
+          res.status(200).json({
+            message: "top books fetched",
+            data: result
+        })      
+
+    } catch (error) {
+        res.status(500).json({
+            message: "internal server error occured"
+        })
+    }
+}
 const adminNotification = async (req, res) => {
     try {
         const pendingRequests = await RequestsCollection.find({ status: "Pending" }).populate("userId", "id name").populate("bookId", "Title Copy ISBN")
@@ -120,7 +183,7 @@ const UserExpiredApprovalsData = async (req, res) => {
 const UserData = async (req, res) => {
     const id = req.ActiveID
     try {
-        const data = await RequestsCollection.find({ userId: id, status: {$in:["Borrowed","Overdued","Returned"]} }).populate("bookId", "Title Author Pages Genre")
+        const data = await RequestsCollection.find({ userId: id, status: { $in: ["Borrowed", "Overdued", "Returned"] } }).populate("bookId", "Title Author Pages Genre")
 
         res.status(200).json({
             message: "data fetched successfully",
@@ -153,7 +216,7 @@ const requestCount = async (req, res) => {
 }
 const borrowedRequestCount = async (req, res) => {
     try {
-        const ApprovedRequests = await RequestsCollection.find({ status: {$in:["Borrowed" ,"Overdued"]} })
+        const ApprovedRequests = await RequestsCollection.find({ status: { $in: ["Borrowed", "Overdued"] } })
         res.status(200).json({
             message: "data fetched successfully",
             data: ApprovedRequests.length
@@ -200,7 +263,7 @@ const membersActivity = async (req, res) => {
 }
 const approvedRequestsData = async (req, res) => {
     try {
-        const approvedBooksData = await RequestsCollection.find({ status: "Approved" },{issueDate: 0,rejectedDate:0, rejectionReason: 0, dueDate: 0, returnDate: 0}).populate("userId", "id name").populate("bookId", "Title Author")
+        const approvedBooksData = await RequestsCollection.find({ status: "Approved" }, { issueDate: 0, rejectedDate: 0, rejectionReason: 0, dueDate: 0, returnDate: 0 }).populate("userId", "id name").populate("bookId", "Title Author")
         res.status(200).json({
             message: "data fetched successfully",
             data: approvedBooksData
@@ -216,7 +279,7 @@ const approvedRequestsData = async (req, res) => {
 }
 const expiredApprovalsData = async (req, res) => {
     try {
-        const approvedBooksData = await RequestsCollection.find({ status: "Expired" }, {issueDate: 0,rejectedDate:0, rejectionReason: 0, dueDate: 0, returnDate: 0}).populate("userId", "id name").populate("bookId", "Title Author",)
+        const approvedBooksData = await RequestsCollection.find({ status: "Expired" }, { issueDate: 0, rejectedDate: 0, rejectionReason: 0, dueDate: 0, returnDate: 0 }).populate("userId", "id name").populate("bookId", "Title Author",)
         res.status(200).json({
             message: "data fetched successfully",
             data: approvedBooksData
@@ -232,7 +295,7 @@ const expiredApprovalsData = async (req, res) => {
 }
 const rejectedRequetsData = async (req, res) => {
     try {
-        const approvedBooksData = await RequestsCollection.find({ status: "Rejected" }, {issueDate: 0,approvedDate:0,expireDate:0,dueDate: 0, returnDate: 0}).populate("userId", "id name").populate("bookId", "Title Author",)
+        const approvedBooksData = await RequestsCollection.find({ status: "Rejected" }, { issueDate: 0, approvedDate: 0, expireDate: 0, dueDate: 0, returnDate: 0 }).populate("userId", "id name").populate("bookId", "Title Author",)
         res.status(200).json({
             message: "data fetched successfully",
             data: approvedBooksData
@@ -248,12 +311,12 @@ const rejectedRequetsData = async (req, res) => {
 }
 const BorrowedBooks = async (req, res) => {
     try {
-    const BorrowedBooksData = await RequestsCollection.find({ status: {$in: ["Borrowed","Overdued"]} }, {approvedDate: 0,expireDate:0,rejectedDate:0, rejectionReason: 0,requestDate:0}).populate("userId", "id name email").populate("bookId", "Title Author")
+        const BorrowedBooksData = await RequestsCollection.find({ status: { $in: ["Borrowed", "Overdued"] } }, { approvedDate: 0, expireDate: 0, rejectedDate: 0, rejectionReason: 0, requestDate: 0 }).populate("userId", "id name email").populate("bookId", "Title Author")
         res.status(200).json({
             message: "data fetched successfully",
             data: BorrowedBooksData
         })
-     
+
 
     } catch (error) {
         res.status(500).json({
@@ -264,12 +327,12 @@ const BorrowedBooks = async (req, res) => {
 }
 const returnedBooks = async (req, res) => {
     try {
-    const returnedBooksData = await RequestsCollection.find({ status: "Returned" }, {approvedDate: 0,expireDate:0,rejectedDate:0, rejectionReason: 0, requestDate: 0,}).populate("userId", "id name email").populate("bookId", "Title Author")
+        const returnedBooksData = await RequestsCollection.find({ status: "Returned" }, { approvedDate: 0, expireDate: 0, rejectedDate: 0, rejectionReason: 0, requestDate: 0, }).populate("userId", "id name email").populate("bookId", "Title Author")
         res.status(200).json({
             message: "data fetched successfully",
             data: returnedBooksData
         })
-     
+
 
     } catch (error) {
         res.status(500).json({
@@ -280,12 +343,12 @@ const returnedBooks = async (req, res) => {
 }
 const RecentActvity = async (req, res) => {
     try {
-    const Recent = await RequestsCollection.find({ status: {$in:["Returned","Borrowed","Overdued"]} }, {approvedDate: 0,expireDate:0,rejectedDate:0, rejectionReason: 0, requestDate: 0,}).populate("userId", "name").populate("bookId", "Title").sort({activityDate:-1}).limit(6)
+        const Recent = await RequestsCollection.find({ status: { $in: ["Returned", "Borrowed", "Overdued"] } }, { approvedDate: 0, expireDate: 0, rejectedDate: 0, rejectionReason: 0, requestDate: 0, }).populate("userId", "name").populate("bookId", "Title").sort({ activityDate: -1 }).limit(6)
         res.status(200).json({
             message: "data fetched successfully",
             data: Recent
         })
-     
+
 
     } catch (error) {
         res.status(500).json({
@@ -294,4 +357,4 @@ const RecentActvity = async (req, res) => {
     }
 
 }
-module.exports = {UserData,UserRejectedRequestData, UserExpiredApprovalsData,UserApprovedRequestData, adminNotification,BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData,rejectedRequetsData ,expiredApprovalsData,returnedBooks,RecentActvity}
+module.exports = {topBooks, UserData, UserRejectedRequestData, UserExpiredApprovalsData, UserApprovedRequestData, adminNotification, BorrowedBooks, UserpendingRequestData, requestCount, borrowedRequestCount, overDueCount, membersActivity, approvedRequestsData, rejectedRequetsData, expiredApprovalsData, returnedBooks, RecentActvity }

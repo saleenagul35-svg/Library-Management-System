@@ -3,18 +3,14 @@
 import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
   Calendar,
-  RotateCcw,
-  Search,
-  Filter,
-  ChevronDown,
   CheckCircle2,
   Loader2,
   BookMarked,
-  Hash,
+
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -184,53 +180,37 @@ function TableRow({ record, onIssue, issuing, index }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ApprovedBooks() {
-  const [records, setRecords] = useState([]);
   const [issuing, setIssuing] = useState(null);
-  const [search, setSearch] = useState('');
-  const [loader, setLoader] = useState(true)
-
-
   // ── Fetch approved books ──
-  const fetchingAPIs = async () => {
-    try {
-      const token = localStorage.getItem('Admintoken');
-      const response = await fetch("http://localhost:5000/api/approvedRequestsData", {
-        method: "GET",
-        headers: {
-          authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setRecords(data.data);
+  const fetchData = (url) => {
+    const token = localStorage.getItem('Admintoken');
+    return fetch(url, {
+      headers: {
+        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoader(false)
+    }).then(res => res.json()).then(res => res.data)
+  }
+  const { data: records = [], isPending: P1 } = useQuery({
+    queryKey: ["approvedrecords"],
+    queryFn: () => fetchData("http://localhost:5000/api/approvedRequestsData"),
+    refetchInterval: 15000
+  })
 
-    }
-  };
-  useEffect(() => {
-    fetchingAPIs()
-  }, []);
+
 
   // ── Issue book ──
   const handleIssue = async (recordId) => {
     setIssuing(recordId)
     try {
       const token = localStorage.getItem('Admintoken');
-      const res = await fetch(`http://localhost:5000/api/BookIssue/${recordId}`, {
+      await fetch(`http://localhost:5000/api/BookIssue/${recordId}`, {
         method: 'PUT',
         headers: {
           authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      if (res.ok) {
-        fetchingAPIs();
-      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -238,19 +218,7 @@ export default function ApprovedBooks() {
     }
   };
 
-
-  // ── Search filter ──
-  const filtered = records.filter((r) => {
-    const q = search.toLowerCase();
-    return (
-      !q ||
-      r.book.title.toLowerCase().includes(q) ||
-      r.user.name.toLowerCase().includes(q) ||
-      r.user.rollNo.toLowerCase().includes(q) ||
-      r.user.email.toLowerCase().includes(q)
-    );
-  });
-  if (loader) {
+  if (P1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
@@ -289,52 +257,27 @@ export default function ApprovedBooks() {
         </div>
       </div>
 
-      {/* ── Search bar ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search
-            size={15}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-800/30"
-          />
-          <input
-            type="text"
-            placeholder="Search by book, requester, ID..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none transition-all duration-200 bg-card-bg border border-primary/15 text-primary-950 placeholder:text-primary-800/30 focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
-          />
-        </div>
-      </div>
-
       {/* ── Empty state ── */}
-      {filtered.length === 0 && (
+      {records.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5">
             <BookOpen size={28} className="text-primary-800/40" strokeWidth={1.5} />
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-primary-800/60">
-              {search ? 'No matching records' : 'No approved books found'}
+              No approved books found
             </p>
             <p className="text-xs mt-1 text-primary-800/30">
-              {search ? `No results for "${search}"` : 'Approved requests will appear here'}
+             Approved requests will appear here
             </p>
           </div>
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="text-xs px-4 py-2 rounded-lg transition-colors border border-primary/30 text-primary hover:bg-primary/5"
-            >
-              Clear search
-            </button>
-          )}
         </div>
       )}
 
       {/* ── Mobile Cards ── */}
-      {filtered.length > 0 && (
+      {records.length > 0 && (
         <div className="grid grid-cols-1 gap-3 md:hidden">
-          {filtered.map((record) => (
+          {records.map((record) => (
             <BookCard
               key={record._id}
               record={record}
@@ -346,7 +289,7 @@ export default function ApprovedBooks() {
       )}
 
       {/* ── Desktop Table ── */}
-      {filtered.length > 0 && (
+      {records.length > 0 && (
         <div className="hidden md:block rounded-2xl overflow-hidden border border-primary/[0.1] bg-card-bg shadow-brand-sm">
           <table className="w-full">
             <thead>
@@ -362,7 +305,7 @@ export default function ApprovedBooks() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((record, i) => (
+              {records.map((record, i) => (
                 <TableRow
                   key={record._id}
                   record={record}

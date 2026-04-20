@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
@@ -16,26 +17,32 @@ import {
   Plus,
   BarChart2,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+
 
 // ─── Data (replace with API calls in production) ──────────────────────────────
 export default function AdminDashboardPage() {
+
+  const Counting = () => {
+    return topBooks.reduce((acc, curr) => {
+      return acc + curr.totalBorrowed
+    }, 0)
+
+  }
+
   const getGreeting = () => {
     const greeting = new Date().getHours()
-    if (greeting > 5 && greeting < 12) {
+    if (greeting >= 5 && greeting < 12) {
       return "Good Morning, "
-    }
-    if (greeting >= 12 && greeting <= 14) {
+    } else if (greeting >= 12 && greeting <= 14) {
       return "Good noon, "
-    }
-    if (greeting >= 15 && greeting < 17) {
+    } else if (greeting > 14 && greeting < 17) {
       return "Good Afternoon, "
-    }
-    if (greeting >= 17 && greeting < 18) {
+    } else if (greeting >= 17 && greeting < 19) {
       return "Good Evening, "
+    } else {
+      return "Night Owl, "
     }
 
-      return "Night Owl, "
   }
 
   const countingTime = (time) => {
@@ -58,82 +65,46 @@ export default function AdminDashboardPage() {
   }
 
   //============================== APIs ===========================//
-  const [loader, setLoader] = useState(true)
-  const [totalBooks, setTotalBooks] = useState(null)
-  const [totalStudents, setTotalStudents] = useState(null)
-  const [totalBorrowings, setTotalBorrowings] = useState(null)
-  const [overDueBooks, setOverDueBooks] = useState(null)
-  const [topBooks, setTopBooks] = useState([])
-  const fetchingAPIs = async () => {
-    try {
-      const token = localStorage.getItem("Admintoken")
-      const headers = {
+
+  const fetchData = (url) => {
+    const token = localStorage.getItem("Admintoken")
+    return fetch(url, {
+      headers: {
         "authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       }
-      const [res1, res2, res3, res4, res5] = await Promise.all([
-        fetch("http://localhost:5000/api/bookCount", { method: "GET", headers }),
-        fetch("http://localhost:5000/api/membersCount", { method: "GET", headers }),
-        fetch("http://localhost:5000/api/borrowedRequestCount", { method: "GET", headers }),
-        fetch("http://localhost:5000/api/overDueCount", { method: "GET", headers }),
-        fetch("http://localhost:5000/api/RecentActvity", { method: "GET", headers }),
-      ])
-      const [data1, data2, data3, data4, data5] = await Promise.all([
-        res1.ok ? res1.json() : null,
-        res2.ok ? res2.json() : null,
-        res3.ok ? res3.json() : null,
-        res4.ok ? res4.json() : null,
-        res5.ok ? res5.json() : null
-      ])
-
-      if (data1) {
-        const dataArray = data1.data
-        setTotalBooks(dataArray)
-
-      }
-      if (data2) {
-        let length = data2.data
-        setTotalStudents(length)
-
-
-      }
-      if (data3) {
-        let length = data3.data
-        setTotalBorrowings(length)
-
-
-      }
-      if (data4) {
-        let length = data4.data
-        setOverDueBooks(length)
-
-
-      }
-      if (data5) {
-        let length = data5.data
-        setTopBooks(length)
-
-
-
-
-      }
-
-    } catch (error) {
-      console.log(error);
-
-    } finally {
-      setLoader(false)
-    }
+    }).then(res => res.json()).then(res => res.data)
   }
-  useEffect(() => {
-
-    fetchingAPIs()
-
-  }, [])
-
-
-
-
+  const { data: totalBooks = 0, isPending: P1 } = useQuery({
+    queryKey: ["totalBooks"],
+    queryFn: () => fetchData("http://localhost:5000/api/bookCount"),
+    refetchInterval: 15000
+  })
+  const { data: totalStudents = 0, isPending: P2 } = useQuery({
+    queryKey: ["totalStudents"],
+    queryFn: () => fetchData("http://localhost:5000/api/membersCount"),
+    refetchInterval: 15000
+  })
+  const { data: topBooks = [], isPending: P3 } = useQuery({
+    queryKey: ["topBooks"],
+    queryFn: () => fetchData("http://localhost:5000/api/topBooks"),
+    refetchInterval: 15000
+  })
+  const { data: totalBorrowings = 0, isPending: P4 } = useQuery({
+    queryKey: ["totalBorrowings"],
+    queryFn: () => fetchData("http://localhost:5000/api/borrowedRequestCount"),
+    refetchInterval: 15000
+  })
+  const { data: overDueBooks = 0, isPending: P5 } = useQuery({
+    queryKey: ["overDueBooks"],
+    queryFn: () => fetchData("http://localhost:5000/api/overDueCount"),
+    refetchInterval: 15000
+  })
+  const { data: activity = [], isPending: P6 } = useQuery({
+    queryKey: ["activity"],
+    queryFn: () => fetchData("http://localhost:5000/api/RecentActvity"),
+    refetchInterval: 150000
+  })
 
   const STAT_CARDS = [
     {
@@ -174,17 +145,8 @@ export default function AdminDashboardPage() {
     },
   ];
 
-  const TOP_BOOKS = [
-    { title: 'Dune', author: 'Frank Herbert', borrows: 284, pct: 92 },
-    { title: 'Sapiens', author: 'Yuval Noah Harari', borrows: 261, pct: 85 },
-    { title: 'The Name of the Rose', author: 'Umberto Eco', borrows: 238, pct: 77 },
-    { title: 'Meditations', author: 'Marcus Aurelius', borrows: 197, pct: 64 },
-    { title: 'Crime and Punishment', author: 'Fyodor Dostoevsky', borrows: 164, pct: 53 },
-  ];
 
   // ─── Sub-components ───────────────────────────────────────────────────────────
-
-
 
 
   /** Individual stat card */
@@ -198,11 +160,11 @@ export default function AdminDashboardPage() {
     return (
       <div
         className={`
-        group relative overflow-hidden rounded-2xl border bg-card-bg p-5
-        shadow-brand-sm transition-all duration-300
-        hover:-translate-y-1 hover:shadow-brand-lg
-        ${card.accent}
-        animate-fade-up
+           group relative overflow-hidden rounded-2xl border bg-card-bg p-5
+           shadow-brand-sm transition-all duration-300
+           hover:-translate-y-1 hover:shadow-brand-lg
+           ${card.accent}
+          animate-fade-up
       `}
         style={{ animationDelay: `${index * 80}ms` }}
       >
@@ -247,7 +209,8 @@ export default function AdminDashboardPage() {
 
     return (
       <div
-        className="flex items-center gap-4 py-3 border-b border-primary/[0.05] last:border-0 animate-fade-up"
+        className="flex items-center gap-4 py-3 border-b border-primary/[0.05] last:border-0"
+
         style={{ animationDelay: `${200 + index * 60}ms` }}
       >
         <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${cfg.color}`}>
@@ -277,19 +240,19 @@ export default function AdminDashboardPage() {
   function TopBooksChart() {
     return (
       <div className="space-y-3">
-        {TOP_BOOKS.map((book, i) => (
-          <div key={i} className="animate-fade-up" style={{ animationDelay: `${300 + i * 60}ms` }}>
+        {topBooks.map((book, i) => (
+          <div key={i} >
             <div className="flex items-center justify-between mb-1">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-primary-900 truncate">{book.title}</p>
-                <p className="text-xs text-primary-800/45">{book.author}</p>
+                <p className="text-sm font-medium text-primary-900 truncate">{book.Title}</p>
+                <p className="text-xs text-primary-800/45">{book.Author}</p>
               </div>
-              <span className="ml-3 flex-shrink-0 text-sm font-bold text-primary">{book.borrows}</span>
+              <span className="ml-3 flex-shrink-0 text-sm font-bold text-primary">{book.totalBorrowed}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/8">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-primary to-primary-400 transition-all duration-700"
-                style={{ width: `${book.pct}%`, transitionDelay: `${400 + i * 80}ms` }}
+                style={{ width: `${(book.totalBorrowed / Counting()) * 100}%`, transitionDelay: `${400 + i * 80}ms` }}
               />
             </div>
           </div>
@@ -323,7 +286,7 @@ export default function AdminDashboardPage() {
   const timeString = now.toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
-  if (loader) {
+  if (P1 || P2 || P3 || P4 || P5 || P6) {
     return (
 
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
@@ -380,7 +343,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="px-5 divide-y divide-primary/[0.04]">
-              {topBooks.map((item, i) => (
+              {activity.map((item, i) => (
                 <ActivityRow key={item._id} item={item} index={i} />
               ))}
             </div>

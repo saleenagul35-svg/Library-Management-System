@@ -12,7 +12,11 @@ export default function ProfilePage() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [USER, setUSER] = useState(null)
 
-  
+  const LogOutAdmin = () => {
+    localStorage.removeItem("UserLoginToken")
+    window.history.replaceState(null, "", "/authentication/login")
+    window.location.href = "/authentication/login"
+  }
   const fetchInfo = async () => {
     try {
       let token = null
@@ -44,12 +48,12 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchInfo()
   }, [])
-  if (!USER) return  <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row"> <CircularProgress sx={{ color: "#52512a" }} /></Stack>
-  
+  if (!USER) return <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row"> <CircularProgress sx={{ color: "#52512a" }} /></Stack>
+
   const date = new Date(USER.memberSince)
   const day = date.getDate()
   const year = date.getFullYear()
-  const month = date.toLocaleString("en-US",{month:"long"})
+  const month = date.toLocaleString("en-US", { month: "long" })
   const formattedDate = `${day} ${month} ${year}`
 
 
@@ -189,9 +193,17 @@ export default function ProfilePage() {
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
 
           {/* ── Page Title ── */}
-          <div style={{ marginBottom: "40px", animation: "fadeUp .4s ease" }}>
-            <p style={{ fontSize: "11px", fontWeight: "600", color: "#b0a080", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>Account</p>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "38px", fontWeight: "700", color: "#515427", lineHeight: 1.1 }}>My Profile</h1>
+
+          <div style={{ marginBottom: "40px", animation: "fadeUp .4s ease" }} className="flex justify-between">
+            <div >
+              <p style={{ fontSize: "11px", fontWeight: "600", color: "#b0a080", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>Account</p>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "38px", fontWeight: "700", color: "#515427", lineHeight: 1.1 }}>My Profile</h1>
+            </div>
+            <div className="flex flex-col justify-end">
+              <button className="bg-[#515427] font-serif rounded-full text-white w-20 h-8" onClick={()=>LogOutAdmin()} >
+                Logout
+              </button>
+            </div>
           </div>
 
           {/* ── Identity Card ── */}
@@ -232,7 +244,7 @@ export default function ProfilePage() {
               gap: "0", paddingTop: "22px",
               borderTop: "1px solid rgba(255,255,243,.12)",
             }}>
-            
+
               {[
                 { label: "Member ID", value: "REG-" + USER.id },
                 { label: "Member Since", value: formattedDate },
@@ -285,6 +297,7 @@ export default function ProfilePage() {
               onAction={() => setShowPasswordModal(true)}
             />
           </div>
+
 
           {/* ── Note ── */}
           <p style={{ fontSize: "11px", color: "#c8b99a", textAlign: "center", marginTop: "28px", lineHeight: "1.6" }}>

@@ -1,5 +1,5 @@
 'use client';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -24,6 +24,8 @@ import {
   OctagonX
 } from 'lucide-react';
 
+
+const queryClient = new QueryClient() 
 // ─── Navigation config ────────────────────────────────────────────────────────
 const NAV_ITEMS = [
   {
@@ -218,7 +220,8 @@ function NavItem({ item, onClick,dropdown ,setDropdown}) {
 function SidebarUserCard() {
   const LogOutAdmin = () => {
     localStorage.removeItem("Admintoken")
-    window.location.href = "/authentication"
+    window.history.replaceState(null,"","/authentication/admin")
+    window.location.href = "/authentication/admin"
   }
   return (
     <div className="mx-3 mb-4 rounded-xl border border-white/[0.08] bg-white/[0.05] p-3">
@@ -378,7 +381,6 @@ export default function AdminLayout({ children }) {
   const [dropdown, setDropdown] = useState(false)
 
   const [requestCount, setRequestCount] = useState(null)
-  console.log(requestCount);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const fetchingAPI = async () => {
@@ -470,7 +472,9 @@ export default function AdminLayout({ children }) {
 
         {/* Scrollable page area */}
         <main className="flex-1 overflow-y-auto bg-brand-bg scrollbar-thin">
+          <QueryClientProvider client={queryClient}>
           {children}
+          </QueryClientProvider>
         </main>
       </div>
 

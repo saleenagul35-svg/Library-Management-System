@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function BookDetailsModal({ record, onClose, setSelectedRecord }) {
+function BookDetailsModal({ record, onClose,}) {
     if (!record) return null;
     return (
         <div
@@ -87,7 +87,7 @@ function formatDate(dateStr) {
 
 
 // ─── Book Card (Mobile) ───────────────────────────────────────────────────────
-function BookCard({ record, setSelectedRecord }) {
+function BookCard({ record }) {
     return (
         <div className="rounded-2xl border p-4 transition-all duration-200 bg-card-bg border-primary/15">
             {/* Book title row */}
