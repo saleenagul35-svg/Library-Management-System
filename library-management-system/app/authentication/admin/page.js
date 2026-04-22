@@ -1,18 +1,19 @@
 "use client"
 import Image from "next/image";
-import admin from "../../../public/images/admin.png"
+import admin from "../../../public/images/admin.jpg"
 import { useState,useEffect } from "react";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-
+import { useRouter } from "next/navigation";
 
 
 // ================= LOGIN PAGE =================
 export default function AdminLoginPage() {
    const [alert, setAlert] = useState(false)
+   const [submit, setSubmit] = useState(false)
   const [errors, setErrors] = useState({})
   const [handleform, setHandleForm] = useState({ email: "", password: "" })
-
+const router = useRouter()
   const formData = (e) => {
     const { name, value } = e.target
     setHandleForm((prev) => ({
@@ -33,6 +34,8 @@ export default function AdminLoginPage() {
   }
   const adminPage = async (e) => {
     e.preventDefault()
+    if (!validation()) return
+    setSubmit(true)
     if (validation()) {
       try {
         const response = await fetch("http://localhost:5000/api/adminVerification", {
@@ -50,7 +53,8 @@ export default function AdminLoginPage() {
 
 
           localStorage.setItem("Admintoken", data.accessToken)
-          window.location.href = "/admin"
+          router.push("/admin")
+         
         } else {
           setAlert(`${data.message}`)
         }
@@ -59,6 +63,8 @@ export default function AdminLoginPage() {
       } catch (error) {
         console.log(error);
 
+      } finally{
+        setSubmit(false)
       }
     }
 
@@ -85,7 +91,7 @@ export default function AdminLoginPage() {
 
         {/* Right Form */}
         <div className="flex items-center justify-center p-6 md:p-12">
-          <form onSubmit={adminPage} className="w-full max-w-md">
+          <form  className="w-full max-w-md">
             <h2 className="text-2xl md:text-3xl font-bold text-[#515427] mb-2 text-center md:text-left">
               Welcome Back Admin
             </h2>
@@ -134,6 +140,8 @@ export default function AdminLoginPage() {
 
             {/* Button */}
             <button
+            disabled={submit}
+            onClick={adminPage}
               className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
               Login
             </button>

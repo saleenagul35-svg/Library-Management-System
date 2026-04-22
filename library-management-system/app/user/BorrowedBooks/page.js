@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useQuery } from '@tanstack/react-query';
 
 const STATUS_CONFIG = {
   Borrowed: { label: "Active", bg: "bg-[#e8f0e0]", color: "text-[#4a6b3a]", dot: "bg-[#6b9e50]" },
@@ -138,18 +139,19 @@ function ProgressRing({ value, max, color, label, sublabel }) {
 
 // ─── Main BorrowedBooksPage ────────────────────────────────────────────────────
 export default function BorrowedBooksPage() {
-  const [loader, setLoader] = useState(true);
   const [filter, setFilter] = useState("All");
   const [sortBy, setSortBy] = useState("dueDate");
-  const [userdata, setUserData] = useState([]);
+
 
   const filters = ["All", "Active", "Due Soon", "Overdue", "Returned"];
   const filterMap = { "All": null, "Active": "Borrowed", "Due Soon": "due-soon", "Overdue": "Overdued", "Returned": "Returned" };
 
-  const fetchingData = async () => {
+
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+
     try {
-      const token = localStorage.getItem('UserLoginToken') ||  localStorage.getItem("user_Signup_Token");
-      const response = await fetch("http://localhost:5000/api/UserData", {
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           authorization: `Bearer ${token}`,
@@ -158,15 +160,17 @@ export default function BorrowedBooksPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setUserData(data.data);
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false);
     }
   };
-
+const {data : userdata = [], isPending: P1 } = useQuery({
+  queryKey: ["UserData"],
+  queryFn: ()=>fetchData("http://localhost:5000/api/UserData"),
+  refetchInterval: 60000
+})
   const filtered = userdata
     .filter(b => !filterMap[filter] || computeStatus(b) === filterMap[filter])
     .sort((a, b) => {
@@ -184,11 +188,7 @@ export default function BorrowedBooksPage() {
     total: userdata.length,
   };
 
-  useEffect(() => {
-    fetchingData();
-  }, []);
-
-  if (loader) {
+  if (P1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />

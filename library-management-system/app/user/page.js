@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import Image from "next/image";
+import { useQuery } from '@tanstack/react-query';
 function BookCover({ book }) {
 
   return (
@@ -43,35 +44,34 @@ function BookCard({ book, onBorrowClick, onDetaillClick }) {
 
 export default function UserHomePage() {
   // ─── Data ─────────────────────────────────────────────────────────────────────
-  const [loader, setLoader] = useState(true);
-  const [books, setBooks] = useState([]);
 
 
-  const fetchingAPIs = async () => {
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+
     try {
-      const  token = localStorage.getItem("UserLoginToken") || localStorage.getItem("user_Signup_Token");;
-console.log("sign", localStorage.getItem("user_Signup_Token"));
-
-      const headers = {
-        "authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      };
-      const res1 = await fetch("http://localhost:5000/api/bookData", { method: "GET", headers });
-      const data1 = await res1.json();
-
-      if (data1) {
-        setBooks(data1.data || []);
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false);
     }
   };
+  const { data: books = [], isPending: P1 } = useQuery({
+    queryKey: ["bookData"],
+    queryFn: () => fetchData("http://localhost:5000/api/bookData"),
+    refetchInterval: 60000
+  })
 
-  useEffect(() => {
-    fetchingAPIs();
-  }, []);
+
 
   const GENRES = ["All", "Fiction", "Self-Help", "History", "Novel", "Psychology", "Productivity", "Classic", "Philosophy"];
 
@@ -99,7 +99,7 @@ console.log("sign", localStorage.getItem("user_Signup_Token"));
           </p>
           <div className="flex gap-[10px] font-sans">
             <button onClick={onCancel} className="flex-1 p-3 rounded-[10px] border-[1.5px] border-[#d4c9a8] bg-transparent text-[#7a6f4e] cursor-pointer text-[14px]">Cancel</button>
-            <button onClick={() => onConfirm(book)} className="flex-1 p-3 rounded-[10px] border-none bg-[#864c25] text-[#fffff3] cursor-pointer text-[14px] font-bold shadow-[0_4px_16px_rgba(134,76,37,.32)]">Confirm Request</button>
+            <button disabled={!book} onClick={() => onConfirm(book)} className="flex-1 p-3 rounded-[10px] border-none bg-[#864c25] text-[#fffff3] cursor-pointer text-[14px] font-bold shadow-[0_4px_16px_rgba(134,76,37,.32)]">Confirm Request</button>
           </div>
         </div>
       </div>
@@ -158,7 +158,7 @@ console.log("sign", localStorage.getItem("user_Signup_Token"));
     setModalBook(null);
 
     try {
-      const token = localStorage.getItem("UserLoginToken") ||  localStorage.getItem("user_Signup_Token");
+      const token = localStorage.getItem("UserLoginToken") || localStorage.getItem("user_Signup_Token");
       const response = await fetch("http://localhost:5000/api/borrowRequest", {
         method: "POST",
         headers: {
@@ -175,7 +175,7 @@ console.log("sign", localStorage.getItem("user_Signup_Token"));
     }
   };
 
-  if (loader) {
+  if (P1) {
     return (
       <Stack className="flex justify-center items-center min-h-screen text-gray-500" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />

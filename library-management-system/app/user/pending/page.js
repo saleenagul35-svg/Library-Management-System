@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useQuery } from '@tanstack/react-query';
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
@@ -137,13 +138,13 @@ function MobileCards({ requests }) {
 }
 
 export default function UserBorrowRequests() {
-  const [requests, setRequests] = useState([]);
-  const [loader, setLoader] = useState(true)
 
-  const fetchingAPIs = async () => {
+
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+
     try {
-      const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
-      const response = await fetch("http://localhost:5000/api/UserpendingRequestData", {
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           authorization: `Bearer ${token}`,
@@ -152,19 +153,18 @@ export default function UserBorrowRequests() {
       });
       if (response.ok) {
         const data = await response.json();
-        setRequests(data.data);
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false)
     }
   };
-
-  useEffect(() => {
-    fetchingAPIs();
-  }, []);
-  if (loader) {
+    const { data: requests = [], isPending: P1 } = useQuery({
+    queryKey: ["UserpendingRequestData"],
+    queryFn: () => fetchData("http://localhost:5000/api/UserpendingRequestData"),
+    refetchInterval: 60000
+  })
+  if (P1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
@@ -285,37 +286,29 @@ export default function InventoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   /* fetch */
-    const fetchData = (url) => {
-    const token = localStorage.getItem('Admintoken');
-    return fetch(url, {
-      headers: {
-        authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
       }
-    }).then(res => res.json()).then(res => res.data)
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const { data: books = [], isPending: P1 } = useQuery({
-    queryKey: ["approvedrecords"],
+    queryKey: ["InventoryBookData"],
     queryFn: () => fetchData("http://localhost:5000/api/bookData"),
     refetchInterval: 15000
   })
-  const fetchingAPIs = async () => {
-    try {
-      const token = localStorage.getItem('Admintoken');
-      const headers = {
-        authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-      const res1 = await fetch('http://localhost:5000/api/bookData', { method: 'GET', headers });
-      const data1 = res1.ok ? await res1.json() : null;
-      if (data1) setBooks(data1.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoader(false);
-    }
-  };
-
   useEffect(() => { setCurrentPage(1); }, [search]);
 
   /* sort + filter */

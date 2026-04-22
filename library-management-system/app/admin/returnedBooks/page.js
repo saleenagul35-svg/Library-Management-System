@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useQuery } from '@tanstack/react-query';
 import {
 
     Calendar,
@@ -151,53 +151,45 @@ function TableRow({ record, index }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function returnedBooks() {
-    const [records, setRecords] = useState([]);
+
     const [search, setSearch] = useState('');
-
-    const [loader, setLoader] = useState(true)
-
-
     // ── Fetch returned Books──
-    const fetchingAPIs = async () => {
-        try{
-            const token = localStorage.getItem('Admintoken');
-            const response = await fetch("http://localhost:5000/api/returnedBooks", {
-                method: "GET",
-                headers: {
-                    authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRecords(data.data);
-
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoader(false)
-
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-    };
-    useEffect(() => {
-        fetchingAPIs()
-    }, []);
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+    const { data: records = [], isPending: P1 } = useQuery({
+        queryKey: ["returnedBooks"],
+        queryFn: () => fetchData("http://localhost:5000/api/returnedBooks"),
+        refetchInterval: 30000
+    })
 
-
-
+    
     // ── Search filter ──
     const filtered = records.filter((r) => {
         const q = search.toLowerCase();
         return (
             !q ||
-            r.book.title.toLowerCase().includes(q) ||
-            r.user.name.toLowerCase().includes(q) ||
-            r.user.rollNo.toLowerCase().includes(q) ||
-            r.user.email.toLowerCase().includes(q)
+            r.bookId.Title.toLowerCase().includes(q) ||
+            r.userId.name.toLowerCase().includes(q) ||
+            r.userId.id.toString().toLowerCase().includes(q)
         );
     });
-    if (loader) {
+    if (P1) {
         return (
             <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
@@ -219,7 +211,7 @@ export default function returnedBooks() {
                             <RotateCcw size={18} className="text-primary" strokeWidth={1.75} />
                         </div>
                         <h1 className="text-xl font-bold text-primary-950">
-                            Returned Books 
+                            Returned Books
                         </h1>
                     </div>
                     <p className="text-sm ml-12 text-primary-800/45">

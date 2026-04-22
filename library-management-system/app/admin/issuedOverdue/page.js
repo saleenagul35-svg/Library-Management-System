@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
   RotateCcw,
@@ -77,7 +78,7 @@ function BookCard({ record, onReturn, returning }) {
             {record.userId.name}
           </p>
           <p className="text-[11px] truncate text-primary-800/40">
-            {record.userId.id}
+            REG-{record.userId.id}
           </p>
         </div>
         <div className="rounded-lg p-2.5 bg-primary/[0.02] border border-primary/[0.04]">
@@ -145,8 +146,7 @@ function TableRow({ record, onReturn, returning, index }) {
               {record.userId.name}
             </p>
             <p className="text-[11px] flex items-center gap-1 text-primary-800/35">
-              <Hash size={9} />
-              {record.userId.id}
+              REG-{record.userId.id}
             </p>
           </div>
         </div>
@@ -195,40 +195,37 @@ function TableRow({ record, onReturn, returning, index }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function IssuedBooks() {
-  const [records, setRecords] = useState([]);
   const [returning, setReturning] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'Borrowed' | 'Overdued'
   const [filterOpen, setFilterOpen] = useState(false);
-  const [loader, setLoader] = useState(true);
+
 
   // ── Fetch issued books ──
-  const fetchingAPIs = async () => {
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
     try {
-      const token = localStorage.getItem('Admintoken');
-      const response = await fetch('http://localhost:5000/api/BorrowedBooks', {
-        method: 'GET',
+      const response = await fetch(url, {
+        method: "GET",
         headers: {
           authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
       if (response.ok) {
         const data = await response.json();
-        setRecords(data.data);
-        console.log(data.data);
-
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false);
     }
   };
+  const { data: records = [], isPending: P1 } = useQuery({
+    queryKey: ["BorrowedBooks"],
+    queryFn: () => fetchData("http://localhost:5000/api/BorrowedBooks"),
+    refetchInterval: 500
+  })
 
-  useEffect(() => {
-    fetchingAPIs();
-  }, []);
 
   // ── Mark as returned ──
   const handleReturn = async (recordId) => {
@@ -259,8 +256,7 @@ export default function IssuedBooks() {
       !q ||
       r.bookId.Title.toLowerCase().includes(q) ||
       r.userId.name.toLowerCase().includes(q) ||
-      r.userId.id.toLowerCase().includes(q) ||
-      r.userId.email.toLowerCase().includes(q);
+      r.userId.id.toString().toLowerCase().includes(q)
 
     const matchFilter = filter === 'all' || r.status === filter;
 
@@ -276,7 +272,7 @@ export default function IssuedBooks() {
     Overdued: 'Overdue',
   };
 
-  if (loader) {
+  if (P1) {
     return (
       <Stack
         sx={{ color: 'grey.500' }}

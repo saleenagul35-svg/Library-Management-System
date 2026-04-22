@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { X, AlertCircle, XCircle } from "lucide-react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useQuery } from '@tanstack/react-query';
 
 // ─── Helpers ──────────────────────────────────────────────
 const getInitials = (name = "") => {
@@ -119,7 +120,7 @@ function DeclineModal({ isOpen, onClose, onConfirm, request }) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4"
-          style={{ }}>
+          style={{}}>
           <div className="flex items-center gap-3">
             <div>
               <p className="font-serif text-[18px] font-medium" style={{ color: '#515029' }}>
@@ -317,17 +318,16 @@ function MobileCards({ requests, handleRejection, handleApproval }) {
 
 // ─── Main Component ────────────────────────────────────────
 export default function BorrowRequests() {
-  const [requests, setRequests] = useState([]);
-  const [loader, setLoader] = useState(true);
+
+
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-
-  const fetchingAPIs = async () => {
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
     try {
-      const token = localStorage.getItem('Admintoken');
-      const response = await fetch("http://localhost:5000/api/adminNotification", {
+      const response = await fetch(url, {
         method: "GET",
         headers: {
           authorization: `Bearer ${token}`,
@@ -336,15 +336,17 @@ export default function BorrowRequests() {
       });
       if (response.ok) {
         const data = await response.json();
-        setRequests(data.data);
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoader(false);
     }
   };
-
+  const { data: requests = [], isPending: P1 } = useQuery({
+    queryKey: ["adminNotification"],
+    queryFn: () => fetchData("http://localhost:5000/api/adminNotification"),
+    refetchInterval: 300
+  })
   // ✅ Ye ab pura request object leta hai, modal open karta hai
   const handleRejection = (request) => {
     setSelectedRequest(request);
@@ -363,9 +365,6 @@ export default function BorrowRequests() {
         },
         body: JSON.stringify({ reason })
       });
-      if (res.ok) {
-        fetchingAPIs();
-      }
     } catch (error) {
       console.log(error);
     }
@@ -382,18 +381,14 @@ export default function BorrowRequests() {
         },
       });
       if (res.ok) {
-        fetchingAPIs();
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    fetchingAPIs();
-  }, []);
 
-  if (loader) {
+  if (P1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />

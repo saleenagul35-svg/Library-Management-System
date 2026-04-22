@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
-
+import Link from "next/link"
 export default function UserNavbar({ borrowedCount = 0 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,12 +52,12 @@ export default function UserNavbar({ borrowedCount = 0 }) {
         }}>
 
           {/* Logo */}
-          <div onClick={() => router.push("/user")}
+          <Link href="/user"
             style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
             <span style={{ fontSize: "22px" }}>📚</span>
             <span style={{ fontFamily: "Georgia, serif", fontSize: "19px", fontWeight: "700", color: "#515427" }}>Folio</span>
             <span style={{ fontSize: "11px", color: "#9b8a6a", fontStyle: "italic", marginTop: "3px" }}>Premium Library</span>
-          </div>
+          </Link>
 
           {/* Nav Links */}
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -112,11 +112,12 @@ export default function UserNavbar({ borrowedCount = 0 }) {
                         zIndex: 200,
                       }}>
                         {children.map((child) => (
-                          <button
+                          <Link
+                          href={child.path}
                             key={child.path}
                             className="dropdown-item"
                             onClick={() => {
-                              router.push(child.path);
+                              
                               setOpenDropdown(null);
                             }}
                             style={{
@@ -135,7 +136,7 @@ export default function UserNavbar({ borrowedCount = 0 }) {
                             }}
                           >
                             {child.label}
-                          </button>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -145,10 +146,10 @@ export default function UserNavbar({ borrowedCount = 0 }) {
 
               // ── Normal button ──
               return (
-                <button
+                <Link
                   key={label}
                   className="nav-btn"
-                  onClick={() => router.push(path)}
+                  href={path}
                   style={{
                     background: isActive ? "#515427" : "transparent",
                     border: "none",
@@ -166,7 +167,7 @@ export default function UserNavbar({ borrowedCount = 0 }) {
                   }}
                 >
                   {label}
-                </button>
+                </Link>
               );
             })}
           </div>

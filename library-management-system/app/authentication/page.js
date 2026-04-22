@@ -1,7 +1,8 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import library from "../../public/images/library.png";
+
+import Link from "next/link"
+import library from "../../public/images/library.jpg";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,600&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -28,7 +29,7 @@ const styles = `
 `;
 
 export default function RoleSelection() {
-  const router = useRouter();
+
 
   return (
     <>
@@ -121,11 +122,11 @@ export default function RoleSelection() {
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 
               {/* Admin */}
-              <button
+              <Link
                 className="role-btn"
                 suppressHydrationWarning={true}
 
-                onClick={() => router.push("/authentication/admin")}
+                href="/authentication/admin"
                 style={{
                   width: "100%", padding: "14px 20px",
                   borderRadius: "11px", border: "none",
@@ -139,14 +140,13 @@ export default function RoleSelection() {
                 }}
               >
                 <span>🗝️</span> Continue as Admin
-              </button>
+              </Link>
 
               {/* Member */}
-              <button
+              <Link
                 className="role-btn"
                 suppressHydrationWarning={true}
-
-                onClick={() => router.push("/authentication/login")}
+                href="/authentication/login"
                 style={{
                   width: "100%", padding: "14px 20px",
                   borderRadius: "12px",
@@ -160,7 +160,7 @@ export default function RoleSelection() {
                 }}
               >
                 <span>📖</span> Continue as Member
-              </button>
+              </Link>
 
             </div>
 

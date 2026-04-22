@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { X, MessageSquareX, AlignLeft } from "lucide-react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useQuery } from '@tanstack/react-query';
+
 function BookDetailsModal({ record, onClose, }) {
     if (!record) return null;
     return (
@@ -201,34 +203,33 @@ function MobileCards({ requests, setSelectedRecord }) {
 
 export default function rejectedApprovals() {
     const [selectedRecord, setSelectedRecord] = useState(null)
-    const [requests, setRequests] = useState([]);
-    const [loader, setLoader] = useState(true)
 
-    const fetchingAPIs = async () => {
-        try {
-            const token = localStorage.getItem('UserLoginToken') ||  localStorage.getItem("user_Signup_Token");
-            const response = await fetch("http://localhost:5000/api/UserRejectedRequestData", {
-                method: "GET",
-                headers: {
-                    authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRequests(data.data);
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoader(false)
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-    };
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    useEffect(() => {
-        fetchingAPIs();
-    }, []);
-    if (loader) {
+      const { data: requests = [], isPending: P1 } = useQuery({
+    queryKey: ["UserRejectedRequestData"],
+    queryFn: () => fetchData("http://localhost:5000/api/UserRejectedRequestData"),
+    refetchInterval: 60000
+  })
+    if (P1) {
         return (
             <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

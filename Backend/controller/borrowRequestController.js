@@ -31,10 +31,10 @@ const borrowBook = async (req, res) => {
             const CheckingBook = await bookCollection.findOne({ _id: bookId })
             
             if (CheckingBook.Copy > 0) {
-                const CheckRequest = await RequestsCollection.findOne({ userId: userId, bookId: bookId, }).sort({ requestDate: -1 })
+                const CheckRequest = await RequestsCollection.findOne({ userId: userId, bookId: bookId,  status: { $in: ["Pending", "Approved", "Borrowed", "Overdued"]} }).sort({ requestDate: -1 })
 
                 if (CheckRequest) {
-                    const DateObj = CheckRequest.dueDate;
+                    
                     if (CheckRequest.status === "Pending") {
                         return res.status(409).json({
                             message: "Request already submitted",
@@ -43,11 +43,11 @@ const borrowBook = async (req, res) => {
                         return res.status(409).json({
                             message: "Your request has been approved! You can now collect the book from the library.",
                         })
-                    } else if (CheckRequest.status === "Borrowed" && DateObj.getTime() < new Date().getTime()) {
+                    } else if (CheckRequest.status === "Overdued") {
                         return res.status(409).json({
                             message: "You have already borrowed this book and it is overdue. Please return it as soon as possible",
                         })
-                    } else if (CheckRequest.status === "Borrowed" && DateObj.getTime() > new Date().getTime()) {
+                    } else if (CheckRequest.status === "Borrowed") {
                         return res.status(409).json({
                             message: "You are currently holding this book. You cannot request the same book again.",
 

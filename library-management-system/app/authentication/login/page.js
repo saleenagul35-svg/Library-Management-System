@@ -1,16 +1,19 @@
 "use client"
 import Image from "next/image";
-import user from "../../../public/images/users.png"
+import user from "../../../public/images/users.jpg"
 import { useEffect, useState } from "react";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-
+import { useRouter } from "next/navigation";
 
 // ================= LOGIN PAGE =================
 export default function UserLoginPage() {
+
   const [alert, setAlert] = useState(false)
+  const [submit, setSubmit] = useState(false)
   const [errors, setErrors] = useState({})
   const [handleForm, setHandleForm] = useState({ email: "", password: "" })
+  const router = useRouter()
   const submitForm = (e) => {
     const { name, value } = e.target
     setHandleForm((prev) => ({
@@ -33,6 +36,8 @@ export default function UserLoginPage() {
   }
   const userpage = async (e) => {
     e.preventDefault()
+   if (!validation()) return
+   setSubmit(true)
     if (validation()) {
       try {
         const response = await fetch("http://localhost:5000/api/userLogin", {
@@ -50,7 +55,7 @@ export default function UserLoginPage() {
         if (response.ok) {
 
           localStorage.setItem("UserLoginToken", data.accessToken)
-          window.location.href = "/user"
+          router.push("/user")
         } else {
           setAlert(`${data.message}`)
 
@@ -60,6 +65,8 @@ export default function UserLoginPage() {
       } catch (error) {
         console.log(error);
 
+      }finally{
+        setSubmit(false)
       }
 
     }
@@ -89,7 +96,7 @@ export default function UserLoginPage() {
 
         {/* Right Form */}
         <div className="flex items-center justify-center p-6 md:p-12">
-          <form className="w-full max-w-md" onSubmit={userpage}>
+          <form className="w-full max-w-md" >
             <h2 className="text-2xl md:text-3xl font-bold text-[#515427] mb-2 text-center md:text-left">
               Welcome Back
             </h2>
@@ -138,7 +145,8 @@ export default function UserLoginPage() {
 
             {/* Button */}
             <button
-              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90">
+            disabled={submit}
+              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90"  onClick={userpage}>
 
               Login
 

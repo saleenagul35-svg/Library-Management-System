@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Users, Search, Mail, Phone, Calendar, BookOpen } from 'lucide-react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useQuery } from '@tanstack/react-query';
 // ─── Exact Color Palette ──────────────────────────────────────────────────────
 const C = {
   brown: '#7a421f',
@@ -34,16 +34,16 @@ function formatDate(d) {
   });
 }
 
-  
+
 
 // ─── Student Row ──────────────────────────────────────────────────────────────
 function StudentRow({ student, index }) {
   const [hov, setHov] = useState(false);
   const [from, to] = AVATAR_PAIRS[student.id % AVATAR_PAIRS.length];
-    const date = new Date(student.memberSince)
+  const date = new Date(student.memberSince)
   const day = date.getDate()
   const year = date.getFullYear()
-  const month = date.toLocaleString("en-US",{month:"long"})
+  const month = date.toLocaleString("en-US", { month: "long" })
   const formattedDate = `${day} ${month} ${year}`
 
   return (
@@ -112,47 +112,37 @@ function StudentRow({ student, index }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function StudentRegistryPage() {
-  const [loader, setLoader] = useState(true)
   const [search, setSearch] = useState('');
-  const [focused, setFocused] = useState(false);
-  const [totalStudents, setTotalStudents] = useState([])
-  //============================== total Students ===========================//
+  const [focused, setFocused] = useState(false);  //============================== total Students ===========================//
 
-  const fetchingAPIs = async () => {
+
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
     try {
-      const token = localStorage.getItem("Admintoken")
-      const headers = {
-        "authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-      const [res1] = await Promise.all([
-        fetch("http://localhost:5000/api/membersData", { method: "GET", headers })
-      ])
-      const [data1] = await Promise.all([
-        res1.ok ? res1.json() : null
-      ])
-      if (data1) {
-        const dataArray = data1.data
-        setTotalStudents(dataArray)
-
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
       }
     } catch (error) {
       console.log(error);
-
-    } finally {
-      setLoader(false)
     }
-  }
-  useEffect(() => {
-
-    fetchingAPIs()
-
-  }, [])
-
+  };
+  const { data: totalStudents = [], isPending: P1 } = useQuery({
+    queryKey: ["membersData"],
+    queryFn: () => fetchData("http://localhost:5000/api/membersData"),
+    refetchInterval: 30000
+  })
   const filtered = totalStudents.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase())
   );
-  if (loader) {
+  if (P1) {
     return (
 
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
@@ -162,7 +152,7 @@ export default function StudentRegistryPage() {
       </Stack>
     )
   }
-  
+
 
   return (
     <div style={{ minHeight: '100%', padding: '32px', backgroundColor: C.offwhite }}>
@@ -260,7 +250,7 @@ export default function StudentRegistryPage() {
           borderBottom: `1px solid ${C.brown}18`,
           backgroundColor: `${C.brown}07`,
         }}>
-          {['Member',"Email Address" ,'Contact Number', 'Member Since'].map((col, i) => (
+          {['Member', "Email Address", 'Contact Number', 'Member Since'].map((col, i) => (
             <p key={i} style={{
               margin: 0, fontSize: 10, fontWeight: 600,
               textTransform: 'uppercase', letterSpacing: '0.07em',

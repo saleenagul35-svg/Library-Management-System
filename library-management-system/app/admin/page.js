@@ -66,15 +66,24 @@ export default function AdminDashboardPage() {
 
   //============================== APIs ===========================//
 
-  const fetchData = (url) => {
-    const token = localStorage.getItem("Admintoken")
-    return fetch(url, {
-      headers: {
-        "authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
       }
-    }).then(res => res.json()).then(res => res.data)
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const { data: totalBooks = 0, isPending: P1 } = useQuery({
     queryKey: ["totalBooks"],
     queryFn: () => fetchData("http://localhost:5000/api/bookCount"),

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useQuery } from '@tanstack/react-query';
 import {
     FileX,
     Calendar,
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function BookDetailsModal({ record, onClose,}) {
+function BookDetailsModal({ record, onClose, }) {
     if (!record) return null;
     return (
         <div
@@ -217,39 +217,34 @@ function TableRow({ record, index, setSelectedRecord }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function RejectedRequests() {
     const [selectedRecord, setSelectedRecord] = useState(null)
-    const [records, setRecords] = useState([]);
+
     const [search, setSearch] = useState('');
 
-    const [loader, setLoader] = useState(true)
 
-
-    // ── Fetch rejected requests ──
-    const fetchingAPIs = async () => {
-        try {
-            const token = localStorage.getItem('Admintoken');
-            const response = await fetch("http://localhost:5000/api/rejectedRequetsData", {
-                method: "GET",
-                headers: {
-                    authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setRecords(data.data);
-                console.log(data.data);
-
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoader(false)
-
+  const fetchData = async (url) => {
+          const token = localStorage.getItem('Admintoken')
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-    };
-    useEffect(() => {
-        fetchingAPIs()
-    }, []);
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+    const { data: records = [], isPending: P1 } = useQuery({
+        queryKey: ["rejectedRequetsData"],
+        queryFn: () => fetchData("http://localhost:5000/api/rejectedRequetsData"),
+        refetchInterval: 30000
+    })
+    // ── Fetch rejected requests ──
 
 
 
@@ -258,13 +253,12 @@ export default function RejectedRequests() {
         const q = search.toLowerCase();
         return (
             !q ||
-            r.book.title.toLowerCase().includes(q) ||
-            r.user.name.toLowerCase().includes(q) ||
-            r.user.rollNo.toLowerCase().includes(q) ||
-            r.user.email.toLowerCase().includes(q)
+            r.bookId.Title.toLowerCase().includes(q) ||
+            r.userId.name.toLowerCase().includes(q) ||
+            r.userId.id.toString().toLowerCase().includes(q)
         );
     });
-    if (loader) {
+    if (P1) {
         return (
             <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
