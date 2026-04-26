@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
@@ -181,10 +182,11 @@ function TableRow({ record, onIssue, issuing, index }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ApprovedBooks() {
   const [issuing, setIssuing] = useState(null);
+  const [alert, setAlert] = useState(false)
   const [search, setSearch] = useState('');
-    // ── Fetch approved books ──
+  // ── Fetch approved books ──
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -198,14 +200,16 @@ export default function ApprovedBooks() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-const {data : records = [], isPending: P1 } = useQuery({
-  queryKey: ["approvedRequestsData"],
-  queryFn: ()=>fetchData("http://localhost:5000/api/approvedRequestsData"),
-  refetchInterval: 500
-})
+  const { data: records = [], isLoading: L1, } = useQuery({
+    queryKey: ["approvedRequestsData"],
+    queryFn: () => fetchData("http://localhost:5000/api/approvedRequestsData"),
+    refetchInterval: 5000,
+    staleTime: 5000,
+    gcTime: 10 * 60 * 1000
+  })
 
   // ── Issue book ──
   const handleIssue = async (recordId) => {
@@ -220,7 +224,7 @@ const {data : records = [], isPending: P1 } = useQuery({
         },
       });
     } catch (error) {
-      console.log(error);
+      setAlert("Something went wrong")
     } finally {
       setIssuing(null);
     }
@@ -234,10 +238,16 @@ const {data : records = [], isPending: P1 } = useQuery({
       !q ||
       r.bookId.Title.toLowerCase().includes(q) ||
       r.userId.name.toLowerCase().includes(q) ||
-        r.userId.id.toString().toLowerCase().includes(q)
+      r.userId.id.toString().toLowerCase().includes(q)
     );
   });
-  if (P1) {
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 
@@ -362,6 +372,9 @@ const {data : records = [], isPending: P1 } = useQuery({
           </table>
         </div>
       )}
+      {alert && <Stack spacing={2} className="fixed top-17 right-15 w-100 z-1000">
+        <Alert sx={{ backgroundColor: "#54552b", color: "#fdfdef" }} severity="error">{alert}</Alert>
+      </Stack>}
     </div>
   );
 }

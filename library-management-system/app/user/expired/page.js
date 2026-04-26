@@ -154,16 +154,18 @@ export default function expiredApprovals() {
                 return data.data;
             }
         } catch (error) {
-            console.log(error);
+           throw error
         }
     };
-    const { data: requests = [], isPending: P1 } = useQuery({
+    const { data: requests = [], isLoading: L1 } = useQuery({
         queryKey: ["UserExpiredApprovalsData"],
         queryFn: () => fetchData("http://localhost:5000/api/UserExpiredApprovalsData"),
-        refetchInterval: 60000
+        refetchInterval: 60000,
+        staleTime: 60000,
+        gcTime: 10 * 60 * 1000
     })
 
-    if (P1) {
+    if (L1) {
         return (
             <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

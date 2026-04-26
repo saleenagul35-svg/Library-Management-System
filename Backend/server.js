@@ -9,7 +9,9 @@ const adminRoute = require("./routes/adminRoute")
 const userRoute = require("./routes/userRoute")
 const requestRoute = require("./routes/requestRoute")
 const BorrowDataRequest = require("./routes/BorrowDataRoute")
+const cookieParser = require("cookie-parser")
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors({
     origin:"http://localhost:3000",
     credentials:true

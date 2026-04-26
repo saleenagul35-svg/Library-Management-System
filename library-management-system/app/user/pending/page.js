@@ -141,7 +141,7 @@ export default function UserBorrowRequests() {
 
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+    const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
 
     try {
       const response = await fetch(url, {
@@ -156,15 +156,17 @@ export default function UserBorrowRequests() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-    const { data: requests = [], isPending: P1 } = useQuery({
+  const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["UserpendingRequestData"],
     queryFn: () => fetchData("http://localhost:5000/api/UserpendingRequestData"),
-    refetchInterval: 60000
+    refetchInterval: 5000,
+    staleTime: 5000,
+    gcTime: 10 * 60 * 1000
   })
-  if (P1) {
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

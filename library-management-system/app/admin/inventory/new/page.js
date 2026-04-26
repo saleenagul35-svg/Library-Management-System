@@ -1,10 +1,11 @@
 "use client";
-
-import { Cloud } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 export default function AddNewBookForm() {
+  const [alert, setAlert] = useState(false)
+  const router = useRouter()
   const [handleform, setHandleForm] = useState({ Title: "", Author: "", ISBN: "", Genre: "", Publisher: "", Year: "", Language: "", Copy: "", Pages: "", Description: "", ImageURL: "" })
   const [selectedFile, setSelectedFile] = useState(null)
   const [submitting, setSubmitting] = useState(false)
@@ -125,7 +126,7 @@ export default function AddNewBookForm() {
 
 
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
 
       }
     } else {
@@ -134,7 +135,7 @@ export default function AddNewBookForm() {
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!validation()) return
+    if (!validation()) return
     setSubmitting(true)
     const URL = await CloudinaryUploading()
     if (URL) {
@@ -155,11 +156,11 @@ export default function AddNewBookForm() {
 
         if (response.ok) {
 
-          window.location.href = "/admin/inventory"
+          router.push("/admin/inventory")
         }
 
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
       } finally {
         setSubmitting(false)
       }
@@ -167,9 +168,15 @@ export default function AddNewBookForm() {
   };
 
   const cancel = () => {
-    window.location.href = "/admin/inventory"
-  }
 
+    router.push("/admin/inventory")
+  }
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
   return (
     <div className="min-h-screen bg-[#fcf5e1] font-sans">
 
@@ -571,6 +578,9 @@ export default function AddNewBookForm() {
           </button>
         </div>
       </form>
+      {alert && <Stack spacing={2} className="fixed top-17 right-15 w-100 z-1000">
+        <Alert sx={{ backgroundColor: "#54552b", color: "#fdfdef" }} severity="error">{alert}</Alert>
+      </Stack>}
     </div>
   );
 }

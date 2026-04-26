@@ -117,7 +117,7 @@ export default function StudentRegistryPage() {
 
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -131,13 +131,15 @@ export default function StudentRegistryPage() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-  const { data: totalStudents = [], isPending: P1 } = useQuery({
+  const { data: totalStudents = [], isLoading: P1 } = useQuery({
     queryKey: ["membersData"],
     queryFn: () => fetchData("http://localhost:5000/api/membersData"),
-    refetchInterval: 30000
+    refetchInterval: 30000,
+    staleTime: 30000,
+    gcTime: 10 * 60 * 1000
   })
   const filtered = totalStudents.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase())

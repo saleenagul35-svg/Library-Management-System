@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 const styles = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
         * { box-sizing: border-box; margin: 0; padding: 0; }`
@@ -61,8 +63,11 @@ export default function SignupPage() {
           localStorage.setItem("user_Signup_Token", data.accessToken);
           window.location.href = "/user";
         }
+        if(response.status === 500){
+          setAlert("Something went wrong.")
+        }
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
       } finally {
         setSubmitting(false)
       }
@@ -85,7 +90,12 @@ export default function SignupPage() {
   });
 
   const wrapStyle = { marginBottom: "18px" };
-
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
   return (
     <>
 
@@ -239,7 +249,9 @@ export default function SignupPage() {
               Sign in here
             </a>
           </p>
-
+          {alert && <Stack spacing={2} className="fixed top-5 right-16 w-100 ">
+            <Alert sx={{  backgroundColor: "#54552b", color:"#fdfdef" }} severity="error">{alert}</Alert>
+          </Stack>}
         </div>
       </div>
     </>

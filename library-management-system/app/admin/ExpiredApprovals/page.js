@@ -158,7 +158,8 @@ export default function ExpiredApprovals() {
   // ── Fetch expired requests ──
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
+
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -172,13 +173,16 @@ export default function ExpiredApprovals() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
+
   };
-  const { data: records = [], isPending: P1 } = useQuery({
+  const { data: records = [], isLoading: L1 } = useQuery({
     queryKey: ["expiredApprovalsData"],
     queryFn: () => fetchData("http://localhost:5000/api/expiredApprovalsData"),
-    refetchInterval: 30000
+    refetchInterval: 30000,
+    staleTime: 30000,
+    gcTime: 10 * 60 * 1000
   })
 
   // ── Search filter ──
@@ -191,7 +195,7 @@ export default function ExpiredApprovals() {
       r.userId.id.toString().toLowerCase().includes(q)
     );
   });
-  if (P1) {
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

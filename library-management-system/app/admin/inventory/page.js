@@ -287,7 +287,7 @@ export default function InventoryPage() {
 
   /* fetch */
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -301,13 +301,15 @@ export default function InventoryPage() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-  const { data: books = [], isPending: P1 } = useQuery({
+  const { data: books = [], isLoading: L1 } = useQuery({
     queryKey: ["InventoryBookData"],
     queryFn: () => fetchData("http://localhost:5000/api/bookData"),
-    refetchInterval: 15000
+    refetchInterval: 15000,
+    staleTime: 15000,
+    gcTime: 10 * 60 * 1000
   })
   useEffect(() => { setCurrentPage(1); }, [search]);
 
@@ -373,7 +375,7 @@ export default function InventoryPage() {
     }
   };
 
-  if (P1) {
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: '#52512a' }} />

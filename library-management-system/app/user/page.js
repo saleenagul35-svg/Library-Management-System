@@ -62,13 +62,14 @@ export default function UserHomePage() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-  const { data: books = [], isPending: P1 } = useQuery({
+  const { data: books = [], isLoading: L1 } = useQuery({
     queryKey: ["bookData"],
     queryFn: () => fetchData("http://localhost:5000/api/bookData"),
-    refetchInterval: 60000
+    refetchInterval: 60000,
+    staleTime:60000,
   })
 
 
@@ -171,11 +172,11 @@ export default function UserHomePage() {
       setToast(`${data.message}`);
 
     } catch (error) {
-      console.log(error);
+        setToast("Something went wrong.");
     }
   };
 
-  if (P1) {
+  if (L1) {
     return (
       <Stack className="flex justify-center items-center min-h-screen text-gray-500" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />

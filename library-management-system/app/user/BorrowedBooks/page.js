@@ -48,8 +48,8 @@ function BorrowedBookRow({ book, index }) {
     computedStatus === "Overdued"
       ? "text-[#d94f4f]"
       : computedStatus === "due-soon"
-      ? "text-[#e6a832]"
-      : "text-[#7a6f4e]";
+        ? "text-[#e6a832]"
+        : "text-[#7a6f4e]";
 
   return (
     <div
@@ -148,7 +148,7 @@ export default function BorrowedBooksPage() {
 
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
+    const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
 
     try {
       const response = await fetch(url, {
@@ -163,14 +163,16 @@ export default function BorrowedBooksPage() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-const {data : userdata = [], isPending: P1 } = useQuery({
-  queryKey: ["UserData"],
-  queryFn: ()=>fetchData("http://localhost:5000/api/UserData"),
-  refetchInterval: 60000
-})
+  const { data: userdata = [], isLoading: L1 } = useQuery({
+    queryKey: ["UserData"],
+    queryFn: () => fetchData("http://localhost:5000/api/UserData"),
+    refetchInterval: 60000,
+    staleTime: 60000,
+    gcTime: 10 * 60 * 1000
+  })
   const filtered = userdata
     .filter(b => !filterMap[filter] || computeStatus(b) === filterMap[filter])
     .sort((a, b) => {
@@ -188,7 +190,7 @@ const {data : userdata = [], isPending: P1 } = useQuery({
     total: userdata.length,
   };
 
-  if (P1) {
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />

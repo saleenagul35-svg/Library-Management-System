@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react";
 import { X, AlertCircle, XCircle } from "lucide-react";
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
@@ -322,10 +323,12 @@ export default function BorrowRequests() {
 
 
   // Modal state
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [alert, setAlert] = useState(false)
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -339,13 +342,15 @@ export default function BorrowRequests() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-  const { data: requests = [], isPending: P1 } = useQuery({
+  const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["adminNotification"],
     queryFn: () => fetchData("http://localhost:5000/api/adminNotification"),
-    refetchInterval: 300
+    refetchInterval: 5000,
+    staleTime: 5000,
+    gcTime: 10 * 60 * 1000
   })
   // ✅ Ye ab pura request object leta hai, modal open karta hai
   const handleRejection = (request) => {
@@ -366,7 +371,7 @@ export default function BorrowRequests() {
         body: JSON.stringify({ reason })
       });
     } catch (error) {
-      console.log(error);
+      setAlert("Something went wrong.")
     }
   };
 
@@ -383,12 +388,17 @@ export default function BorrowRequests() {
       if (res.ok) {
       }
     } catch (error) {
-      console.log(error);
+       setAlert("Something went wrong.")
     }
   };
 
-
-  if (P1) {
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
+  if (L1) {
     return (
       <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
         <CircularProgress sx={{ color: "#52512a" }} />
@@ -431,6 +441,9 @@ export default function BorrowRequests() {
         onConfirm={handleConfirmDecline}
         request={selectedRequest}
       />
+      {alert && <Stack spacing={2} className="fixed top-17 right-15 w-100 z-1000">
+        <Alert sx={{ backgroundColor: "#54552b", color: "#fdfdef" }} severity="error">{alert}</Alert>
+      </Stack>}
     </div>
   );
 }

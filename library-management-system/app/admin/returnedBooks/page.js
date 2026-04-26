@@ -154,31 +154,33 @@ export default function returnedBooks() {
 
     const [search, setSearch] = useState('');
     // ── Fetch returned Books──
-  const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+    const fetchData = async (url) => {
+        const token = localStorage.getItem('Admintoken')
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                return data.data;
+            }
+        } catch (error) {
+            throw error
         }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.data;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-    const { data: records = [], isPending: P1 } = useQuery({
+    };
+    const { data: records = [], isLoading: L1 } = useQuery({
         queryKey: ["returnedBooks"],
         queryFn: () => fetchData("http://localhost:5000/api/returnedBooks"),
-        refetchInterval: 30000
+        refetchInterval: 30000,
+        staleTime: 30000,
+        gcTime: 10 * 60 * 1000
     })
 
-    
+
     // ── Search filter ──
     const filtered = records.filter((r) => {
         const q = search.toLowerCase();
@@ -189,7 +191,7 @@ export default function returnedBooks() {
             r.userId.id.toString().toLowerCase().includes(q)
         );
     });
-    if (P1) {
+    if (L1) {
         return (
             <Stack sx={{ color: 'grey.500' }} className="flex justify-center items-center min-h-screen" spacing={2} direction="row">
 

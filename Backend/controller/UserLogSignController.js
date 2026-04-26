@@ -21,7 +21,7 @@ const registerUsers = async (req, res) => {
                 id: Date.now(),
                 name: name,
                 email: email,
-                phone: phone,
+                phone: `+92${phone}`,
                 password: hash,
                 memberSince: new Date()
             })
@@ -54,7 +54,7 @@ const registerUsers = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({
-            message: "server error occured"
+            message: "Something went wrong"
         })
     }
 }
@@ -93,7 +93,7 @@ const loginUser = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({
-            message: "server error occured"
+            message: "Something went wrong"
         })
     }
 }

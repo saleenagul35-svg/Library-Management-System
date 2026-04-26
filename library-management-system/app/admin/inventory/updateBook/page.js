@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 export default function updateBookForm() {
+  const [alert, setAlert] = useState(false)
   const router = useRouter()
   const useSrchPrms = useSearchParams()
   const [submitting, setSubmitting] = useState(false)
@@ -131,7 +134,7 @@ export default function updateBookForm() {
 
 
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
 
       }
     } else {
@@ -166,7 +169,7 @@ export default function updateBookForm() {
         }
 
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
 
       } finally {
         setSubmitting(false)
@@ -185,7 +188,12 @@ export default function updateBookForm() {
     }
 
   }, [book])
-
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
   return (
     <div className="min-h-screen bg-[#fcf5e1] font-sans">
 
@@ -588,7 +596,7 @@ export default function updateBookForm() {
               <label
                 htmlFor="book-upload"
                 className="flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed border-[#d4c9b0] bg-[#fdfaea] hover:border-[#864c25] hover:bg-[#fffcf0] transition-all cursor-pointer overflow-hidden"
-              >{(fileName ? fileName : handleform.ImageURL) || `Choose File` }</label>
+              >{(fileName ? fileName : handleform.ImageURL) || `Choose File`}</label>
               {imageError &&
                 <p className="text-sm pl-1 text-red-700">{imageError}</p>
               }
@@ -620,6 +628,9 @@ export default function updateBookForm() {
           </button>
         </div>
       </form>
+      {alert && <Stack spacing={2} className="fixed top-17 right-15 w-100 z-1000">
+        <Alert sx={{ backgroundColor: "#54552b", color:"#fdfdef" }} severity="error">{alert}</Alert>
+      </Stack>}
     </div>
   );
 }

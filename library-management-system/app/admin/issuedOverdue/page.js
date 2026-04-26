@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
@@ -196,6 +197,7 @@ function TableRow({ record, onReturn, returning, index }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function IssuedBooks() {
   const [returning, setReturning] = useState(null);
+    const [alert, setAlert] = useState(false)
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'Borrowed' | 'Overdued'
   const [filterOpen, setFilterOpen] = useState(false);
@@ -203,7 +205,7 @@ export default function IssuedBooks() {
 
   // ── Fetch issued books ──
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+    const token = localStorage.getItem('Admintoken')
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -217,13 +219,15 @@ export default function IssuedBooks() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
-  const { data: records = [], isPending: P1 } = useQuery({
+  const { data: records = [], isLoading: L1 } = useQuery({
     queryKey: ["BorrowedBooks"],
     queryFn: () => fetchData("http://localhost:5000/api/BorrowedBooks"),
-    refetchInterval: 500
+    refetchInterval: 5000,
+    staleTime: 5000,
+    gcTime: 10 * 60 * 1000
   })
 
 
@@ -243,7 +247,7 @@ export default function IssuedBooks() {
         fetchingAPIs();
       }
     } catch (error) {
-      console.log(error);
+      setAlert("Something went wrong")
     } finally {
       setReturning(null);
     }
@@ -271,8 +275,13 @@ export default function IssuedBooks() {
     Borrowed: 'Borrowed',
     Overdued: 'Overdue',
   };
-
-  if (P1) {
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => setAlert(false), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [alert])
+  if (L1) {
     return (
       <Stack
         sx={{ color: 'grey.500' }}
@@ -443,6 +452,9 @@ export default function IssuedBooks() {
           </table>
         </div>
       )}
+      {alert && <Stack spacing={2} className="fixed top-17 right-15 w-100 z-1000">
+        <Alert sx={{ backgroundColor: "#54552b", color: "#fdfdef" }} severity="error">{alert}</Alert>
+      </Stack>}
     </div>
   );
 }

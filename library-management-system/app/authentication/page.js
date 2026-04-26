@@ -39,7 +39,7 @@ export default function RoleSelection() {
 
         {/* ── Background image ── */}
         <Image
-          src={library}
+          src="https://res.cloudinary.com/dvu3gnyjt/image/upload/v1777146938/library_nbeqvz.jpg"
           alt="library background"
           fill
           priority

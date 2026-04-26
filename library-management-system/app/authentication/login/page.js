@@ -36,13 +36,13 @@ export default function UserLoginPage() {
   }
   const userpage = async (e) => {
     e.preventDefault()
-   if (!validation()) return
-   setSubmit(true)
+    if (!validation()) return
+    setSubmit(true)
     if (validation()) {
       try {
         const response = await fetch("http://localhost:5000/api/userLogin", {
           method: "POST",
-          credentials:"include",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json"
           },
@@ -63,9 +63,9 @@ export default function UserLoginPage() {
 
 
       } catch (error) {
-        console.log(error);
+        setAlert("Something went wrong.")
 
-      }finally{
+      } finally {
         setSubmit(false)
       }
 
@@ -86,9 +86,10 @@ export default function UserLoginPage() {
 
         {/* Left Image */}
 
-        <div className="hidden md:flex items-center justify-center p-4 ">
+        <div className="hidden md:flex items-center justify-center p-4  relative">
           <Image
-            src={user}
+            src="https://res.cloudinary.com/dvu3gnyjt/image/upload/v1777146892/users_nquwri.jpg"
+            fill
             alt="user"
             className="w-full h-auto object-contain rounded-4xl"
           />
@@ -145,8 +146,8 @@ export default function UserLoginPage() {
 
             {/* Button */}
             <button
-            disabled={submit}
-              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90"  onClick={userpage}>
+              disabled={submit}
+              className="w-full bg-[#864c25] text-[#fffff3] py-3 rounded-lg transition hover:opacity-90" onClick={userpage}>
 
               Login
 
