@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import customFetch from "../../../lib/api"
 export default function AddNewBookForm() {
   const [alert, setAlert] = useState(false)
   const router = useRouter()
@@ -141,11 +142,10 @@ export default function AddNewBookForm() {
     if (URL) {
 
       try {
-        const token = localStorage.getItem("Admintoken")
-        const response = await fetch("http://localhost:5000/api/addBooks", {
+
+        const response = await customFetch("/api/addBooks", {
           method: "POST",
           headers: {
-            "authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({

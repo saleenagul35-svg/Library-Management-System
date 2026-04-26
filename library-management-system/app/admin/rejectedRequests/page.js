@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
+
 import {
     FileX,
     Calendar,
@@ -15,6 +17,7 @@ import {
     BookMarked,
     X
 } from 'lucide-react';
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function BookDetailsModal({ record, onClose, }) {
@@ -222,12 +225,11 @@ export default function RejectedRequests() {
 
 
     const fetchData = async (url) => {
-        const token = localStorage.getItem('Admintoken')
+
         try {
-            const response = await fetch(url, {
+            const response = await customFetch(url, {
                 method: "GET",
                 headers: {
-                    authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
@@ -241,7 +243,7 @@ export default function RejectedRequests() {
     };
     const { data: records = [], isLoading: L1 } = useQuery({
         queryKey: ["rejectedRequetsData"],
-        queryFn: () => fetchData("http://localhost:5000/api/rejectedRequetsData"),
+        queryFn: () => fetchData("/api/rejectedRequetsData"),
         refetchInterval: 30000,
         staleTime: 30000,
         gcTime: 10 * 60 * 1000

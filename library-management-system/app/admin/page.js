@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import customFetch from "../../lib/api"
 import {
   BookOpen,
   Users,
@@ -67,12 +68,12 @@ export default function AdminDashboardPage() {
   //============================== APIs ===========================//
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('Admintoken')
+
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -86,32 +87,32 @@ export default function AdminDashboardPage() {
   };
   const { data: totalBooks = 0, isPending: P1 } = useQuery({
     queryKey: ["totalBooks"],
-    queryFn: () => fetchData("http://localhost:5000/api/bookCount"),
+    queryFn: () => fetchData("/api/bookCount"),
     refetchInterval: 15000
   })
   const { data: totalStudents = 0, isPending: P2 } = useQuery({
     queryKey: ["totalStudents"],
-    queryFn: () => fetchData("http://localhost:5000/api/membersCount"),
+    queryFn: () => fetchData("/api/membersCount"),
     refetchInterval: 15000
   })
   const { data: topBooks = [], isPending: P3 } = useQuery({
     queryKey: ["topBooks"],
-    queryFn: () => fetchData("http://localhost:5000/api/topBooks"),
+    queryFn: () => fetchData("/api/topBooks"),
     refetchInterval: 15000
   })
   const { data: totalBorrowings = 0, isPending: P4 } = useQuery({
     queryKey: ["totalBorrowings"],
-    queryFn: () => fetchData("http://localhost:5000/api/borrowedRequestCount"),
+    queryFn: () => fetchData("/api/borrowedRequestCount"),
     refetchInterval: 15000
   })
   const { data: overDueBooks = 0, isPending: P5 } = useQuery({
     queryKey: ["overDueBooks"],
-    queryFn: () => fetchData("http://localhost:5000/api/overDueCount"),
+    queryFn: () => fetchData("/api/overDueCount"),
     refetchInterval: 15000
   })
   const { data: activity = [], isPending: P6 } = useQuery({
     queryKey: ["activity"],
-    queryFn: () => fetchData("http://localhost:5000/api/RecentActvity"),
+    queryFn: () => fetchData("/api/RecentActvity"),
     refetchInterval: 150000
   })
 

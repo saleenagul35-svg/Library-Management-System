@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
 import {
 
     Calendar,
@@ -12,6 +13,7 @@ import {
     CheckCircle2,
     BookMarked,
 } from 'lucide-react';
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatDate(dateStr) {
@@ -155,12 +157,11 @@ export default function returnedBooks() {
     const [search, setSearch] = useState('');
     // ── Fetch returned Books──
     const fetchData = async (url) => {
-        const token = localStorage.getItem('Admintoken')
         try {
-            const response = await fetch(url, {
+            const response = await customFetch(url, {
                 method: "GET",
                 headers: {
-                    authorization: `Bearer ${token}`,
+
                     'Content-Type': 'application/json'
                 }
             });
@@ -174,7 +175,7 @@ export default function returnedBooks() {
     };
     const { data: records = [], isLoading: L1 } = useQuery({
         queryKey: ["returnedBooks"],
-        queryFn: () => fetchData("http://localhost:5000/api/returnedBooks"),
+        queryFn: () => fetchData("/api/returnedBooks"),
         refetchInterval: 30000,
         staleTime: 30000,
         gcTime: 10 * 60 * 1000

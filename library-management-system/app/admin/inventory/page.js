@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import customFetch from "../../../lib/api"
 import {
   Search, Plus, Filter, BookOpen,
   ChevronUp, ChevronDown, Pencil, Trash2,
@@ -287,12 +288,10 @@ export default function InventoryPage() {
 
   /* fetch */
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -306,7 +305,7 @@ export default function InventoryPage() {
   };
   const { data: books = [], isLoading: L1 } = useQuery({
     queryKey: ["InventoryBookData"],
-    queryFn: () => fetchData("http://localhost:5000/api/bookData"),
+    queryFn: () => fetchData("/api/bookData"),
     refetchInterval: 15000,
     staleTime: 15000,
     gcTime: 10 * 60 * 1000
@@ -359,12 +358,12 @@ export default function InventoryPage() {
   const handleDeleteConfirm = async (book) => {
     try {
       const bookId = book._id;
-      const token = localStorage.getItem('Admintoken');
+
       const headers = {
-        authorization: `Bearer ${token}`,
+
         'Content-Type': 'application/json',
       };
-      await fetch(`http://localhost:5000/api/deleteBook/${bookId}`, {
+      await customFetch(`/api/deleteBook/${bookId}`, {
         method: 'DELETE',
         headers,
       });

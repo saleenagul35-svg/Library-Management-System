@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
 
 import {
   TimerOff,
@@ -158,13 +159,12 @@ export default function ExpiredApprovals() {
   // ── Fetch expired requests ──
 
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
+  
 
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -179,7 +179,7 @@ export default function ExpiredApprovals() {
   };
   const { data: records = [], isLoading: L1 } = useQuery({
     queryKey: ["expiredApprovalsData"],
-    queryFn: () => fetchData("http://localhost:5000/api/expiredApprovalsData"),
+    queryFn: () => fetchData("/api/expiredApprovalsData"),
     refetchInterval: 30000,
     staleTime: 30000,
     gcTime: 10 * 60 * 1000

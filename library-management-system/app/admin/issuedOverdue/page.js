@@ -5,6 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
 import {
   BookOpen,
   RotateCcw,
@@ -197,7 +198,7 @@ function TableRow({ record, onReturn, returning, index }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function IssuedBooks() {
   const [returning, setReturning] = useState(null);
-    const [alert, setAlert] = useState(false)
+  const [alert, setAlert] = useState(false)
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all'); // 'all' | 'Borrowed' | 'Overdued'
   const [filterOpen, setFilterOpen] = useState(false);
@@ -205,12 +206,11 @@ export default function IssuedBooks() {
 
   // ── Fetch issued books ──
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
+
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -224,7 +224,7 @@ export default function IssuedBooks() {
   };
   const { data: records = [], isLoading: L1 } = useQuery({
     queryKey: ["BorrowedBooks"],
-    queryFn: () => fetchData("http://localhost:5000/api/BorrowedBooks"),
+    queryFn: () => fetchData("/api/BorrowedBooks"),
     refetchInterval: 5000,
     staleTime: 5000,
     gcTime: 10 * 60 * 1000
@@ -235,16 +235,16 @@ export default function IssuedBooks() {
   const handleReturn = async (recordId) => {
     setReturning(recordId);
     try {
-      const token = localStorage.getItem('Admintoken');
-      const res = await fetch(`http://localhost:5000/api/returnBook/${recordId}`, {
+
+      const res = await customFetch(`/api/returnBook/${recordId}`, {
         method: 'PUT',
         headers: {
-          authorization: `Bearer ${token}`,
+   
           'Content-Type': 'application/json',
         },
       });
       if (res.ok) {
-        fetchingAPIs();
+        refetch()
       }
     } catch (error) {
       setAlert("Something went wrong")

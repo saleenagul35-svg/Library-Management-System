@@ -5,6 +5,7 @@ import { Users, Search, Mail, Phone, Calendar, BookOpen } from 'lucide-react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
 // ─── Exact Color Palette ──────────────────────────────────────────────────────
 const C = {
   brown: '#7a421f',
@@ -117,12 +118,12 @@ export default function StudentRegistryPage() {
 
 
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
+
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -136,7 +137,7 @@ export default function StudentRegistryPage() {
   };
   const { data: totalStudents = [], isLoading: P1 } = useQuery({
     queryKey: ["membersData"],
-    queryFn: () => fetchData("http://localhost:5000/api/membersData"),
+    queryFn: () => fetchData("/api/membersData"),
     refetchInterval: 30000,
     staleTime: 30000,
     gcTime: 10 * 60 * 1000

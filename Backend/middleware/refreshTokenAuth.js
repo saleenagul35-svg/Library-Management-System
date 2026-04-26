@@ -12,7 +12,7 @@ const refreshTokenAuth = async (req, res) => {
                     { expiresIn: "2h" }
                 )
                 res.status(200).json({
-                    access: newAccessToken
+                    accessToken: newAccessToken
                 })
             }else{
             res.status(403).json({

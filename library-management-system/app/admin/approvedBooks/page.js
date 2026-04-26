@@ -5,6 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "../../../lib/api"
 import {
   BookOpen,
   Calendar,
@@ -186,12 +187,11 @@ export default function ApprovedBooks() {
   const [search, setSearch] = useState('');
   // ── Fetch approved books ──
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
+
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -199,13 +199,14 @@ export default function ApprovedBooks() {
         const data = await response.json();
         return data.data;
       }
+    
     } catch (error) {
       throw error
     }
   };
   const { data: records = [], isLoading: L1, } = useQuery({
     queryKey: ["approvedRequestsData"],
-    queryFn: () => fetchData("http://localhost:5000/api/approvedRequestsData"),
+    queryFn: () => fetchData("/api/approvedRequestsData"),
     refetchInterval: 5000,
     staleTime: 5000,
     gcTime: 10 * 60 * 1000
@@ -215,14 +216,20 @@ export default function ApprovedBooks() {
   const handleIssue = async (recordId) => {
     setIssuing(recordId)
     try {
-      const token = localStorage.getItem('Admintoken');
-      await fetch(`http://localhost:5000/api/BookIssue/${recordId}`, {
+
+      await customFetch(`/api/BookIssue/${recordId}`, {
         method: 'PUT',
         headers: {
-          authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+
+        if (response.ok) {
+            refetch()  // ← success hone pe data refresh karo
+        } else {
+            const data = await response.json()
+            setAlert(data.message || "Something went wrong")
+        }
     } catch (error) {
       setAlert("Something went wrong")
     } finally {

@@ -15,9 +15,19 @@ const adminVerification = async (req, res) => {
                 const accessToken = jwt.sign(
                     { id: testAdmin._id, email: testAdmin.email, role: "admin" },
                     process.env.JWT_SECRET_KEY,
-                    { expiresIn: "2h" }
+                    { expiresIn: "1m" }
                 )
-
+                const refreshToken = jwt.sign(
+                    { id: testAdmin._id, email: testAdmin.email, role: "admin" },
+                    process.env.JWT_REFRESH_SECRET_KEY,
+                    { expiresIn: "2d" }
+                )
+                res.cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "Strict",
+                    maxAge: 2 * 24 * 60 * 60 * 1000
+                })
 
                 res.status(200).json({
                     message: "Admin verified",
@@ -67,6 +77,17 @@ const adminsignup = async (req, res) => {
 
             })
             await gmailInfo.save()
+            const refreshToken = jwt.sign(
+                { id: testAdmin._id, email: testAdmin.email, role: "admin" },
+                process.env.JWT_REFRESH_SECRET_KEY,
+                { expiresIn: "2d" }
+            )
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "Strict",
+                maxAge: 2 * 24 * 60 * 60 * 1000
+            })
             res.status(200).json({
                 message: "Admin signed up",
 

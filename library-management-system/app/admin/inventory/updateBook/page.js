@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import customFetch from "../../../lib/api"
 export default function updateBookForm() {
   const [alert, setAlert] = useState(false)
   const router = useRouter()
@@ -151,12 +152,12 @@ export default function updateBookForm() {
 
       try {
         const bookId = parsed._id
-        const token = localStorage.getItem('Admintoken')
+
         const headers = {
-          "authorization": `Bearer ${token}`,
+
           "Content-Type": "application/json"
         }
-        const response = await fetch(`http://localhost:5000/api/editBook/${bookId}`, {
+        const response = await customFetch(`/api/editBook/${bookId}`, {
           method: "PUT",
           headers,
           body: JSON.stringify({

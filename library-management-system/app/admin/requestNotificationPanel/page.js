@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-
+import customFetch from "../../../lib/api"
 // ─── Helpers ──────────────────────────────────────────────
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
@@ -328,12 +328,12 @@ export default function BorrowRequests() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [alert, setAlert] = useState(false)
   const fetchData = async (url) => {
-    const token = localStorage.getItem('Admintoken')
+
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -347,7 +347,7 @@ export default function BorrowRequests() {
   };
   const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["adminNotification"],
-    queryFn: () => fetchData("http://localhost:5000/api/adminNotification"),
+    queryFn: () => fetchData("/api/adminNotification"),
     refetchInterval: 5000,
     staleTime: 5000,
     gcTime: 10 * 60 * 1000
@@ -361,15 +361,18 @@ export default function BorrowRequests() {
   // ✅ Modal confirm hone par reason ke saath API call
   const handleConfirmDecline = async (requestId, reason) => {
     try {
-      const token = localStorage.getItem('Admintoken');
-      const res = await fetch(`http://localhost:5000/api/rejectRequest/${requestId}`, {
+
+      const res = await customFetch(`/api/rejectRequest/${requestId}`, {
         method: 'PUT',
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ reason })
       });
+      if (res.ok) {
+        refetch()
+      }
     } catch (error) {
       setAlert("Something went wrong.")
     }
@@ -377,18 +380,19 @@ export default function BorrowRequests() {
 
   const handleApproval = async (requestId) => {
     try {
-      const token = localStorage.getItem('Admintoken');
-      const res = await fetch(`http://localhost:5000/api/acceptRequest/${requestId}`, {
+
+      const res = await customFetch(`/api/acceptRequest/${requestId}`, {
         method: 'PUT',
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json',
         },
       });
       if (res.ok) {
+        refetch()
       }
     } catch (error) {
-       setAlert("Something went wrong.")
+      setAlert("Something went wrong.")
     }
   };
 
