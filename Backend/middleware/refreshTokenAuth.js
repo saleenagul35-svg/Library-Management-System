@@ -14,10 +14,14 @@ const refreshTokenAuth = async (req, res) => {
                 res.status(200).json({
                     access: newAccessToken
                 })
+            }else{
+            res.status(403).json({
+                message:"Invalid refresh token"
+            })                
             }
         }else{
-            res.status(403).json({
-                message:"Refresh token is invalid or expired"
+            res.status(404).json({
+                message:"Refresh token not found"
             })
         }
     } catch (error) {

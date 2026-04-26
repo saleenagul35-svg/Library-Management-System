@@ -13,7 +13,7 @@ const Token_Verfication = async (req, res, next) => {
                     next();
                 }
                 if (decoded.role === "admin") {
-                     req.ActiveID = decoded.id
+                    req.ActiveID = decoded.id
                     next();
                 }
             }
@@ -29,8 +29,10 @@ const Token_Verfication = async (req, res, next) => {
             })
         }
     } catch (error) {
-        console.log(error);
-        
+        if (error.name === "TokenExpiredError") {
+            res.status(401).json({ message: "Token expired" })
+        }
+
         res.status(500).json({ message: "Internal error" })
     }
 
