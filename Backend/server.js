@@ -9,8 +9,8 @@ const adminRoute = require("./routes/adminRoute")
 const userRoute = require("./routes/userRoute")
 const requestRoute = require("./routes/requestRoute")
 const BorrowDataRoute = require("./routes/BorrowDataRoute")
-const requestRoute = require("./routes/requestRoute")
 const cookieParser = require("cookie-parser")
+const refreshRoute = require("./routes/refreshRoute")
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
@@ -24,7 +24,7 @@ app.use("/api",adminRoute)
 app.use("/api", userRoute)
 app.use("/api",requestRoute)
 app.use("/api",BorrowDataRoute)
-app.use("/api",requestRoute)
+app.use("/api",refreshRoute)
 
 
 app.put("/edit/:id", async (req, res) => {

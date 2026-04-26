@@ -32,4 +32,4 @@ const refreshTokenAuth = async (req, res) => {
 
 
 }
-module.exports = refreshTokenAuth
+module.exports = {refreshTokenAuth}
