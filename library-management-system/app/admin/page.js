@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
         return data.data;
       }
     } catch (error) {
-      console.log(error);
+      throw error
     }
   };
   const { data: totalBooks = 0, isPending: P1 } = useQuery({

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import customFetch from "@/lib/userAPI";
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────────
 
 
@@ -12,25 +13,26 @@ export default function ProfilePage() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [USER, setUSER] = useState(null)
 
-  const LogOutAdmin = () => {
-    localStorage.removeItem("UserLoginToken")
+  const LogOutUser = async () => {
+    await fetch('http://localhost:5000/api/userLogout', {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    localStorage.removeItem("activeUser")
+    document.cookie = `refreshToken=; path=/; max-age=0`
+    document.cookie = `activeUser=; path=/; max-age=0`
     window.history.replaceState(null, "", "/authentication/login")
     window.location.href = "/authentication/login"
   }
   const fetchInfo = async () => {
     try {
-      let token = null
-      if (localStorage.getItem("UserLoginToken")) {
-        token = localStorage.getItem("UserLoginToken")
-      } else if (localStorage.getItem("user_Signup_Token")) {
-        token = localStorage.getItem("user_Signup_Token")
-      }
-
-
-      const response = await fetch("http://localhost:5000/api/CUserInfo", {
+      const response = await customFetch("/api/CUserInfo", {
         method: "Get",
         headers: {
-          "authorization": `Bearer ${token}`,
+
           "Content-Type": "application/json"
         },
 
@@ -200,7 +202,7 @@ export default function ProfilePage() {
               <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "38px", fontWeight: "700", color: "#515427", lineHeight: 1.1 }}>My Profile</h1>
             </div>
             <div className="flex flex-col justify-end">
-              <button className="bg-[#515427] font-serif rounded-full text-white w-20 h-8" onClick={()=>LogOutAdmin()} >
+              <button className="bg-[#515427] font-serif rounded-full text-white w-20 h-8" onClick={() => LogOutUser()} >
                 Logout
               </button>
             </div>

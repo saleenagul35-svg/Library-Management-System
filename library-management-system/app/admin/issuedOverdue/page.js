@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 import {
   BookOpen,
   RotateCcw,
@@ -222,7 +222,7 @@ export default function IssuedBooks() {
       throw error
     }
   };
-  const { data: records = [], isLoading: L1 } = useQuery({
+  const { data: records = [], isLoading: L1,refetch } = useQuery({
     queryKey: ["BorrowedBooks"],
     queryFn: () => fetchData("/api/BorrowedBooks"),
     refetchInterval: 5000,

@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import Image from "next/image";
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "@/lib/userAPI";
 function BookCover({ book }) {
 
   return (
@@ -47,13 +48,11 @@ export default function UserHomePage() {
 
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
-
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -67,7 +66,7 @@ export default function UserHomePage() {
   };
   const { data: books = [], isLoading: L1 } = useQuery({
     queryKey: ["bookData"],
-    queryFn: () => fetchData("http://localhost:5000/api/bookData"),
+    queryFn: () => fetchData("/api/bookData"),
     refetchInterval: 60000,
     staleTime:60000,
   })
@@ -159,12 +158,11 @@ export default function UserHomePage() {
     setModalBook(null);
 
     try {
-      const token = localStorage.getItem("UserLoginToken") || localStorage.getItem("user_Signup_Token");
-      const response = await fetch("http://localhost:5000/api/borrowRequest", {
+      const response = await customFetch("/api/borrowRequest", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "authorization": `Bearer ${token}`
+
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ bookId: `${book._id}` })
       });

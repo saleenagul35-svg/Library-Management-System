@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 // ─── Helpers ──────────────────────────────────────────────
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
@@ -345,7 +345,7 @@ export default function BorrowRequests() {
       throw error
     }
   };
-  const { data: requests = [], isLoading: L1 } = useQuery({
+  const { data: requests = [], isLoading: L1 ,refetch} = useQuery({
     queryKey: ["adminNotification"],
     queryFn: () => fetchData("/api/adminNotification"),
     refetchInterval: 5000,

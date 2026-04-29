@@ -54,7 +54,8 @@ export default function UserLoginPage() {
 
         if (response.ok) {
 
-          localStorage.setItem("UserLoginToken", data.accessToken)
+          localStorage.setItem("activeUser", data.accessToken)
+          document.cookie = `activeUser=${data.accessToken}; path=/; max-age=${2 * 60 * 60}`
           router.push("/user")
         } else {
           setAlert(`${data.message}`)

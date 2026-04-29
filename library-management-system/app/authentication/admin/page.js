@@ -53,6 +53,7 @@ export default function AdminLoginPage() {
 
 
           localStorage.setItem("Admintoken", data.accessToken)
+          document.cookie=`Admintoken=${data.accessToken}; path=/; max-age=${2*60*60}`
           router.push("/admin")
 
         } else {

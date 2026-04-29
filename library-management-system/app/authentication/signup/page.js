@@ -60,10 +60,12 @@ export default function SignupPage() {
 
         if (response.ok) {
           const data = await response.json();
-          localStorage.setItem("user_Signup_Token", data.accessToken);
+          localStorage.setItem("activeUser", data.accessToken);
+          document.cookie = `activeUser=${data.accessToken}; path=/; max-age=${2 * 60 * 60}`
+
           window.location.href = "/user";
         }
-        if(response.status === 500){
+        if (response.status === 500) {
           setAlert("Something went wrong.")
         }
       } catch (error) {
@@ -250,7 +252,7 @@ export default function SignupPage() {
             </a>
           </p>
           {alert && <Stack spacing={2} className="fixed top-5 right-16 w-100 ">
-            <Alert sx={{  backgroundColor: "#54552b", color:"#fdfdef" }} severity="error">{alert}</Alert>
+            <Alert sx={{ backgroundColor: "#54552b", color: "#fdfdef" }} severity="error">{alert}</Alert>
           </Stack>}
         </div>
       </div>

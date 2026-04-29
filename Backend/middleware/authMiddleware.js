@@ -5,7 +5,6 @@ const Token_Verfication = async (req, res, next) => {
         if (token) {
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-            if (decoded) {
                 if (decoded.role === "user") {
                     req.ActiveEmail = decoded.email
                     req.ActiveID = decoded.id
@@ -16,24 +15,22 @@ const Token_Verfication = async (req, res, next) => {
                     req.ActiveID = decoded.id
                     next();
                 }
-            }
-            else {
-                res.status(401).json({
-                    message: "Invalid token"
-                })
-            }
+            
+
 
         } else {
-            res.status(401).json({
+            res.status(404).json({
                 message: "token not found"
             })
         }
     } catch (error) {
         if (error.name === "TokenExpiredError") {
-            res.status(401).json({ message: "Token expired" })
+         return   res.status(401).json({ message: "Token expired" })
         }
-
-        res.status(500).json({ message: "Internal error" })
+        if (error.name === "JsonWebTokenError") {
+         return   res.status(401).json({ message: "invalid token" })
+        }
+     return   res.status(500).json({ message: "Internal error" })
     }
 
 

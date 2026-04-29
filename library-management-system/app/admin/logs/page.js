@@ -5,7 +5,7 @@ import { Users, Search, Mail, Phone, Calendar, BookOpen } from 'lucide-react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 // ─── Exact Color Palette ──────────────────────────────────────────────────────
 const C = {
   brown: '#7a421f',

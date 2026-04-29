@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-
+import customFetch from "@/lib/userAPI";
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
@@ -141,13 +141,12 @@ function MobileCards({ requests }) {
 export default function ApprovedRequests() {
 
   const fetchData = async (url) => {
-    const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
 
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -161,7 +160,7 @@ export default function ApprovedRequests() {
   };
   const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["UserApprovedRequestData"],
-    queryFn: () => fetchData("http://localhost:5000/api/UserApprovedRequestData"),
+    queryFn: () => fetchData("/api/UserApprovedRequestData"),
     refetchInterval: 60000,
     staleTime:60000,
     gcTime: 10 * 60 * 1000

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 import {
   Search, Plus, Filter, BookOpen,
   ChevronUp, ChevronDown, Pencil, Trash2,

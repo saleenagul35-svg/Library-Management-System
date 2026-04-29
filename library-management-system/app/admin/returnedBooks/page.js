@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 import {
 
     Calendar,

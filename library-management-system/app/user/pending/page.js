@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "@/lib/userAPI";
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
@@ -141,13 +142,12 @@ export default function UserBorrowRequests() {
 
 
   const fetchData = async (url) => {
-    const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
 
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -161,7 +161,7 @@ export default function UserBorrowRequests() {
   };
   const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["UserpendingRequestData"],
-    queryFn: () => fetchData("http://localhost:5000/api/UserpendingRequestData"),
+    queryFn: () => fetchData("/api/UserpendingRequestData"),
     refetchInterval: 5000,
     staleTime: 5000,
     gcTime: 10 * 60 * 1000

@@ -15,7 +15,7 @@ const adminVerification = async (req, res) => {
                 const accessToken = jwt.sign(
                     { id: testAdmin._id, email: testAdmin.email, role: "admin" },
                     process.env.JWT_SECRET_KEY,
-                    { expiresIn: "1m" }
+                    { expiresIn: "2h" }
                 )
                 const refreshToken = jwt.sign(
                     { id: testAdmin._id, email: testAdmin.email, role: "admin" },

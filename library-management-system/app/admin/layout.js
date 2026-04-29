@@ -23,9 +23,10 @@ import {
   CalendarX,
   OctagonX
 } from 'lucide-react';
+import customFetch from '@/lib/api';
 
 
-const queryClient = new QueryClient() 
+const queryClient = new QueryClient()
 // ─── Navigation config ────────────────────────────────────────────────────────
 const NAV_ITEMS = [
   {
@@ -120,7 +121,7 @@ function SidebarBrand() {
 }
 
 /** Single nav link with active state */
-function NavItem({ item, onClick,dropdown ,setDropdown}) {
+function NavItem({ item, onClick, dropdown, setDropdown }) {
   const pathname = usePathname();
   const isActive = item.exact
     ? pathname === item.href
@@ -218,9 +219,24 @@ function NavItem({ item, onClick,dropdown ,setDropdown}) {
 
 /** Bottom user card in sidebar */
 function SidebarUserCard() {
-  const LogOutAdmin = () => {
+  const LogOutAdmin = async () => {
+    try {
+      await fetch("http://localhost:5000/api/adminLogout", {
+        method: "POST",
+        credentials:"include",
+        headers: {
+          "Content-Type": "application/json",
+
+        }
+      })
+    } catch (error) {
+      throw error
+    }
+
     localStorage.removeItem("Admintoken")
-    window.history.replaceState(null,"","/authentication/admin")
+    document.cookie = `Admintoken=; path="/"; max-age=0`
+    document.cookie = `refreshToken=; path=/; max-age=0`
+    window.history.replaceState(null, "", "/authentication/admin")
     window.location.href = "/authentication/admin"
   }
   return (
@@ -246,7 +262,7 @@ function SidebarUserCard() {
 }
 
 /** The full sidebar — used in both desktop (fixed) and mobile (drawer) */
-function Sidebar({ onClose, dropdown, setDropdown}) {
+function Sidebar({ onClose, dropdown, setDropdown }) {
   return (
     <aside
       className="flex h-full w-64 flex-col"
@@ -299,7 +315,7 @@ function Sidebar({ onClose, dropdown, setDropdown}) {
           Navigation
         </p>
         {NAV_ITEMS.map((item) => (
-            <NavItem key={item.href} item={item} onClick={onClose} setDropdown={setDropdown} dropdown={dropdown} />
+          <NavItem key={item.href} item={item} onClick={onClose} setDropdown={setDropdown} dropdown={dropdown} />
         ))}
 
         {/* Divider */}
@@ -384,13 +400,13 @@ export default function AdminLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const fetchingAPI = async () => {
-    const token = localStorage.getItem("Admintoken")
+
     try {
-      const response = await fetch("http://localhost:5000/api/requestCount", {
+      const response = await customFetch("/api/requestCount", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization: `Bearer ${token}`
+
         }
       })
       if (response.ok) {
@@ -401,7 +417,7 @@ export default function AdminLayout({ children }) {
 
 
     } catch (error) {
-      console.log(error);
+      throw error
 
     } finally {
       setLoader(false)
@@ -439,7 +455,7 @@ export default function AdminLayout({ children }) {
       {/* ── Desktop sidebar (always visible) ── */}
       <div className="hidden lg:flex lg:flex-shrink-0 relative" >
         <div className="w-64 h-screen">
-          <Sidebar requestCount={requestCount} dropdown={dropdown} setDropdown={setDropdown}/>
+          <Sidebar requestCount={requestCount} dropdown={dropdown} setDropdown={setDropdown} />
         </div>
       </div>
 
@@ -459,7 +475,7 @@ export default function AdminLayout({ children }) {
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <Sidebar onClose={() => setMobileOpen(false)}  dropdown={dropdown} setDropdown={setDropdown}/>
+        <Sidebar onClose={() => setMobileOpen(false)} dropdown={dropdown} setDropdown={setDropdown} />
       </div>
 
       {/* ── Main content column ── */}
@@ -473,7 +489,7 @@ export default function AdminLayout({ children }) {
         {/* Scrollable page area */}
         <main className="flex-1 overflow-y-auto bg-brand-bg scrollbar-thin">
           <QueryClientProvider client={queryClient}>
-          {children}
+            {children}
           </QueryClientProvider>
         </main>
       </div>

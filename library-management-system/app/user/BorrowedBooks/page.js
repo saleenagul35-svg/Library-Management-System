@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-
+import customFetch from "@/lib/userAPI";
 const STATUS_CONFIG = {
   Borrowed: { label: "Active", bg: "bg-[#e8f0e0]", color: "text-[#4a6b3a]", dot: "bg-[#6b9e50]" },
   "due-soon": { label: "Due Soon", bg: "bg-[#fef3e2]", color: "text-[#8b5e1a]", dot: "bg-[#8b5e1a]" },
@@ -148,13 +148,12 @@ export default function BorrowedBooksPage() {
 
 
   const fetchData = async (url) => {
-    const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
-
+ 
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -168,7 +167,7 @@ export default function BorrowedBooksPage() {
   };
   const { data: userdata = [], isLoading: L1 } = useQuery({
     queryKey: ["UserData"],
-    queryFn: () => fetchData("http://localhost:5000/api/UserData"),
+    queryFn: () => fetchData("/api/UserData"),
     refetchInterval: 60000,
     staleTime: 60000,
     gcTime: 10 * 60 * 1000
@@ -213,7 +212,7 @@ export default function BorrowedBooksPage() {
       {/* ── Stats Row ── */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-8">
         {[
-          { label: "Currently Borrowed", val: stats.active, sub: "books in hand", color: "text-[#6b9e50]", bg: "bg-[#f0f5eb]", border: "border-[#6b9e5022]" },
+          { label: "Currently Borrowed", val: stats.active + stats.overdue, sub: "books in hand", color: "text-[#6b9e50]", bg: "bg-[#f0f5eb]", border: "border-[#6b9e5022]" },
           { label: "Overdue", val: stats.overdue, sub: "need immediate return", color: "text-[#d94f4f]", bg: "bg-[#fde8e8]", border: "border-[#d94f4f22]" },
           { label: "Due This Week", val: stats.dueSoon, sub: "return soon", color: "text-[#e6a832]", bg: "bg-[#fef3e2]", border: "border-[#e6a83222]" },
           { label: "Total Borrowed", val: stats.total, sub: "all time", color: "text-[#9b80c8]", bg: "bg-[#ece8f0]", border: "border-[#9b80c822]" },

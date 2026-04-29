@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
-import customFetch from "../../../lib/api"
+import customFetch from "@/lib/userAPI";
 import {
   BookOpen,
   Calendar,
@@ -204,7 +204,7 @@ export default function ApprovedBooks() {
       throw error
     }
   };
-  const { data: records = [], isLoading: L1, } = useQuery({
+  const { data: records = [], isLoading: L1, refetch} = useQuery({
     queryKey: ["approvedRequestsData"],
     queryFn: () => fetchData("/api/approvedRequestsData"),
     refetchInterval: 5000,
@@ -217,7 +217,7 @@ export default function ApprovedBooks() {
     setIssuing(recordId)
     try {
 
-      await customFetch(`/api/BookIssue/${recordId}`, {
+    const response =  await customFetch(`/api/BookIssue/${recordId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

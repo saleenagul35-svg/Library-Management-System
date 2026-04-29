@@ -4,6 +4,7 @@ import { X, MessageSquareX, AlignLeft } from "lucide-react";
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useQuery } from '@tanstack/react-query';
+import customFetch from "@/lib/userAPI";
 
 function BookDetailsModal({ record, onClose, }) {
     if (!record) return null;
@@ -205,13 +206,12 @@ export default function rejectedApprovals() {
     const [selectedRecord, setSelectedRecord] = useState(null)
 
   const fetchData = async (url) => {
-          const token = localStorage.getItem('UserLoginToken') || localStorage.getItem("user_Signup_Token");
 
     try {
-      const response = await fetch(url, {
+      const response = await customFetch(url, {
         method: "GET",
         headers: {
-          authorization: `Bearer ${token}`,
+
           'Content-Type': 'application/json'
         }
       });
@@ -226,7 +226,7 @@ export default function rejectedApprovals() {
 
       const { data: requests = [], isLoading: L1 } = useQuery({
     queryKey: ["UserRejectedRequestData"],
-    queryFn: () => fetchData("http://localhost:5000/api/UserRejectedRequestData"),
+    queryFn: () => fetchData("/api/UserRejectedRequestData"),
     refetchInterval: 60000,
     staleTime:60000,
     gcTime: 10 * 60 * 1000
