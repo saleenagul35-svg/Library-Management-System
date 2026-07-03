@@ -1,0 +1,33 @@
+{
+  "name": "bibliotheca-lms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bibliotheca — Production-ready Library Management System frontend",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.10",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@tanstack/react-query": "^5.99.2",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^0.383.0",
+    "next": "14.2.x",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.13.2",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.x",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2"
+  }
+}
