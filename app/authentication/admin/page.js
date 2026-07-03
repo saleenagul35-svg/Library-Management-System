@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
     setSubmit(true)
     if (validation()) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URI}/api/adminsignup`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URI}/api/adminVerification`, {
           method: "POST",
           credentials: "include",
           headers: {
